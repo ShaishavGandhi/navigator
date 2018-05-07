@@ -29,6 +29,14 @@ public class ExtraProcessor extends AbstractProcessor {
 
     private static final ClassName context = ClassName.get("android.content", "Context");
     private static final ClassName intent = ClassName.get("android.content", "Intent");
+    private static final ClassName bundle = ClassName.get("android.os", "Bundle");
+
+    private HashMap typeMapper = new HashMap(){{
+        put("java.lang.String", "String");
+        put("java.lang.Integer", "Int");
+        put("java.lang.Long","Long");
+    }};
+
     private HashMap<String, Set<Element>> annotationsPerClass;
 
     private Filer filer;
@@ -36,8 +44,14 @@ public class ExtraProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
+        initMapper();
         filer = processingEnvironment.getFiler();
         annotationsPerClass = new HashMap<>();
+    }
+
+    private void initMapper() {
+        typeMapper.put(TypeName.INT, "int");
+        typeMapper.put(TypeName.OBJECT, "");
     }
 
     @Override
@@ -64,7 +78,9 @@ public class ExtraProcessor extends AbstractProcessor {
             String activity = item.getKey();
             Set<Element> annotations = item.getValue();
             MethodSpec method = getMethod(activity, annotations);
+            MethodSpec bindMethod = getBindMethod(activity, annotations);
             navigator.addMethod(method);
+            navigator.addMethod(bindMethod);
         }
 
         JavaFile javaFile = JavaFile.builder("com.shaishavgandhi.navigator", navigator.build())
@@ -77,6 +93,31 @@ public class ExtraProcessor extends AbstractProcessor {
         }
 
         return true;
+    }
+
+    private MethodSpec getBindMethod(String activity, Set<Element> annotations) {
+        ClassName activityClass = ClassName.bestGuess(activity);
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("bind")
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
+                .addParameter(activityClass, "activity");
+        builder.addStatement("$T bundle = $L.getIntent().getExtras()", bundle, "activity");
+
+        for (Element element: annotations) {
+            Set<Modifier> modifiers = element.getModifiers();
+            TypeName name = TypeName.get(element.asType());
+            builder.addStatement("$T $L = bundle.get" + typeMapper.get(name.toString()) + "" +
+                            "(\"$L\")",
+                    name, element.getSimpleName().toString(), element.getSimpleName().toString());
+            if (modifiers.contains(Modifier.PRIVATE)) {
+                // Use getter and setter
+
+            } else {
+                // TODO: Add public access
+            }
+        }
+
+
+        return builder.build();
     }
 
     private MethodSpec getMethod(String activity, Set<Element> elements) {
