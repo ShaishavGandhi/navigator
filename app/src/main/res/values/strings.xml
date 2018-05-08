@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Navigator</string>
+    <string name="title_activity_details2">DetailsActivity2</string>
 </resources>

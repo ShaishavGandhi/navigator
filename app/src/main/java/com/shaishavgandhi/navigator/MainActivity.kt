@@ -15,7 +15,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         findViewById<View>(R.id.button).setOnClickListener {
-            Navigator.startDetailActivity(this, 0L)
+            Navigator.startDetailActivity(this, 10L)
+        }
+
+        findViewById<View>(R.id.button2).setOnClickListener {
+            Navigator.startDetailActivity2(this, "Hello there!")
         }
 
     }

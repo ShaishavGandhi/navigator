@@ -44,14 +44,8 @@ public class ExtraProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
-        initMapper();
         filer = processingEnvironment.getFiler();
         annotationsPerClass = new HashMap<>();
-    }
-
-    private void initMapper() {
-        typeMapper.put(TypeName.INT, "int");
-        typeMapper.put(TypeName.OBJECT, "");
     }
 
     @Override
@@ -105,14 +99,18 @@ public class ExtraProcessor extends AbstractProcessor {
         for (Element element: annotations) {
             Set<Modifier> modifiers = element.getModifiers();
             TypeName name = TypeName.get(element.asType());
+            String varName = element.getSimpleName().toString();
             builder.addStatement("$T $L = bundle.get" + typeMapper.get(name.toString()) + "" +
                             "(\"$L\")",
-                    name, element.getSimpleName().toString(), element.getSimpleName().toString());
+                    name, varName, varName);
+
             if (modifiers.contains(Modifier.PRIVATE)) {
                 // Use getter and setter
+                builder.addStatement("$L.set$L($L)", "activity", varName.substring(0, 1).toUpperCase() +
+                        varName.substring(1), varName);
 
             } else {
-                // TODO: Add public access
+                builder.addStatement("$L.$L = $L", "activity", varName, varName);
             }
         }
 

@@ -7,13 +7,13 @@ import android.widget.TextView
 
 class DetailActivity : AppCompatActivity() {
 
-    @Extra var whatever: Long? = null
+    @Extra protected var whatever: Long? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
 
-        whatever = intent.extras.getLong("whatever")
+        Navigator.bind(this)
         findViewById<TextView>(R.id.whatever).text = "$whatever"
     }
 }
