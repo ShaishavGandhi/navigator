@@ -19,7 +19,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.button2).setOnClickListener {
-            Navigator.startDetailActivity2(this, "Hello there!")
+            Navigator.startDetailActivity2(this, "this is a char array"
+                    .toCharArray(), 100, "count")
         }
 
     }

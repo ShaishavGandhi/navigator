@@ -27,14 +27,32 @@ import javax.lang.model.type.TypeMirror;
 @AutoService(Processor.class)
 public class ExtraProcessor extends AbstractProcessor {
 
-    private static final ClassName context = ClassName.get("android.content", "Context");
-    private static final ClassName intent = ClassName.get("android.content", "Intent");
-    private static final ClassName bundle = ClassName.get("android.os", "Bundle");
+    private static final ClassName CONTEXT_CLASSNAME = ClassName.get("android.content", "Context");
+    private static final ClassName INTENT_CLASSNAME = ClassName.get("android.content", "Intent");
+    private static final ClassName BUNDLE_CLASSNAME = ClassName.get("android.os", "Bundle");
 
     private HashMap typeMapper = new HashMap(){{
         put("java.lang.String", "String");
         put("java.lang.Integer", "Int");
+        put("int", "Int");
         put("java.lang.Long","Long");
+        put("long", "Long");
+        put("double", "Double");
+        put("java.lang.Double", "Double");
+        put("byte", "Byte");
+        put("byte[]", "ByteArray");
+        put("short", "Short");
+        put("short[]", "ShortArray");
+        put("char", "Char");
+        put("char[]", "CharArray");
+        put("float", "Float");
+        put("java.lang.Float","Float");
+        put("float[]", "FloatArray");
+        put("java.lang.CharSequence", "CharSequence");
+        put("java.lang.CharSequence[]", "CharSequenceArray");
+        // TODO: Add support for CharSequenceArrayList
+
+
     }};
 
     private HashMap<String, Set<Element>> annotationsPerClass;
@@ -94,7 +112,8 @@ public class ExtraProcessor extends AbstractProcessor {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("bind")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
                 .addParameter(activityClass, "activity");
-        builder.addStatement("$T bundle = $L.getIntent().getExtras()", bundle, "activity");
+        builder.addStatement("$T bundle = $L.getIntent().getExtras()", BUNDLE_CLASSNAME,
+                "activity");
 
         for (Element element: annotations) {
             Set<Modifier> modifiers = element.getModifiers();
@@ -121,9 +140,10 @@ public class ExtraProcessor extends AbstractProcessor {
     private MethodSpec getMethod(String activity, Set<Element> elements) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("start" + activity)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
-                .addParameter(context, "context");
+                .addParameter(CONTEXT_CLASSNAME, "context");
 
-        builder.addStatement("$T intent = new $T($L, $L)", intent, intent, "context",
+        builder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
+                INTENT_CLASSNAME, "context",
                 activity + ".class");
 
         for (Element element: elements) {
