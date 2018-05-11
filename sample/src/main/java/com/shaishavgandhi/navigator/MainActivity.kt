@@ -1,15 +1,12 @@
 package com.shaishavgandhi.navigator
 
-import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.annotation.NonNull
 import android.view.View
 
 class MainActivity : AppCompatActivity() {
 
     @Extra var id: Int? = null
-    @NonNull
     @Extra var key: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,13 +14,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         findViewById<View>(R.id.button).setOnClickListener {
-//            Navigator.startDetailActivity(this, 123)
-            val intent = Intent(this, DetailActivity2::class.java)
-            startActivity(intent)
+            Navigator.startDetailActivity(this, arrayOf("one", "two"),  User(name =
+            "Shaishav", age = 14), 123, Points(value = 20))
+
         }
 
         findViewById<View>(R.id.button2).setOnClickListener {
-            Navigator.startDetailActivity2(this, "count", 100)
+            Navigator.startDetailActivity2(this,  "whatever", 100)
         }
 
     }

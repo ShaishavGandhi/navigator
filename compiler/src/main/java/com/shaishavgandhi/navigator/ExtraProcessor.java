@@ -11,6 +11,7 @@ import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,7 +24,10 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 @AutoService(Processor.class)
 public class ExtraProcessor extends AbstractProcessor {
@@ -32,39 +36,53 @@ public class ExtraProcessor extends AbstractProcessor {
     private static final ClassName INTENT_CLASSNAME = ClassName.get("android.content", "Intent");
     private static final ClassName BUNDLE_CLASSNAME = ClassName.get("android.os", "Bundle");
 
-    private HashMap typeMapper = new HashMap<String, String>(){{
+    private HashMap<String, String> typeMapper = new HashMap<String, String>(){{
         put("java.lang.String", "String");
+        put("java.lang.String[]", "StringArray");
         put("java.lang.Integer", "Int");
         put("int", "Int");
+        put("int[]", "IntArray");
         put("java.lang.Long","Long");
         put("long", "Long");
+        put("long[]", "LongArray");
         put("double", "Double");
         put("java.lang.Double", "Double");
+        put("double[]", "DoubleArray");
+        put("float", "Float");
+        put("java.lang.Float","Float");
+        put("float[]", "FloatArray");
         put("byte", "Byte");
         put("byte[]", "ByteArray");
         put("short", "Short");
         put("short[]", "ShortArray");
         put("char", "Char");
         put("char[]", "CharArray");
-        put("float", "Float");
-        put("java.lang.Float","Float");
-        put("float[]", "FloatArray");
         put("java.lang.CharSequence", "CharSequence");
         put("java.lang.CharSequence[]", "CharSequenceArray");
+        put("android.util.Size", "Size");
+        put("android.util.SizeF", "SizeF");
+        put("boolean", "Boolean");
+        put("boolean[]", "BooleanArray");
+        put("java.lang.Boolean", "Boolean");
+        put("java.lang.Boolean[]", "BooleanArray");
         // TODO: Add support for CharSequenceArrayList
 
 
     }};
 
-    private HashMap<String, Set<Element>> annotationsPerClass;
+    private LinkedHashMap<String, Set<Element>> annotationsPerClass;
+    private Types typeUtils;
+    private Elements elementUtils;
 
     private Filer filer;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
+        typeUtils = processingEnv.getTypeUtils();
+        elementUtils = processingEnv.getElementUtils();
         filer = processingEnvironment.getFiler();
-        annotationsPerClass = new HashMap<>();
+        annotationsPerClass = new LinkedHashMap<>();
     }
 
     @Override
@@ -124,7 +142,7 @@ public class ExtraProcessor extends AbstractProcessor {
             TypeName name = TypeName.get(element.asType());
             String varName = element.getSimpleName().toString();
             builder.beginControlFlow("if ($L.containsKey(\"$L\"))", "bundle", varName);
-            builder.addStatement("$T $L = bundle.get" + typeMapper.get(name.toString()) + "" +
+            builder.addStatement("$T $L = bundle.get" + getExtraTypeName(element.asType()) + "" +
                             "(\"$L\")",
                     name, varName, varName);
             if (modifiers.contains(Modifier.PRIVATE)) {
@@ -157,16 +175,53 @@ public class ExtraProcessor extends AbstractProcessor {
             if (typeMirror == null) {
                 continue;
             }
+//            if (!isValidExtra(element)) {
+//                throw new IllegalStateException("Can't set field to Bundle");
+//            }
             String name = element.getSimpleName().toString();
-            ParameterSpec parameter = ParameterSpec.builder(TypeName.get(typeMirror), name)
-                    .addAnnotation(ClassName.bestGuess("android.support.annotation.NonNull"))
-                    .build();
-            builder.addParameter(parameter);
+            ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(TypeName.get
+                    (typeMirror), name);
+
+            if (!typeMirror.getKind().isPrimitive()) {
+                parameterBuilder.addAnnotation(ClassName.bestGuess("android.support.annotation" +
+                        ".NonNull"));
+            }
+            builder.addParameter(parameterBuilder.build());
             builder.addStatement("intent.putExtra(\"$L\", $L)", name, name);
         }
 
         builder.addStatement("$L.startActivity($L)", "context", "intent");
         return builder.build();
+    }
+
+    private boolean isValidExtra(Element element) {
+        return !(element.asType().getKind() == TypeKind.DECLARED
+                && !typeUtils.isSubtype(element.asType(), elementUtils.getTypeElement("java.io.Serializable").asType())
+                && !typeUtils.isSubtype(element.asType(), elementUtils.getTypeElement("android.os" +
+                ".Parcelable").asType()));
+    }
+
+    private String getExtraTypeName(TypeMirror typeMirror) {
+        TypeName typeName = TypeName.get(typeMirror);
+        String type = typeMapper.get(typeName.toString());
+        if (type == null) {
+            if (isSerializable(typeUtils, elementUtils, typeMirror)) {
+                type = "Serializable";
+            } else if (isParcelable(typeUtils, elementUtils, typeMirror)) {
+                type = "Parcelable";
+            }
+        }
+        return type;
+    }
+
+    private boolean isParcelable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
+        return typeUtils.isSubtype(typeMirror, elementUtils.getTypeElement("android.os.Parcelable")
+                .asType());
+    }
+
+    private boolean isSerializable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
+        return typeUtils.isSubtype(typeMirror, elementUtils.getTypeElement("java.io.Serializable")
+                .asType());
     }
 
     @Override

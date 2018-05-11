@@ -1,13 +1,17 @@
 package com.shaishavgandhi.navigator
 
+import android.graphics.Point
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 
 class DetailActivity : AppCompatActivity() {
 
     @Extra protected var whatever: Long? = null
+    @Extra var strings: Array<String>? = null
+    @Extra var user: User? = null
+    @Extra var points: Points? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,5 +19,12 @@ class DetailActivity : AppCompatActivity() {
 
         Navigator.bind(this)
         findViewById<TextView>(R.id.whatever).text = "$whatever"
+        Toast.makeText(applicationContext, strings?.reduce { acc, s -> acc.plus(s) }, Toast
+                .LENGTH_SHORT)
+                .show()
+        Toast.makeText(applicationContext, user?.name + " has got " + points?.value + " points",
+                Toast
+                .LENGTH_SHORT).show()
+
     }
 }

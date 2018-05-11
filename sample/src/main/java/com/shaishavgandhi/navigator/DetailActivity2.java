@@ -7,7 +7,7 @@ import android.widget.Toast;
 
 public class DetailActivity2 extends AppCompatActivity {
 
-    @Extra String key;
+    @Extra static String key;
     @Extra int something;
 
     @Override
@@ -20,7 +20,4 @@ public class DetailActivity2 extends AppCompatActivity {
                 .show();
     }
 
-    public void setKey(String key) {
-        this.key = key;
-    }
 }
