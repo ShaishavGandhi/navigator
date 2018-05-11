@@ -9,7 +9,6 @@ public class DetailActivity2 extends AppCompatActivity {
 
     @Extra String key;
     @Extra int something;
-    @Extra char[] sentence;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,7 +16,7 @@ public class DetailActivity2 extends AppCompatActivity {
         setContentView(R.layout.activity_detail2);
         Navigator.bind(this);
 
-        Toast.makeText(this, String.valueOf(sentence) + " = " + something, Toast.LENGTH_SHORT)
+        Toast.makeText(this, String.valueOf(key) + " = " + something, Toast.LENGTH_SHORT)
                 .show();
     }
 

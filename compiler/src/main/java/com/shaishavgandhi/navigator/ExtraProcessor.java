@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
@@ -31,7 +32,7 @@ public class ExtraProcessor extends AbstractProcessor {
     private static final ClassName INTENT_CLASSNAME = ClassName.get("android.content", "Intent");
     private static final ClassName BUNDLE_CLASSNAME = ClassName.get("android.os", "Bundle");
 
-    private HashMap typeMapper = new HashMap(){{
+    private HashMap typeMapper = new HashMap<String, String>(){{
         put("java.lang.String", "String");
         put("java.lang.Integer", "Int");
         put("int", "Int");
@@ -115,14 +116,17 @@ public class ExtraProcessor extends AbstractProcessor {
         builder.addStatement("$T bundle = $L.getIntent().getExtras()", BUNDLE_CLASSNAME,
                 "activity");
 
+        builder.beginControlFlow("if (bundle != null)");
         for (Element element: annotations) {
             Set<Modifier> modifiers = element.getModifiers();
+
+
             TypeName name = TypeName.get(element.asType());
             String varName = element.getSimpleName().toString();
+            builder.beginControlFlow("if ($L.containsKey(\"$L\"))", "bundle", varName);
             builder.addStatement("$T $L = bundle.get" + typeMapper.get(name.toString()) + "" +
                             "(\"$L\")",
                     name, varName, varName);
-
             if (modifiers.contains(Modifier.PRIVATE)) {
                 // Use getter and setter
                 builder.addStatement("$L.set$L($L)", "activity", varName.substring(0, 1).toUpperCase() +
@@ -131,7 +135,9 @@ public class ExtraProcessor extends AbstractProcessor {
             } else {
                 builder.addStatement("$L.$L = $L", "activity", varName, varName);
             }
+            builder.endControlFlow();
         }
+        builder.endControlFlow();
 
 
         return builder.build();
@@ -152,7 +158,10 @@ public class ExtraProcessor extends AbstractProcessor {
                 continue;
             }
             String name = element.getSimpleName().toString();
-            builder.addParameter(TypeName.get(typeMirror), name);
+            ParameterSpec parameter = ParameterSpec.builder(TypeName.get(typeMirror), name)
+                    .addAnnotation(ClassName.bestGuess("android.support.annotation.NonNull"))
+                    .build();
+            builder.addParameter(parameter);
             builder.addStatement("intent.putExtra(\"$L\", $L)", name, name);
         }
 
