@@ -1,6 +1,5 @@
 package com.shaishavgandhi.navigator;
 
-import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -8,29 +7,19 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.Processor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-@AutoService(Processor.class)
-public class ExtraProcessor extends AbstractProcessor {
+public final class FileWriter {
 
     private static final ClassName CONTEXT_CLASSNAME = ClassName.get("android.content", "Context");
     private static final ClassName INTENT_CLASSNAME = ClassName.get("android.content", "Intent");
@@ -65,6 +54,8 @@ public class ExtraProcessor extends AbstractProcessor {
         put("boolean[]", "BooleanArray");
         put("java.lang.Boolean", "Boolean");
         put("java.lang.Boolean[]", "BooleanArray");
+        put("android.os.Parcelable", "Parcelable");
+        put("java.util.ArrayList<android.os.Parcelable>", "ParcelableArrayList");
         // TODO: Add support for CharSequenceArrayList
 
 
@@ -74,56 +65,27 @@ public class ExtraProcessor extends AbstractProcessor {
     private Types typeUtils;
     private Elements elementUtils;
 
-    private Filer filer;
-
-    @Override
-    public synchronized void init(ProcessingEnvironment processingEnvironment) {
-        super.init(processingEnvironment);
-        typeUtils = processingEnv.getTypeUtils();
-        elementUtils = processingEnv.getElementUtils();
-        filer = processingEnvironment.getFiler();
-        annotationsPerClass = new LinkedHashMap<>();
+    public FileWriter(Types typeUtils, Elements elementUtils, LinkedHashMap<String, Set<Element>> annotationsPerClass) {
+        this.typeUtils = typeUtils;
+        this.elementUtils = elementUtils;
+        this.annotationsPerClass = annotationsPerClass;
     }
 
-    @Override
-    public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
-
-        for (Element element : roundEnvironment.getElementsAnnotatedWith(Extra.class)) {
-            String classname = element.getEnclosingElement().getSimpleName().toString();
-            if (annotationsPerClass.containsKey(classname)) {
-                Set<Element> annotations = annotationsPerClass.get(classname);
-                annotations.add(element);
-                annotationsPerClass.put(classname, annotations);
-            } else {
-                Set<Element> annotations = new HashSet<>();
-                annotations.add(element);
-                annotationsPerClass.put(classname, annotations);
-            }
-        }
-
-
+    public JavaFile writeFile() {
         TypeSpec.Builder navigator = TypeSpec.classBuilder("Navigator")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
         for (Map.Entry<String, Set<Element>> item : annotationsPerClass.entrySet()) {
             String activity = item.getKey();
             Set<Element> annotations = item.getValue();
-            MethodSpec method = getMethod(activity, annotations);
+            MethodSpec method = getNavigateMethod(activity, annotations);
             MethodSpec bindMethod = getBindMethod(activity, annotations);
             navigator.addMethod(method);
             navigator.addMethod(bindMethod);
         }
 
-        JavaFile javaFile = JavaFile.builder("com.shaishavgandhi.navigator", navigator.build())
+        return JavaFile.builder("com.shaishavgandhi.navigator", navigator.build())
                 .build();
-
-        try {
-            javaFile.writeTo(filer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return true;
     }
 
     private MethodSpec getBindMethod(String activity, Set<Element> annotations) {
@@ -161,7 +123,7 @@ public class ExtraProcessor extends AbstractProcessor {
         return builder.build();
     }
 
-    private MethodSpec getMethod(String activity, Set<Element> elements) {
+    private MethodSpec getNavigateMethod(String activity, Set<Element> elements) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("start" + activity)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
                 .addParameter(CONTEXT_CLASSNAME, "context");
@@ -175,30 +137,28 @@ public class ExtraProcessor extends AbstractProcessor {
             if (typeMirror == null) {
                 continue;
             }
-//            if (!isValidExtra(element)) {
-//                throw new IllegalStateException("Can't set field to Bundle");
-//            }
-            String name = element.getSimpleName().toString();
-            ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(TypeName.get
-                    (typeMirror), name);
 
-            if (!typeMirror.getKind().isPrimitive()) {
-                parameterBuilder.addAnnotation(ClassName.bestGuess("android.support.annotation" +
-                        ".NonNull"));
-            }
-            builder.addParameter(parameterBuilder.build());
-            builder.addStatement("intent.putExtra(\"$L\", $L)", name, name);
+            ParameterSpec parameter = getParameter(element);
+            builder.addParameter(parameter);
+            builder.addStatement("intent.putExtra(\"$L\", $L)", parameter.name, parameter.name);
         }
 
         builder.addStatement("$L.startActivity($L)", "context", "intent");
         return builder.build();
     }
 
-    private boolean isValidExtra(Element element) {
-        return !(element.asType().getKind() == TypeKind.DECLARED
-                && !typeUtils.isSubtype(element.asType(), elementUtils.getTypeElement("java.io.Serializable").asType())
-                && !typeUtils.isSubtype(element.asType(), elementUtils.getTypeElement("android.os" +
-                ".Parcelable").asType()));
+    private ParameterSpec getParameter(Element element) {
+        TypeMirror typeMirror = element.asType();
+        String name = element.getSimpleName().toString();
+        ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(TypeName.get(typeMirror),
+                name);
+        parameterBuilder.addModifiers(Modifier.FINAL);
+
+        if (!typeMirror.getKind().isPrimitive()) {
+            parameterBuilder.addAnnotation(ClassName.bestGuess("android.support.annotation.NonNull"));
+        }
+
+        return parameterBuilder.build();
     }
 
     private String getExtraTypeName(TypeMirror typeMirror) {
@@ -207,32 +167,32 @@ public class ExtraProcessor extends AbstractProcessor {
         if (type == null) {
             if (isSerializable(typeUtils, elementUtils, typeMirror)) {
                 type = "Serializable";
-            } else if (isParcelable(typeUtils, elementUtils, typeMirror)) {
+            }
+            if (isParcelable(typeUtils, elementUtils, typeMirror)) {
                 type = "Parcelable";
+            }
+            if (isParcelableList(typeUtils, elementUtils, typeMirror)) {
+                type = "ParcelableArrayList";
             }
         }
         return type;
     }
 
     private boolean isParcelable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
-        return typeUtils.isSubtype(typeMirror, elementUtils.getTypeElement("android.os.Parcelable")
+        return typeUtils.isAssignable(typeMirror, elementUtils.getTypeElement("android.os.Parcelable")
                 .asType());
+    }
+
+    private boolean isParcelableList(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
+        DeclaredType type = typeUtils.getDeclaredType(elementUtils.getTypeElement("java.util" +
+                        ".ArrayList"),
+                elementUtils.getTypeElement("android.os.Parcelable").asType());
+        return typeUtils.isAssignable(typeMirror, type);
     }
 
     private boolean isSerializable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
-        return typeUtils.isSubtype(typeMirror, elementUtils.getTypeElement("java.io.Serializable")
+        return typeUtils.isAssignable(typeMirror, elementUtils.getTypeElement("java.io.Serializable")
                 .asType());
     }
 
-    @Override
-    public Set<String> getSupportedAnnotationTypes() {
-        HashSet<String> set = new HashSet<>();
-        set.add(Extra.class.getCanonicalName());
-        return set;
-    }
-
-    @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.latest();
-    }
 }

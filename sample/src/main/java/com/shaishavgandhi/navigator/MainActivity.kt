@@ -14,13 +14,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         findViewById<View>(R.id.button).setOnClickListener {
-            Navigator.startDetailActivity(this, arrayOf("one", "two"),  User(name =
-            "Shaishav", age = 14), 123, Points(value = 20))
+//            Navigator.startDetailActivity(this, arrayOf("one", "two"),  User(name =
+//            "Shaishav", age = 14), 123, Points(value = 20))
 
         }
 
         findViewById<View>(R.id.button2).setOnClickListener {
-            Navigator.startDetailActivity2(this,  "whatever", 100)
+//            Navigator.startDetailActivity2(this,  "whatever", 100)
         }
 
     }
