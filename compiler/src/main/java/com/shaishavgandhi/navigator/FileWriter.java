@@ -24,6 +24,8 @@ public final class FileWriter {
     private static final ClassName CONTEXT_CLASSNAME = ClassName.get("android.content", "Context");
     private static final ClassName INTENT_CLASSNAME = ClassName.get("android.content", "Intent");
     private static final ClassName BUNDLE_CLASSNAME = ClassName.get("android.os", "Bundle");
+    private static final String SERIALIZABLE = "Serializable";
+    private static final String PARCELABLE = "Parcelable";
 
     private HashMap<String, String> typeMapper = new HashMap<String, String>(){{
         put("java.lang.String", "String");
@@ -78,9 +80,9 @@ public final class FileWriter {
         for (Map.Entry<String, Set<Element>> item : annotationsPerClass.entrySet()) {
             String activity = item.getKey();
             Set<Element> annotations = item.getValue();
-            MethodSpec method = getNavigateMethod(activity, annotations);
+            TypeSpec method = getNavigateMethod(activity, annotations);
             MethodSpec bindMethod = getBindMethod(activity, annotations);
-            navigator.addMethod(method);
+            navigator.addType(method);
             navigator.addMethod(bindMethod);
         }
 
@@ -104,9 +106,16 @@ public final class FileWriter {
             TypeName name = TypeName.get(element.asType());
             String varName = element.getSimpleName().toString();
             builder.beginControlFlow("if ($L.containsKey(\"$L\"))", "bundle", varName);
-            builder.addStatement("$T $L = bundle.get" + getExtraTypeName(element.asType()) + "" +
-                            "(\"$L\")",
-                    name, varName, varName);
+
+            String extraName = getExtraTypeName(element.asType());
+            if (extraName == null) {
+                // Add casting for serializable
+                builder.addStatement("$T $L = ($T) bundle.get(\"$L\")", name, varName, name, varName);
+            } else {
+                builder.addStatement("$T $L = bundle.get" + extraName + "(\"$L\")", name, varName,
+                        varName);
+            }
+
             if (modifiers.contains(Modifier.PRIVATE)) {
                 // Use getter and setter
                 builder.addStatement("$L.set$L($L)", "activity", varName.substring(0, 1).toUpperCase() +
@@ -123,12 +132,30 @@ public final class FileWriter {
         return builder.build();
     }
 
-    private MethodSpec getNavigateMethod(String activity, Set<Element> elements) {
-        MethodSpec.Builder builder = MethodSpec.methodBuilder("start" + activity)
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
+    private TypeSpec getNavigateMethod(String activity, Set<Element> elements) {
+        TypeSpec.Builder builder = TypeSpec.classBuilder(activity + "Builder")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+
+        ClassName builderClass = ClassName.bestGuess(activity + "Builder");
+
+        // Constructor
+        MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC);
+
+        // Set intent flags
+        MethodSpec.Builder flagBuilder = MethodSpec.methodBuilder("setFlags")
+                .addParameter(ParameterSpec.builder(TypeName.INT, "flags", Modifier.FINAL).build())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(builderClass)
+                .addStatement("return this");
+
+        builder.addMethod(flagBuilder.build());
+
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("start")
+                .addModifiers(Modifier.PUBLIC)
                 .addParameter(CONTEXT_CLASSNAME, "context");
 
-        builder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
+        methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
                 INTENT_CLASSNAME, "context",
                 activity + ".class");
 
@@ -137,14 +164,18 @@ public final class FileWriter {
             if (typeMirror == null) {
                 continue;
             }
+            String name = element.getSimpleName().toString();
+            builder.addField(TypeName.get(typeMirror), name, Modifier.PRIVATE);
 
             ParameterSpec parameter = getParameter(element);
-            builder.addParameter(parameter);
-            builder.addStatement("intent.putExtra(\"$L\", $L)", parameter.name, parameter.name);
+            constructorBuilder.addParameter(parameter);
+            constructorBuilder.addStatement("this.$L = $L", parameter.name, parameter.name);
+            methodBuilder.addStatement("intent.putExtra(\"$L\", $L)", parameter.name, parameter.name);
         }
 
-        builder.addStatement("$L.startActivity($L)", "context", "intent");
-        return builder.build();
+        methodBuilder.addStatement("$L.startActivity($L)", "context", "intent");
+        builder.addMethod(methodBuilder.build());
+        return builder.addMethod(constructorBuilder.build()).build();
     }
 
     private ParameterSpec getParameter(Element element) {
@@ -164,17 +195,6 @@ public final class FileWriter {
     private String getExtraTypeName(TypeMirror typeMirror) {
         TypeName typeName = TypeName.get(typeMirror);
         String type = typeMapper.get(typeName.toString());
-        if (type == null) {
-            if (isSerializable(typeUtils, elementUtils, typeMirror)) {
-                type = "Serializable";
-            }
-            if (isParcelable(typeUtils, elementUtils, typeMirror)) {
-                type = "Parcelable";
-            }
-            if (isParcelableList(typeUtils, elementUtils, typeMirror)) {
-                type = "ParcelableArrayList";
-            }
-        }
         return type;
     }
 
