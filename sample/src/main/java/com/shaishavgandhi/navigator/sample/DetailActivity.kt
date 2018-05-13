@@ -1,18 +1,25 @@
-package com.shaishavgandhi.navigator
+package com.shaishavgandhi.navigator.sample
 
-import android.graphics.Point
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
+import com.shaishavgandhi.navigato.sampler.R
+import com.shaishavgandhi.navigator.Extra
+import com.shaishavgandhi.navigator.Navigator
 
 class DetailActivity : AppCompatActivity() {
 
-    @Extra protected var whatever: Long? = null
-    @Extra var strings: Array<String>? = null
-    @Extra var user: User? = null
-    @Extra var points: Points? = null
-    @Extra var userList: ArrayList<User>? = null
+    @Extra
+    protected var whatever: Long? = null
+    @Extra
+    var strings: Array<String>? = null
+    @Extra
+    var user: User? = null
+    @Extra
+    var points: Points? = null
+    @Extra
+    var userList: ArrayList<User>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,5 +34,9 @@ class DetailActivity : AppCompatActivity() {
                 Toast
                 .LENGTH_SHORT).show()
 
+    }
+
+    fun setWhatever(whatever: Long) {
+        this.whatever = whatever
     }
 }

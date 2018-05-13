@@ -24,7 +24,9 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -36,7 +38,7 @@ import javax.tools.Diagnostic;
 @AutoService(Processor.class)
 public final class NavigatorProcessor extends AbstractProcessor {
 
-    private LinkedHashMap<String, Set<Element>> annotationsPerClass;
+    private LinkedHashMap<ClassName, Set<Element>> annotationsPerClass;
     private Types typeUtils;
     private Elements elementUtils;
     private Messager messager;
@@ -57,15 +59,17 @@ public final class NavigatorProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
 
         for (Element element : roundEnvironment.getElementsAnnotatedWith(Extra.class)) {
-            String classname = element.getEnclosingElement().getSimpleName().toString();
-            if (annotationsPerClass.containsKey(classname)) {
-                Set<Element> annotations = annotationsPerClass.get(classname);
+
+
+            ClassName className = getClassName(element);
+            if (annotationsPerClass.containsKey(className)) {
+                Set<Element> annotations = annotationsPerClass.get(className);
                 annotations.add(element);
-                annotationsPerClass.put(classname, annotations);
+                annotationsPerClass.put(className, annotations);
             } else {
                 Set<Element> annotations = new HashSet<>();
                 annotations.add(element);
-                annotationsPerClass.put(classname, annotations);
+                annotationsPerClass.put(className, annotations);
             }
         }
 
@@ -81,6 +85,18 @@ public final class NavigatorProcessor extends AbstractProcessor {
         return true;
     }
 
+    private ClassName getClassName(Element element) {
+        String classname = element.getEnclosingElement().getSimpleName().toString();
+        String packageName;
+        Element enclosing = element;
+        while (enclosing.getKind() != ElementKind.PACKAGE) {
+            enclosing = enclosing.getEnclosingElement();
+        }
+        PackageElement packageElement = ((PackageElement) enclosing);
+        packageName = packageElement.toString();
+
+        return ClassName.bestGuess(packageName + "." + classname);
+    }
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {

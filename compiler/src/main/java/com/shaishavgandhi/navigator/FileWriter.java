@@ -63,11 +63,11 @@ public final class FileWriter {
 
     }};
 
-    private LinkedHashMap<String, Set<Element>> annotationsPerClass;
+    private LinkedHashMap<ClassName, Set<Element>> annotationsPerClass;
     private Types typeUtils;
     private Elements elementUtils;
 
-    public FileWriter(Types typeUtils, Elements elementUtils, LinkedHashMap<String, Set<Element>> annotationsPerClass) {
+    public FileWriter(Types typeUtils, Elements elementUtils, LinkedHashMap<ClassName, Set<Element>> annotationsPerClass) {
         this.typeUtils = typeUtils;
         this.elementUtils = elementUtils;
         this.annotationsPerClass = annotationsPerClass;
@@ -77,8 +77,8 @@ public final class FileWriter {
         TypeSpec.Builder navigator = TypeSpec.classBuilder("Navigator")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
-        for (Map.Entry<String, Set<Element>> item : annotationsPerClass.entrySet()) {
-            String activity = item.getKey();
+        for (Map.Entry<ClassName, Set<Element>> item : annotationsPerClass.entrySet()) {
+            ClassName activity = item.getKey();
             Set<Element> annotations = item.getValue();
             TypeSpec method = getNavigateMethod(activity, annotations);
             MethodSpec bindMethod = getBindMethod(activity, annotations);
@@ -90,11 +90,10 @@ public final class FileWriter {
                 .build();
     }
 
-    private MethodSpec getBindMethod(String activity, Set<Element> annotations) {
-        ClassName activityClass = ClassName.bestGuess(activity);
+    private MethodSpec getBindMethod(ClassName activity, Set<Element> annotations) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("bind")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
-                .addParameter(activityClass, "activity");
+                .addParameter(activity, "activity");
         builder.addStatement("$T bundle = $L.getIntent().getExtras()", BUNDLE_CLASSNAME,
                 "activity");
 
@@ -116,7 +115,7 @@ public final class FileWriter {
                         varName);
             }
 
-            if (modifiers.contains(Modifier.PRIVATE)) {
+            if (!modifiers.contains(Modifier.PUBLIC)) {
                 // Use getter and setter
                 builder.addStatement("$L.set$L($L)", "activity", varName.substring(0, 1).toUpperCase() +
                         varName.substring(1), varName);
@@ -132,11 +131,12 @@ public final class FileWriter {
         return builder.build();
     }
 
-    private TypeSpec getNavigateMethod(String activity, Set<Element> elements) {
-        TypeSpec.Builder builder = TypeSpec.classBuilder(activity + "Builder")
+    private TypeSpec getNavigateMethod(ClassName activity, Set<Element> elements) {
+        String activityName = activity.simpleName();
+        TypeSpec.Builder builder = TypeSpec.classBuilder(activityName + "Builder")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
-        ClassName builderClass = ClassName.bestGuess(activity + "Builder");
+        ClassName builderClass = ClassName.bestGuess(activityName + "Builder");
 
         // Constructor
         MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
@@ -156,8 +156,7 @@ public final class FileWriter {
                 .addParameter(CONTEXT_CLASSNAME, "context");
 
         methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
-                INTENT_CLASSNAME, "context",
-                activity + ".class");
+                INTENT_CLASSNAME, "context", activityName + ".class");
 
         for (Element element: elements) {
             TypeMirror typeMirror = element.asType();

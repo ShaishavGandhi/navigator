@@ -1,4 +1,4 @@
-package com.shaishavgandhi.navigator
+package com.shaishavgandhi.navigator.sample
 
 import android.os.Parcel
 import android.os.Parcelable

@@ -23,6 +23,10 @@ android {
 
 }
 
+afterEvaluate {
+    generateReleaseBuildConfig.enabled = false
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
