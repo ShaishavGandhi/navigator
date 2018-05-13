@@ -1,10 +1,12 @@
 package com.shaishavgandhi.navigator.sample
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import com.shaishavgandhi.navigato.sampler.R
 import com.shaishavgandhi.navigator.Extra
+import com.shaishavgandhi.navigator.Navigator
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,13 +20,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         findViewById<View>(R.id.button).setOnClickListener {
-//            Navigator.startDetailActivity(this, User(name =
-//            "Shaishav", age = 14), Points(value = 20), 123, arrayOf("one", "two"))
-//            val users = arrayListOf(User(name = "Shaishav", age = 10),
-//                    User("Dimple", 13))
-//            Navigator.DetailActivityBuilder(100, Points(100),
-//                    arrayOf("One", "Two"), users, users[0])
-//                    .start(this)
+            val users = arrayListOf(User(name = "Shaishav", age = 10),
+                    User("Dimple", 13))
+
+            Navigator.DetailActivityBuilder(users)
+                    // Clears the task
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    .start(this)
 
         }
 

@@ -1,6 +1,8 @@
 package com.shaishavgandhi.navigator;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -26,6 +28,7 @@ public final class FileWriter {
     private static final ClassName BUNDLE_CLASSNAME = ClassName.get("android.os", "Bundle");
     private static final String SERIALIZABLE = "Serializable";
     private static final String PARCELABLE = "Parcelable";
+    private static final String FLAGS = "flags";
 
     private HashMap<String, String> typeMapper = new HashMap<String, String>(){{
         put("java.lang.String", "String");
@@ -136,6 +139,10 @@ public final class FileWriter {
         TypeSpec.Builder builder = TypeSpec.classBuilder(activityName + "Builder")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
+        builder.addField(FieldSpec.builder(TypeName.INT, FLAGS)
+                .initializer("$L", -1)
+                .build());
+
         ClassName builderClass = ClassName.bestGuess(activityName + "Builder");
 
         // Constructor
@@ -147,6 +154,7 @@ public final class FileWriter {
                 .addParameter(ParameterSpec.builder(TypeName.INT, "flags", Modifier.FINAL).build())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
+                .addStatement("this.$1L = $1L", FLAGS)
                 .addStatement("return this");
 
         builder.addMethod(flagBuilder.build());
@@ -172,9 +180,16 @@ public final class FileWriter {
             methodBuilder.addStatement("intent.putExtra(\"$L\", $L)", parameter.name, parameter.name);
         }
 
+        addOptionalAttributes(methodBuilder);
         methodBuilder.addStatement("$L.startActivity($L)", "context", "intent");
         builder.addMethod(methodBuilder.build());
         return builder.addMethod(constructorBuilder.build()).build();
+    }
+
+    private void addOptionalAttributes(MethodSpec.Builder builder) {
+        builder.beginControlFlow("if ($L != -1)", FLAGS);
+        builder.addStatement("$L.setFlags($L)", "intent", FLAGS);
+        builder.endControlFlow();
     }
 
     private ParameterSpec getParameter(Element element) {
