@@ -6,6 +6,7 @@ buildscript {
     repositories {
         google()
         jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.0-alpha14'
@@ -14,6 +15,24 @@ buildscript {
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
+}
+
+ext {
+
+    supportVersion = "27.1.1"
+
+    javapoet = "com.squareup:javapoet:1.11.0"
+    autoservice = "com.google.auto.service:auto-service:1.0-rc4"
+
+    kotlin = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    appcompat = "com.android.support:appcompat-v7:$supportVersion"
+    constraintLayout = "com.android.support.constraint:constraint-layout:1.1.0"
+    design = "com.android.support:design:$supportVersion"
+
+    junit = "junit:junit:4.12"
+
+
 }
 
 allprojects {

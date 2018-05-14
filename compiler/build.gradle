@@ -1,11 +1,10 @@
 apply plugin: 'java-library'
+apply from: '../gradle/gradle-mvn-push.gradle'
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'com.google.auto.service:auto-service:1.0-rc4'
-    api project(":annotations")
-    compile 'com.squareup:javapoet:1.11.0'
+    compileOnly rootProject.ext.autoservice
+    implementation project(":annotations")
+    implementation rootProject.ext.javapoet
 }
 
 sourceCompatibility = "7"

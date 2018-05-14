@@ -1,11 +1,12 @@
 package com.shaishavgandhi.navigator;
 
-import kotlin.annotation.AnnotationRetention;
-import kotlin.annotation.AnnotationTarget;
-import kotlin.annotation.Retention;
-import kotlin.annotation.Target;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-@Target(allowedTargets = AnnotationTarget.FIELD)
-@Retention(AnnotationRetention.SOURCE)
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+@Target(ElementType.FIELD)
+@Retention(SOURCE)
 public @interface Extra {
 }
