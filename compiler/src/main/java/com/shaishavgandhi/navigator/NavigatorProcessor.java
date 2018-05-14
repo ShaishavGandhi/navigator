@@ -13,6 +13,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,7 +39,7 @@ import javax.tools.Diagnostic;
 @AutoService(Processor.class)
 public final class NavigatorProcessor extends AbstractProcessor {
 
-    private LinkedHashMap<ClassName, Set<Element>> annotationsPerClass;
+    private LinkedHashMap<ClassName, LinkedHashSet<Element>> annotationsPerClass;
     private Types typeUtils;
     private Elements elementUtils;
     private Messager messager;
@@ -63,11 +64,11 @@ public final class NavigatorProcessor extends AbstractProcessor {
 
             ClassName className = getClassName(element);
             if (annotationsPerClass.containsKey(className)) {
-                Set<Element> annotations = annotationsPerClass.get(className);
+                LinkedHashSet<Element> annotations = annotationsPerClass.get(className);
                 annotations.add(element);
                 annotationsPerClass.put(className, annotations);
             } else {
-                Set<Element> annotations = new HashSet<>();
+                LinkedHashSet<Element> annotations = new LinkedHashSet<>();
                 annotations.add(element);
                 annotationsPerClass.put(className, annotations);
             }
