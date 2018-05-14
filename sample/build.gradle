@@ -27,14 +27,15 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
-    implementation 'com.android.support:design:27.1.1'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation rootProject.ext.kotlin
+    implementation rootProject.ext.appcompat
+    implementation rootProject.ext.constraintLayout
+    implementation rootProject.ext.design
+    testImplementation rootProject.junit
+
     implementation project(":library")
     kapt project(":compiler")
+
+//    implementation "com.shaishavgandhi.navigator:navigator-annotations:0.1.0.1"
+//    kapt "com.shaishavgandhi.navigator:navigator-compiler:0.1.0.1"
 }
