@@ -10,8 +10,10 @@ import com.shaishavgandhi.navigator.Navigator
 
 class DetailActivity : AppCompatActivity() {
 
-    @Extra
-    var userList: ArrayList<User>? = null
+    @Extra var userList: ArrayList<User>? = null
+    @Extra var points: Points? = null
+    @Extra var userId: Long? = null
+    @Extra var source: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

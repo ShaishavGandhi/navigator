@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
             val users = arrayListOf(User(name = "Shaishav", age = 10),
                     User("Dimple", 13))
 
-            Navigator.DetailActivityBuilder(users)
+            Navigator.DetailActivityBuilder(users, Points(100), 100, "Yay")
                     // Clears the task
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                     .start(this)
@@ -31,7 +31,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.button2).setOnClickListener {
-//            Navigator.startDetailActivity2(this,  "whatever", 100)
         }
 
     }

@@ -11,6 +11,7 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -66,11 +67,11 @@ public final class FileWriter {
 
     }};
 
-    private LinkedHashMap<ClassName, Set<Element>> annotationsPerClass;
+    private LinkedHashMap<ClassName, LinkedHashSet<Element>> annotationsPerClass;
     private Types typeUtils;
     private Elements elementUtils;
 
-    public FileWriter(Types typeUtils, Elements elementUtils, LinkedHashMap<ClassName, Set<Element>> annotationsPerClass) {
+    public FileWriter(Types typeUtils, Elements elementUtils, LinkedHashMap<ClassName, LinkedHashSet<Element>> annotationsPerClass) {
         this.typeUtils = typeUtils;
         this.elementUtils = elementUtils;
         this.annotationsPerClass = annotationsPerClass;
@@ -80,9 +81,9 @@ public final class FileWriter {
         TypeSpec.Builder navigator = TypeSpec.classBuilder("Navigator")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
-        for (Map.Entry<ClassName, Set<Element>> item : annotationsPerClass.entrySet()) {
+        for (Map.Entry<ClassName, LinkedHashSet<Element>> item : annotationsPerClass.entrySet()) {
             ClassName activity = item.getKey();
-            Set<Element> annotations = item.getValue();
+            LinkedHashSet<Element> annotations = item.getValue();
             TypeSpec method = getNavigateMethod(activity, annotations);
             MethodSpec bindMethod = getBindMethod(activity, annotations);
             navigator.addType(method);
@@ -93,7 +94,7 @@ public final class FileWriter {
                 .build();
     }
 
-    private MethodSpec getBindMethod(ClassName activity, Set<Element> annotations) {
+    private MethodSpec getBindMethod(ClassName activity, LinkedHashSet<Element> annotations) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("bind")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
                 .addParameter(activity, "activity");
@@ -134,7 +135,7 @@ public final class FileWriter {
         return builder.build();
     }
 
-    private TypeSpec getNavigateMethod(ClassName activity, Set<Element> elements) {
+    private TypeSpec getNavigateMethod(ClassName activity, LinkedHashSet<Element> elements) {
         String activityName = activity.simpleName();
         TypeSpec.Builder builder = TypeSpec.classBuilder(activityName + "Builder")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
