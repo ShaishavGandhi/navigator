@@ -21,9 +21,6 @@ android {
         }
     }
 
-    dexOptions {
-        preDexLibraries = false
-    }
 }
 
 dependencies {
@@ -36,6 +33,4 @@ dependencies {
     implementation project(":library")
     kapt project(":compiler")
 
-//    implementation "com.shaishavgandhi.navigator:navigator-annotations:0.1.0.1"
-//    kapt "com.shaishavgandhi.navigator:navigator-compiler:0.1.0.1"
 }
