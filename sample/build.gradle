@@ -33,9 +33,9 @@ dependencies {
     implementation rootProject.ext.design
     testImplementation rootProject.junit
 
-//    implementation project(":library")
-//    kapt project(":compiler")
+    implementation project(":library")
+    kapt project(":compiler")
 
-    implementation "com.shaishavgandhi.navigator:navigator-annotations:0.1.0.1"
-    kapt "com.shaishavgandhi.navigator:navigator-compiler:0.1.0.1"
+//    implementation "com.shaishavgandhi.navigator:navigator-annotations:0.1.0.1"
+//    kapt "com.shaishavgandhi.navigator:navigator-compiler:0.1.0.1"
 }
