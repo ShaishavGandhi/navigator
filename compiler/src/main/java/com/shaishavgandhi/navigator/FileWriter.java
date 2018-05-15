@@ -84,9 +84,8 @@ public final class FileWriter {
         for (Map.Entry<ClassName, LinkedHashSet<Element>> item : annotationsPerClass.entrySet()) {
             ClassName activity = item.getKey();
             LinkedHashSet<Element> annotations = item.getValue();
-            TypeSpec method = getNavigateMethod(activity, annotations);
+            writeBuilder(navigator, activity, annotations);
             MethodSpec bindMethod = getBindMethod(activity, annotations);
-            navigator.addType(method);
             navigator.addMethod(bindMethod);
         }
 
@@ -135,7 +134,7 @@ public final class FileWriter {
         return builder.build();
     }
 
-    private TypeSpec getNavigateMethod(ClassName activity, LinkedHashSet<Element> elements) {
+    private void writeBuilder(TypeSpec.Builder navigator, ClassName activity, LinkedHashSet<Element> elements) {
         String activityName = activity.simpleName();
         TypeSpec.Builder builder = TypeSpec.classBuilder(activityName + "Builder")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
@@ -148,7 +147,7 @@ public final class FileWriter {
 
         // Constructor
         MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PUBLIC);
+                .addModifiers(Modifier.PRIVATE);
 
         // Set intent flags
         MethodSpec.Builder flagBuilder = MethodSpec.methodBuilder("setFlags")
@@ -160,31 +159,74 @@ public final class FileWriter {
 
         builder.addMethod(flagBuilder.build());
 
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("start")
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(CONTEXT_CLASSNAME, "context");
+        // Static method to prepare activity
+        MethodSpec.Builder prepareMethodBuilder = getPrepareActivityMethod(activityName,
+                builderClass);
 
-        methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
-                INTENT_CLASSNAME, "context", activityName + ".class");
+        // Start activity
+        MethodSpec.Builder startActivityBuilder = getStartActivityMethod(activityName);
+
+        // TODO: There must be a better way for this with JavaPoet. Right now
+        // I manually append each parameter and remove commas and close the bracket
+        StringBuilder returnStatement = new StringBuilder("return new $T(");
 
         for (Element element: elements) {
             TypeMirror typeMirror = element.asType();
             if (typeMirror == null) {
                 continue;
             }
+            // Add as field parameter
             String name = element.getSimpleName().toString();
             builder.addField(TypeName.get(typeMirror), name, Modifier.PRIVATE);
 
+            // Add to constructor
             ParameterSpec parameter = getParameter(element);
             constructorBuilder.addParameter(parameter);
             constructorBuilder.addStatement("this.$L = $L", parameter.name, parameter.name);
-            methodBuilder.addStatement("intent.putExtra(\"$L\", $L)", parameter.name, parameter.name);
+
+            // Add to static prepare method
+            prepareMethodBuilder.addParameter(parameter);
+
+            // Append to return statement
+            returnStatement.append(parameter.name);
+            returnStatement.append(", ");
+
+            // Put to bundle
+            startActivityBuilder.addStatement("intent.putExtra(\"$L\", $L)", parameter.name, parameter.name);
         }
 
-        addOptionalAttributes(methodBuilder);
-        methodBuilder.addStatement("$L.startActivity($L)", "context", "intent");
-        builder.addMethod(methodBuilder.build());
-        return builder.addMethod(constructorBuilder.build()).build();
+        // Sanitize return statement
+        returnStatement.deleteCharAt(returnStatement.length() - 2);
+        returnStatement.deleteCharAt(returnStatement.length() - 1);
+        returnStatement.append(")");
+        prepareMethodBuilder.addStatement(returnStatement.toString(), builderClass);
+
+        addOptionalAttributes(startActivityBuilder);
+
+        startActivityBuilder.addStatement("$L.startActivity($L)", "context", "intent");
+
+        builder.addMethod(startActivityBuilder.build());
+        TypeSpec builderInnerClass = builder.addMethod(constructorBuilder.build()).build();
+
+        navigator.addType(builderInnerClass);
+        navigator.addMethod(prepareMethodBuilder.build());
+    }
+
+    private MethodSpec.Builder getStartActivityMethod(String activityName) {
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("start")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(CONTEXT_CLASSNAME, "context");
+        methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
+                INTENT_CLASSNAME, "context", activityName + ".class");
+        return methodBuilder;
+    }
+
+    private MethodSpec.Builder getPrepareActivityMethod(String activityName, ClassName builderClass) {
+        MethodSpec.Builder prepareMethodBuilder = MethodSpec.methodBuilder("prepare" +
+                activityName);
+        prepareMethodBuilder.addModifiers(Modifier.STATIC, Modifier.FINAL, Modifier.PUBLIC);
+        prepareMethodBuilder.returns(builderClass);
+        return prepareMethodBuilder;
     }
 
     private void addOptionalAttributes(MethodSpec.Builder builder) {
@@ -209,8 +251,7 @@ public final class FileWriter {
 
     private String getExtraTypeName(TypeMirror typeMirror) {
         TypeName typeName = TypeName.get(typeMirror);
-        String type = typeMapper.get(typeName.toString());
-        return type;
+        return typeMapper.get(typeName.toString());
     }
 
     private boolean isParcelable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
