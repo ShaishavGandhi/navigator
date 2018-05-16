@@ -27,6 +27,12 @@ public final class FileWriter {
     private static final ClassName CONTEXT_CLASSNAME = ClassName.get("android.content", "Context");
     private static final ClassName INTENT_CLASSNAME = ClassName.get("android.content", "Intent");
     private static final ClassName BUNDLE_CLASSNAME = ClassName.get("android.os", "Bundle");
+    private static final ClassName ACTIVITY_CLASSNAME = ClassName.get("android.app", "Activity");
+
+    private static final ClassName NULLABLE = ClassName.bestGuess("android.support.annotation.Nullable");
+    private static final ClassName NONNULL = ClassName.bestGuess("android.support.annotation" +
+            ".NonNull");
+
     private static final String SERIALIZABLE = "Serializable";
     private static final String PARCELABLE = "Parcelable";
     private static final String FLAGS = "flags";
@@ -163,8 +169,16 @@ public final class FileWriter {
         MethodSpec.Builder prepareMethodBuilder = getPrepareActivityMethod(activityName,
                 builderClass);
 
+        // Bundle builder
+        MethodSpec.Builder bundleBuilder = getExtrasBundle(activityName);
+
         // Start activity
         MethodSpec.Builder startActivityBuilder = getStartActivityMethod(activityName);
+
+        // Start for result
+        MethodSpec.Builder startForResultBuilder = getStartForResultMethod(activityName);
+        // Start result with extras
+        MethodSpec.Builder startResultExtrasBuilder = getStartForResultWithExtras(activityName);
 
         // TODO: There must be a better way for this with JavaPoet. Right now
         // I manually append each parameter and remove commas and close the bracket
@@ -192,7 +206,7 @@ public final class FileWriter {
             returnStatement.append(", ");
 
             // Put to bundle
-            startActivityBuilder.addStatement("intent.putExtra(\"$L\", $L)", parameter.name, parameter.name);
+            bundleBuilder.addStatement("intent.putExtra(\"$L\", $L)", parameter.name, parameter.name);
         }
 
         // Sanitize return statement
@@ -201,15 +215,46 @@ public final class FileWriter {
         returnStatement.append(")");
         prepareMethodBuilder.addStatement(returnStatement.toString(), builderClass);
 
+        bundleBuilder.addStatement("return intent.getExtras()");
+        MethodSpec bundle  = bundleBuilder.build();
+
         addOptionalAttributes(startActivityBuilder);
 
+        startActivityBuilder.addStatement("intent.putExtras($N())", bundle);
         startActivityBuilder.addStatement("$L.startActivity($L)", "context", "intent");
 
+        startForResultBuilder.addStatement("intent.putExtras($N())", bundle);
+        startForResultBuilder.addStatement("$L.startActivityForResult($L, $L)", "activity",
+                "intent", "requestCode");
+
+        startResultExtrasBuilder.addStatement("intent.putExtras($N())", bundle);
+        startResultExtrasBuilder.addStatement("$L.startActivityForResult($L, $L, $L)", "activity",
+                "intent", "requestCode", "extras");
+
         builder.addMethod(startActivityBuilder.build());
+        builder.addMethod(startForResultBuilder.build());
+        builder.addMethod(startResultExtrasBuilder.build());
+        builder.addMethod(bundle);
         TypeSpec builderInnerClass = builder.addMethod(constructorBuilder.build()).build();
 
         navigator.addType(builderInnerClass);
         navigator.addMethod(prepareMethodBuilder.build());
+    }
+
+    private MethodSpec.Builder getExtrasBundle(String activityName) {
+        // TODO: This is a hack. We are creating an intent and then skipping type safety
+        // by using intent.putExtra() and then getting bundle using intent.getExtras();
+        // Will have to figure out how to know if element is ParcelableaArrayList
+        // and other types. This isn't that bad since if the user uses the appropriate
+        // types, it should just work. Unfortunately, if they don't, this will
+        // result in a run time exception while casting and we want to avoid that since
+        // that's the whole point of using annotation processors
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getBundle")
+                .addModifiers(Modifier.PUBLIC);
+        methodBuilder.addStatement("$T intent = new $T()", INTENT_CLASSNAME,
+                INTENT_CLASSNAME);
+        methodBuilder.returns(BUNDLE_CLASSNAME);
+        return methodBuilder;
     }
 
     private MethodSpec.Builder getStartActivityMethod(String activityName) {
@@ -218,6 +263,28 @@ public final class FileWriter {
                 .addParameter(CONTEXT_CLASSNAME, "context");
         methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
                 INTENT_CLASSNAME, "context", activityName + ".class");
+        return methodBuilder;
+    }
+
+    private MethodSpec.Builder getStartForResultMethod(String activityName) {
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startForResult")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(ACTIVITY_CLASSNAME, "activity")
+                .addParameter(TypeName.INT, "requestCode");
+        methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
+                INTENT_CLASSNAME, "activity", activityName + ".class");
+        return methodBuilder;
+    }
+
+    private MethodSpec.Builder getStartForResultWithExtras(String activityName) {
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startForResult")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(ACTIVITY_CLASSNAME, "activity")
+                .addParameter(TypeName.INT, "requestCode")
+                .addParameter(ParameterSpec.builder(BUNDLE_CLASSNAME, "extras", Modifier.FINAL)
+                .addAnnotation(NULLABLE).build());
+        methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
+                INTENT_CLASSNAME, "activity", activityName + ".class");
         return methodBuilder;
     }
 
@@ -243,7 +310,7 @@ public final class FileWriter {
         parameterBuilder.addModifiers(Modifier.FINAL);
 
         if (!typeMirror.getKind().isPrimitive()) {
-            parameterBuilder.addAnnotation(ClassName.bestGuess("android.support.annotation.NonNull"));
+            parameterBuilder.addAnnotation(NONNULL);
         }
 
         return parameterBuilder.build();
