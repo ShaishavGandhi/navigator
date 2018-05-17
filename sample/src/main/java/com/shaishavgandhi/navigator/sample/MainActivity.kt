@@ -23,7 +23,8 @@ class MainActivity : AppCompatActivity() {
             val users = arrayListOf(User(name = "Shaishav", age = 10),
                     User("Dimple", 13))
 
-            Navigator.prepareDetailActivity(users, Points(100), 100, "Yay")
+            Navigator.prepareDetailActivity(users, 100, "source")
+                    .setPoints(Points(100))
                     // Clears the task
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                     .start(this)

@@ -5,6 +5,7 @@ dependencies {
     compileOnly rootProject.ext.autoservice
     implementation project(":annotations")
     implementation rootProject.ext.javapoet
+    implementation rootProject.ext.annotations
 }
 
 sourceCompatibility = "7"

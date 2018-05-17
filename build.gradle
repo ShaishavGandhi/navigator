@@ -29,6 +29,7 @@ ext {
     appcompat = "com.android.support:appcompat-v7:$supportVersion"
     constraintLayout = "com.android.support.constraint:constraint-layout:1.1.0"
     design = "com.android.support:design:$supportVersion"
+    annotations = "com.android.support:support-annotations:$supportVersion"
 
     junit = "junit:junit:4.12"
 
