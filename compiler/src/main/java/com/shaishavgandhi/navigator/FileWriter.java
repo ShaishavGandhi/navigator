@@ -1,7 +1,10 @@
 package com.shaishavgandhi.navigator;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -22,16 +25,15 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-public final class FileWriter {
+import static com.shaishavgandhi.navigator.StringUtils.capitalize;
+
+final class FileWriter {
 
     private static final ClassName CONTEXT_CLASSNAME = ClassName.get("android.content", "Context");
     private static final ClassName INTENT_CLASSNAME = ClassName.get("android.content", "Intent");
     private static final ClassName BUNDLE_CLASSNAME = ClassName.get("android.os", "Bundle");
     private static final ClassName ACTIVITY_CLASSNAME = ClassName.get("android.app", "Activity");
 
-    private static final ClassName NULLABLE = ClassName.bestGuess("android.support.annotation.Nullable");
-    private static final ClassName NONNULL = ClassName.bestGuess("android.support.annotation" +
-            ".NonNull");
 
     private static final String SERIALIZABLE = "Serializable";
     private static final String PARCELABLE = "Parcelable";
@@ -77,13 +79,13 @@ public final class FileWriter {
     private Types typeUtils;
     private Elements elementUtils;
 
-    public FileWriter(Types typeUtils, Elements elementUtils, LinkedHashMap<ClassName, LinkedHashSet<Element>> annotationsPerClass) {
+    FileWriter(Types typeUtils, Elements elementUtils, LinkedHashMap<ClassName, LinkedHashSet<Element>> annotationsPerClass) {
         this.typeUtils = typeUtils;
         this.elementUtils = elementUtils;
         this.annotationsPerClass = annotationsPerClass;
     }
 
-    public JavaFile writeFile() {
+    JavaFile writeFile() {
         TypeSpec.Builder navigator = TypeSpec.classBuilder("Navigator")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
@@ -126,8 +128,7 @@ public final class FileWriter {
 
             if (!modifiers.contains(Modifier.PUBLIC)) {
                 // Use getter and setter
-                builder.addStatement("$L.set$L($L)", "activity", varName.substring(0, 1).toUpperCase() +
-                        varName.substring(1), varName);
+                builder.addStatement("$L.set$L($L)", "activity", capitalize(varName), varName);
 
             } else {
                 builder.addStatement("$L.$L = $L", "activity", varName, varName);
@@ -143,7 +144,7 @@ public final class FileWriter {
     private void writeBuilder(TypeSpec.Builder navigator, ClassName activity, LinkedHashSet<Element> elements) {
         String activityName = activity.simpleName();
         TypeSpec.Builder builder = TypeSpec.classBuilder(activityName + "Builder")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
 
         builder.addField(FieldSpec.builder(TypeName.INT, FLAGS)
                 .initializer("$L", -1)
@@ -191,27 +192,38 @@ public final class FileWriter {
             }
             // Add as field parameter
             String name = element.getSimpleName().toString();
-            builder.addField(TypeName.get(typeMirror), name, Modifier.PRIVATE);
+            AnnotationSpec nullability = getNullabilityFor(element);
+            builder.addField(FieldSpec.builder(TypeName.get(typeMirror), name, Modifier.PRIVATE)
+                    .addAnnotation(nullability)
+                    .build());
 
             // Add to constructor
             ParameterSpec parameter = getParameter(element);
-            constructorBuilder.addParameter(parameter);
-            constructorBuilder.addStatement("this.$L = $L", parameter.name, parameter.name);
 
-            // Add to static prepare method
-            prepareMethodBuilder.addParameter(parameter);
+            AnnotationSpec nullable = AnnotationSpec.builder(ClassName.get(Nullable.class)).build();
+            if (!parameter.annotations.contains(nullable)) {
+                constructorBuilder.addParameter(parameter);
+                constructorBuilder.addStatement("this.$L = $L", parameter.name, parameter.name);
 
-            // Append to return statement
-            returnStatement.append(parameter.name);
-            returnStatement.append(", ");
+                // Add to static prepare method
+                prepareMethodBuilder.addParameter(parameter);
+
+                // Append to return statement
+                returnStatement.append(parameter.name);
+                returnStatement.append(", ");
+            } else {
+                addFieldToBuilder(builder, element, builderClass);
+            }
 
             // Put to bundle
             bundleBuilder.addStatement("intent.putExtra(\"$L\", $L)", parameter.name, parameter.name);
         }
 
         // Sanitize return statement
-        returnStatement.deleteCharAt(returnStatement.length() - 2);
-        returnStatement.deleteCharAt(returnStatement.length() - 1);
+        if (returnStatement.charAt(returnStatement.length() - 1) == ' ') {
+            returnStatement.deleteCharAt(returnStatement.length() - 2);
+            returnStatement.deleteCharAt(returnStatement.length() - 1);
+        }
         returnStatement.append(")");
         prepareMethodBuilder.addStatement(returnStatement.toString(), builderClass);
 
@@ -266,6 +278,18 @@ public final class FileWriter {
         return methodBuilder;
     }
 
+    private void addFieldToBuilder(TypeSpec.Builder builder, Element element, ClassName builderClass) {
+        String variableName = element.getSimpleName().toString();
+        MethodSpec.Builder setter = MethodSpec.methodBuilder("set" + capitalize(variableName))
+                .addModifiers(Modifier.FINAL, Modifier.PUBLIC)
+                .addParameter(TypeName.get(element.asType()), variableName)
+                .addStatement("this.$L = $L", variableName, variableName)
+                .returns(builderClass)
+                .addStatement("return this");
+
+        builder.addMethod(setter.build());
+    }
+
     private MethodSpec.Builder getStartForResultMethod(String activityName) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startForResult")
                 .addModifiers(Modifier.PUBLIC)
@@ -282,7 +306,7 @@ public final class FileWriter {
                 .addParameter(ACTIVITY_CLASSNAME, "activity")
                 .addParameter(TypeName.INT, "requestCode")
                 .addParameter(ParameterSpec.builder(BUNDLE_CLASSNAME, "extras", Modifier.FINAL)
-                .addAnnotation(NULLABLE).build());
+                .addAnnotation(Nullable.class).build());
         methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
                 INTENT_CLASSNAME, "activity", activityName + ".class");
         return methodBuilder;
@@ -305,15 +329,24 @@ public final class FileWriter {
     private ParameterSpec getParameter(Element element) {
         TypeMirror typeMirror = element.asType();
         String name = element.getSimpleName().toString();
-        ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(TypeName.get(typeMirror),
-                name);
+        ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(TypeName.get(typeMirror), name);
         parameterBuilder.addModifiers(Modifier.FINAL);
 
-        if (!typeMirror.getKind().isPrimitive()) {
-            parameterBuilder.addAnnotation(NONNULL);
-        }
+        parameterBuilder.addAnnotation(getNullabilityFor(element));
 
         return parameterBuilder.build();
+    }
+
+    private @Nullable AnnotationSpec getNullabilityFor(Element element) {
+        TypeMirror typeMirror = element.asType();
+        if (!typeMirror.getKind().isPrimitive()) {
+            if (element.getAnnotation(Nullable.class) == null) {
+                return AnnotationSpec.builder(ClassName.get(NonNull.class)).build();
+            } else {
+                return AnnotationSpec.builder(ClassName.get(Nullable.class)).build();
+            }
+        }
+        return null;
     }
 
     private String getExtraTypeName(TypeMirror typeMirror) {
