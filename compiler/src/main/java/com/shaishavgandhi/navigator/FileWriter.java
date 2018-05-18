@@ -173,14 +173,6 @@ final class FileWriter {
         // Bundle builder
         MethodSpec.Builder bundleBuilder = getExtrasBundle(activityName);
 
-        // Start activity
-        MethodSpec.Builder startActivityBuilder = getStartActivityMethod(activityName);
-
-        // Start for result
-        MethodSpec.Builder startForResultBuilder = getStartForResultMethod(activityName);
-        // Start result with extras
-        MethodSpec.Builder startResultExtrasBuilder = getStartForResultWithExtras(activityName);
-
         // TODO: There must be a better way for this with JavaPoet. Right now
         // I manually append each parameter and remove commas and close the bracket
         StringBuilder returnStatement = new StringBuilder("return new $T(");
@@ -230,22 +222,23 @@ final class FileWriter {
         bundleBuilder.addStatement("return intent.getExtras()");
         MethodSpec bundle  = bundleBuilder.build();
 
-        addOptionalAttributes(startActivityBuilder);
+        // Start activity
+        MethodSpec.Builder startActivityBuilder = getStartActivityMethod(activityName, bundle);
 
-        startActivityBuilder.addStatement("intent.putExtras($N())", bundle);
-        startActivityBuilder.addStatement("$L.startActivity($L)", "context", "intent");
+        // Start activity with extras
+        MethodSpec.Builder startActivityExtrasBuilder = getStartActivityWithExtras(activityName,
+                bundle);
 
-        startForResultBuilder.addStatement("intent.putExtras($N())", bundle);
-        startForResultBuilder.addStatement("$L.startActivityForResult($L, $L)", "activity",
-                "intent", "requestCode");
-
-        startResultExtrasBuilder.addStatement("intent.putExtras($N())", bundle);
-        startResultExtrasBuilder.addStatement("$L.startActivityForResult($L, $L, $L)", "activity",
-                "intent", "requestCode", "extras");
+        // Start for result
+        MethodSpec.Builder startForResultBuilder = getStartForResultMethod(activityName, bundle);
+        // Start result with extras
+        MethodSpec.Builder startResultExtrasBuilder = getStartForResultWithExtras(activityName,
+                bundle);
 
         builder.addMethod(startActivityBuilder.build());
         builder.addMethod(startForResultBuilder.build());
         builder.addMethod(startResultExtrasBuilder.build());
+        builder.addMethod(startActivityExtrasBuilder.build());
         builder.addMethod(bundle);
         TypeSpec builderInnerClass = builder.addMethod(constructorBuilder.build()).build();
 
@@ -269,12 +262,36 @@ final class FileWriter {
         return methodBuilder;
     }
 
-    private MethodSpec.Builder getStartActivityMethod(String activityName) {
+    private MethodSpec.Builder getStartActivityMethod(String activityName, MethodSpec bundle) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("start")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(CONTEXT_CLASSNAME, "context");
         methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
                 INTENT_CLASSNAME, "context", activityName + ".class");
+        // Put extras
+        methodBuilder.addStatement("intent.putExtras($N())", bundle);
+
+        // Set flags if they exist
+        addOptionalAttributes(methodBuilder);
+
+        // Start activity
+        methodBuilder.addStatement("$L.startActivity($L)", "context", "intent");
+        return methodBuilder;
+    }
+
+    private MethodSpec.Builder getStartActivityWithExtras(String activityName, MethodSpec bundle) {
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startWithExtras")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(CONTEXT_CLASSNAME, "context")
+                .addParameter(BUNDLE_CLASSNAME, "extras");
+        methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
+                INTENT_CLASSNAME, "context", activityName + ".class");
+        // Put extras
+        methodBuilder.addStatement("intent.putExtras($N())", bundle);
+        // Set flags if any
+        addOptionalAttributes(methodBuilder);
+        // Start activity
+        methodBuilder.addStatement("$L.startActivity($L, $L)", "context", "intent", "extras");
         return methodBuilder;
     }
 
@@ -290,17 +307,25 @@ final class FileWriter {
         builder.addMethod(setter.build());
     }
 
-    private MethodSpec.Builder getStartForResultMethod(String activityName) {
+    private MethodSpec.Builder getStartForResultMethod(String activityName, MethodSpec bundle) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startForResult")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ACTIVITY_CLASSNAME, "activity")
                 .addParameter(TypeName.INT, "requestCode");
         methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
                 INTENT_CLASSNAME, "activity", activityName + ".class");
+
+        // Put extras
+        methodBuilder.addStatement("intent.putExtras($N())", bundle);
+        //Add flags if any
+        addOptionalAttributes(methodBuilder);
+        // Start for result
+        methodBuilder.addStatement("$L.startActivityForResult($L, $L)", "activity",
+                "intent", "requestCode");
         return methodBuilder;
     }
 
-    private MethodSpec.Builder getStartForResultWithExtras(String activityName) {
+    private MethodSpec.Builder getStartForResultWithExtras(String activityName, MethodSpec bundle) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startForResult")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ACTIVITY_CLASSNAME, "activity")
@@ -309,6 +334,14 @@ final class FileWriter {
                 .addAnnotation(Nullable.class).build());
         methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
                 INTENT_CLASSNAME, "activity", activityName + ".class");
+
+        // Put extras
+        methodBuilder.addStatement("intent.putExtras($N())", bundle);
+        // Set flags
+        addOptionalAttributes(methodBuilder);
+        // Start activity for result
+        methodBuilder.addStatement("$L.startActivityForResult($L, $L, $L)", "activity",
+                "intent", "requestCode", "extras");
         return methodBuilder;
     }
 
