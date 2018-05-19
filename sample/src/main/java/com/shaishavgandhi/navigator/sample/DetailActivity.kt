@@ -20,8 +20,6 @@ class DetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
 
-        intent.flags
-
         Navigator.bind(this)
         findViewById<TextView>(R.id.whatever).text = userList.first().name
 

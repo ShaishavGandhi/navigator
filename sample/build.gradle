@@ -28,6 +28,7 @@ dependencies {
     implementation rootProject.ext.appcompat
     implementation rootProject.ext.constraintLayout
     implementation rootProject.ext.design
+    implementation 'com.android.support:support-v4:27.1.1'
     testImplementation rootProject.junit
 
     implementation project(":library")
