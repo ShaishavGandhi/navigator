@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.shaishavgandhi.navigato.sampler.R
 import com.shaishavgandhi.navigator.Extra
+import com.shaishavgandhi.navigator.Navigator
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -22,6 +23,11 @@ private const val ARG_PARAM2 = "param2"
 class DetailFragment : Fragment() {
 
     @Extra var user: User? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Navigator.bind(this)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {

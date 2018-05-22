@@ -189,8 +189,6 @@ final class FileWriter {
                 .addStatement("this.$1L = $1L", FLAGS)
                 .addStatement("return this");
 
-        builder.addMethod(flagBuilder.build());
-
         // Static method to prepare activity
         MethodSpec.Builder prepareMethodBuilder = getPrepareActivityMethod(activityName,
                 builderClass);
@@ -260,10 +258,14 @@ final class FileWriter {
         MethodSpec.Builder startResultExtrasBuilder = getStartForResultWithExtras(activityName,
                 bundle);
 
-        builder.addMethod(startActivityBuilder.build());
-        builder.addMethod(startForResultBuilder.build());
-        builder.addMethod(startResultExtrasBuilder.build());
-        builder.addMethod(startActivityExtrasBuilder.build());
+        if (isActivity(activity)) {
+            // Add activity specific methods
+            builder.addMethod(startActivityBuilder.build());
+            builder.addMethod(startForResultBuilder.build());
+            builder.addMethod(startResultExtrasBuilder.build());
+            builder.addMethod(startActivityExtrasBuilder.build());
+            builder.addMethod(flagBuilder.build());
+        }
         builder.addMethod(bundle);
         TypeSpec builderInnerClass = builder.addMethod(constructorBuilder.build()).build();
 
