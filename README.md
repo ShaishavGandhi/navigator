@@ -7,7 +7,9 @@ Utility library that generates activity navigation boilerplate for you, along wi
 
 ## Download
 
-```grrovy
+![Maven Central](https://img.shields.io/maven-central/v/com.shaishavgandhi.navigator/navigator.svg)
+
+```groovy
 dependencies {
   implementation 'com.shaishavgandhi.navigator:navigator:x.y.z'
   annotationProcessor 'com.shaishavgandhi.navigator:navigator-compiler:x.y.z'
