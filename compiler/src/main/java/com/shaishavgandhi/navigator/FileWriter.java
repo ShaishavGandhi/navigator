@@ -90,10 +90,11 @@ final class FileWriter {
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
         for (Map.Entry<ClassName, LinkedHashSet<Element>> item : annotationsPerClass.entrySet()) {
-            ClassName activity = item.getKey();
+            ClassName className = item.getKey();
             LinkedHashSet<Element> annotations = item.getValue();
-            writeBuilder(navigator, activity, annotations);
-            MethodSpec bindMethod = getBindMethod(activity, annotations);
+
+            writeBuilder(navigator, className, annotations);
+            MethodSpec bindMethod = getBindMethod(className, annotations);
             navigator.addMethod(bindMethod);
         }
 
@@ -104,9 +105,15 @@ final class FileWriter {
     private MethodSpec getBindMethod(ClassName activity, LinkedHashSet<Element> annotations) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("bind")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
-                .addParameter(activity, "activity");
-        builder.addStatement("$T bundle = $L.getIntent().getExtras()", BUNDLE_CLASSNAME,
-                "activity");
+                .addParameter(activity, "binder");
+
+        if (isActivity(activity)) {
+            builder.addStatement("$T bundle = $L.getIntent().getExtras()", BUNDLE_CLASSNAME,
+                    "binder");
+        } else if (isFragment(activity)) {
+            builder.addStatement("$T bundle = $L.getArguments()", BUNDLE_CLASSNAME,
+                    "binder");
+        }
 
         builder.beginControlFlow("if (bundle != null)");
         for (Element element: annotations) {
@@ -128,10 +135,10 @@ final class FileWriter {
 
             if (!modifiers.contains(Modifier.PUBLIC)) {
                 // Use getter and setter
-                builder.addStatement("$L.set$L($L)", "activity", capitalize(varName), varName);
+                builder.addStatement("$L.set$L($L)", "binder", capitalize(varName), varName);
 
             } else {
-                builder.addStatement("$L.$L = $L", "activity", varName, varName);
+                builder.addStatement("$L.$L = $L", "binder", varName, varName);
             }
             builder.endControlFlow();
         }
@@ -139,6 +146,24 @@ final class FileWriter {
 
 
         return builder.build();
+    }
+
+    private boolean isFragment(ClassName className) {
+        TypeMirror supportFragment = elementUtils.getTypeElement("android.support.v4.app.Fragment")
+                .asType();
+        TypeMirror fragment = elementUtils.getTypeElement("android.app.Fragment")
+                .asType();
+        // TODO: Add support for androidx.fragment
+        TypeMirror currentClass = elementUtils.getTypeElement(className.toString()).asType();
+        return typeUtils.isSubtype(currentClass, fragment) || typeUtils.isSubtype(currentClass,
+                supportFragment);
+
+    }
+
+    private boolean isActivity(ClassName className) {
+        TypeMirror activity = elementUtils.getTypeElement("android.app.Activity").asType();
+        TypeMirror currentClass = elementUtils.getTypeElement(className.toString()).asType();
+        return typeUtils.isSubtype(currentClass, activity);
     }
 
     private void writeBuilder(TypeSpec.Builder navigator, ClassName activity, LinkedHashSet<Element> elements) {
@@ -163,8 +188,6 @@ final class FileWriter {
                 .returns(builderClass)
                 .addStatement("this.$1L = $1L", FLAGS)
                 .addStatement("return this");
-
-        builder.addMethod(flagBuilder.build());
 
         // Static method to prepare activity
         MethodSpec.Builder prepareMethodBuilder = getPrepareActivityMethod(activityName,
@@ -235,10 +258,14 @@ final class FileWriter {
         MethodSpec.Builder startResultExtrasBuilder = getStartForResultWithExtras(activityName,
                 bundle);
 
-        builder.addMethod(startActivityBuilder.build());
-        builder.addMethod(startForResultBuilder.build());
-        builder.addMethod(startResultExtrasBuilder.build());
-        builder.addMethod(startActivityExtrasBuilder.build());
+        if (isActivity(activity)) {
+            // Add activity specific methods
+            builder.addMethod(startActivityBuilder.build());
+            builder.addMethod(startForResultBuilder.build());
+            builder.addMethod(startResultExtrasBuilder.build());
+            builder.addMethod(startActivityExtrasBuilder.build());
+            builder.addMethod(flagBuilder.build());
+        }
         builder.addMethod(bundle);
         TypeSpec builderInnerClass = builder.addMethod(constructorBuilder.build()).build();
 
