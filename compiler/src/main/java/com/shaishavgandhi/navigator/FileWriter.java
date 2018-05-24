@@ -42,9 +42,11 @@ final class FileWriter {
     private HashMap<String, String> typeMapper = new HashMap<String, String>(){{
         put("java.lang.String", "String");
         put("java.lang.String[]", "StringArray");
+        put("java.util.ArrayList<java.lang.String>", "StringArrayList");
         put("java.lang.Integer", "Int");
         put("int", "Int");
         put("int[]", "IntArray");
+        put("java.util.ArrayList<java.lang.Integer>", "IntegerArrayList");
         put("java.lang.Long","Long");
         put("long", "Long");
         put("long[]", "LongArray");
@@ -62,6 +64,7 @@ final class FileWriter {
         put("char[]", "CharArray");
         put("java.lang.CharSequence", "CharSequence");
         put("java.lang.CharSequence[]", "CharSequenceArray");
+        put("java.util.ArrayList<java.lang.CharSequence>", "CharSequenceArrayList");
         put("android.util.Size", "Size");
         put("android.util.SizeF", "SizeF");
         put("boolean", "Boolean");
@@ -70,9 +73,6 @@ final class FileWriter {
         put("java.lang.Boolean[]", "BooleanArray");
         put("android.os.Parcelable", "Parcelable");
         put("java.util.ArrayList<android.os.Parcelable>", "ParcelableArrayList");
-        // TODO: Add support for CharSequenceArrayList
-
-
     }};
 
     private LinkedHashMap<ClassName, LinkedHashSet<Element>> annotationsPerClass;
