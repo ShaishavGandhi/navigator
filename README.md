@@ -7,7 +7,9 @@ Utility library that generates activity navigation boilerplate for you, along wi
 
 ## Download
 
-```grrovy
+![Maven Central](https://img.shields.io/maven-central/v/com.shaishavgandhi.navigator/navigator.svg)
+
+```groovy
 dependencies {
   implementation 'com.shaishavgandhi.navigator:navigator:x.y.z'
   annotationProcessor 'com.shaishavgandhi.navigator:navigator-compiler:x.y.z'
@@ -131,9 +133,38 @@ class ActivityB : Activity() {
 
 So far, Navigator cannot hook into Kotlin's null types and therefore you'll have to add a `@Nullable` annotation to nullable types. 
 
+## Advanced Usage
+
+Navigator exposes most ways to start an activity. 
+
+#### Start Activity For Result
+
+```kotlin
+Navigator.prepareDetailActivity(users, source)
+               .setPoints(points)
+               .startForResult(activity, requestCode)
+```
+
+#### Start Activity With Transition Bundle
+```kotlin
+Navigator.prepareDetailActivity(users, source)
+               .setPoints(points)
+               .startWithExtras(activity, transitionBundle)
+```
+
+#### Bundle
+
+In cases where you just want to use the type-safety and implicit contract of Navigator, you can easily use the builder to get the bundle created by Navigator
+
+```java
+Bundle bundle = Navigator.prepareDetailActivity(users, source)
+               .setPoints(points)
+               .getBundle();
+```
+
 ## Future Plans
 
-* Generate Kotlin code to hook into platform features 
+* Generate Kotlin code to hook into Kotlin language features like optional parameters, null types etc. 
 
 ## License
     
