@@ -84,6 +84,8 @@ You only need to annotate your fields with `@Extra` in your destination activity
 
 By default, Navigator will treat all fields with `@Extra` as necessary and required for the destination activity to start. Fields that are not _required_ by the activity but might be expected from some places can be annotated with `@Nullable` from android support-annotations. 
 
+Fields annotated with `@Extra` must be public or package-private. If the fields are private, then you must provide a setter for them that will be used by Navigator to bind the data.
+
 Using the same example:
 
 ```java
