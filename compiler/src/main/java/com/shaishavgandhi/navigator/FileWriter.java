@@ -12,9 +12,11 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -78,6 +80,7 @@ final class FileWriter {
     private LinkedHashMap<ClassName, LinkedHashSet<Element>> annotationsPerClass;
     private Types typeUtils;
     private Elements elementUtils;
+    private List<JavaFile> files = new ArrayList<>();
 
     FileWriter(Types typeUtils, Elements elementUtils, LinkedHashMap<ClassName, LinkedHashSet<Element>> annotationsPerClass) {
         this.typeUtils = typeUtils;
@@ -85,7 +88,7 @@ final class FileWriter {
         this.annotationsPerClass = annotationsPerClass;
     }
 
-    JavaFile writeFile() {
+    protected void writeFiles() {
         TypeSpec.Builder navigator = TypeSpec.classBuilder("Navigator")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
@@ -98,8 +101,8 @@ final class FileWriter {
             navigator.addMethod(bindMethod);
         }
 
-        return JavaFile.builder("com.shaishavgandhi.navigator", navigator.build())
-                .build();
+        files.add(JavaFile.builder("com.shaishavgandhi.navigator", navigator.build())
+                .build());
     }
 
     private MethodSpec getBindMethod(ClassName activity, LinkedHashSet<Element> annotations) {
@@ -169,7 +172,7 @@ final class FileWriter {
     private void writeBuilder(TypeSpec.Builder navigator, ClassName activity, LinkedHashSet<Element> elements) {
         String activityName = activity.simpleName();
         TypeSpec.Builder builder = TypeSpec.classBuilder(activityName + "Builder")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
         builder.addField(FieldSpec.builder(TypeName.INT, FLAGS)
                 .initializer("$L", -1)
@@ -179,7 +182,7 @@ final class FileWriter {
 
         // Constructor
         MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PRIVATE);
+                .addModifiers(Modifier.PROTECTED);
 
         // Set intent flags
         MethodSpec.Builder flagBuilder = MethodSpec.methodBuilder("setFlags")
@@ -246,7 +249,7 @@ final class FileWriter {
         MethodSpec bundle  = bundleBuilder.build();
 
         // Start activity
-        MethodSpec.Builder startActivityBuilder = getStartActivityMethod(activityName, bundle);
+        MethodSpec.Builder startActivityBuilder = getStartActivityMethod(activity, bundle);
 
         // Start activity with extras
         MethodSpec.Builder startActivityExtrasBuilder = getStartActivityWithExtras(activityName,
@@ -269,7 +272,8 @@ final class FileWriter {
         builder.addMethod(bundle);
         TypeSpec builderInnerClass = builder.addMethod(constructorBuilder.build()).build();
 
-        navigator.addType(builderInnerClass);
+        JavaFile file = JavaFile.builder("com.shaishavgandhi.navigator", builderInnerClass).build();
+        files.add(file);
         navigator.addMethod(prepareMethodBuilder.build());
     }
 
@@ -289,12 +293,12 @@ final class FileWriter {
         return methodBuilder;
     }
 
-    private MethodSpec.Builder getStartActivityMethod(String activityName, MethodSpec bundle) {
+    private MethodSpec.Builder getStartActivityMethod(ClassName activity, MethodSpec bundle) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("start")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(CONTEXT_CLASSNAME, "context");
-        methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
-                INTENT_CLASSNAME, "context", activityName + ".class");
+        methodBuilder.addStatement("$T intent = new $T($L, $T.class)", INTENT_CLASSNAME,
+                INTENT_CLASSNAME, "context", activity);
         // Put extras
         methodBuilder.addStatement("intent.putExtras($N())", bundle);
 
@@ -429,6 +433,10 @@ final class FileWriter {
     private boolean isSerializable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
         return typeUtils.isAssignable(typeMirror, elementUtils.getTypeElement("java.io.Serializable")
                 .asType());
+    }
+
+    protected List<JavaFile> getFiles() {
+        return files;
     }
 
 }
