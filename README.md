@@ -1,7 +1,8 @@
 # Navigator
 
 
-![CircleCI](https://img.shields.io/circleci/project/github/shaishavgandhi05/navigator.svg)
+![CircleCI branch](https://img.shields.io/circleci/project/github/shaishavgandhi05/navigator/master.svg)
+
 
 Utility library that generates activity navigation boilerplate for you, along with all it's bindings. 
 
@@ -134,6 +135,36 @@ class ActivityB : Activity() {
 ```
 
 So far, Navigator cannot hook into Kotlin's null types and therefore you'll have to add a `@Nullable` annotation to nullable types. 
+
+## Fragments
+
+The same examples mentioned above work for fragments as well. However, **Navigator is not interested in being a navigation library for fragments**. A whole different library can be written about that. 
+
+Navigator does support binding of arguments passed to the fragment as well as constructing the arguments required for a fragment in an API that is very similar to Activities. 
+
+#### Get arguments
+
+```java
+Navigator.prepareDetailFragment(userList)
+                .setPoints(points)
+                .getBundle()
+```
+
+#### Bind arguments
+
+```kotlin
+class DetailFragment : Fragment() {
+
+    @Extra var user: User? = null
+    @Extra @Nullable var points: Point? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Navigator.bind(this)
+    }
+
+}
+```
 
 ## Advanced Usage
 
