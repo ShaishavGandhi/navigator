@@ -175,8 +175,12 @@ final class FileWriter {
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
         builder.addField(FieldSpec.builder(TypeName.INT, FLAGS)
+                .addModifiers(Modifier.PRIVATE)
                 .initializer("$L", -1)
                 .build());
+
+        builder.addField(FieldSpec.builder(BUNDLE_CLASSNAME, "extras")
+                .addModifiers(Modifier.PRIVATE).build());
 
         ClassName builderClass = ClassName.bestGuess(activityName + "Builder");
 
@@ -245,6 +249,9 @@ final class FileWriter {
         returnStatement.append(")");
         prepareMethodBuilder.addStatement(returnStatement.toString(), builderClass);
 
+        bundleBuilder.beginControlFlow("if ($L != null)", "extras");
+        bundleBuilder.addStatement("intent.putExtras($L)", "extras");
+        bundleBuilder.endControlFlow();
         bundleBuilder.addStatement("return intent.getExtras()");
         MethodSpec bundle  = bundleBuilder.build();
 
@@ -257,9 +264,12 @@ final class FileWriter {
 
         // Start for result
         MethodSpec.Builder startForResultBuilder = getStartForResultMethod(activityName, bundle);
+
         // Start result with extras
         MethodSpec.Builder startResultExtrasBuilder = getStartForResultWithExtras(activityName,
                 bundle);
+
+        MethodSpec.Builder setExtrasBuilder = getExtrasMethod(builderClass);
 
         if (isActivity(activity)) {
             // Add activity specific methods
@@ -270,11 +280,22 @@ final class FileWriter {
             builder.addMethod(flagBuilder.build());
         }
         builder.addMethod(bundle);
+        builder.addMethod(setExtrasBuilder.build());
         TypeSpec builderInnerClass = builder.addMethod(constructorBuilder.build()).build();
 
         JavaFile file = JavaFile.builder("com.shaishavgandhi.navigator", builderInnerClass).build();
         files.add(file);
         navigator.addMethod(prepareMethodBuilder.build());
+    }
+
+    private MethodSpec.Builder getExtrasMethod(ClassName builderClass) {
+        return MethodSpec.methodBuilder("setExtras")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(builderClass)
+                .addParameter(ParameterSpec.builder(BUNDLE_CLASSNAME, "extras")
+                .addModifiers(Modifier.FINAL).build())
+                .addStatement("this.$L = $L", "extras", "extras")
+                .addStatement("return this");
     }
 
     private MethodSpec.Builder getExtrasBundle(String activityName) {

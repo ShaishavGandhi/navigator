@@ -1,10 +1,12 @@
 package com.shaishavgandhi.navigator.sample
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.annotation.Nullable
 import android.widget.TextView
 import android.widget.Toast
+import com.evernote.android.state.State
 import com.shaishavgandhi.navigato.sampler.R
 import com.shaishavgandhi.navigator.Extra
 import com.shaishavgandhi.navigator.Navigator
