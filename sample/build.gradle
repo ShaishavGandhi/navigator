@@ -31,6 +31,9 @@ dependencies {
     implementation 'com.android.support:support-v4:27.1.1'
     testImplementation rootProject.junit
 
+    compile 'com.evernote:android-state:1.2.1'
+    kapt 'com.evernote:android-state-processor:1.2.1'
+
     implementation project(":library")
     kapt project(":compiler")
 
