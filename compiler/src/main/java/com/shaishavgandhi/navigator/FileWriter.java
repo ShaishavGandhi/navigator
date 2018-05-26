@@ -178,10 +178,12 @@ final class FileWriter {
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
         builder.addField(FieldSpec.builder(TypeName.INT, FLAGS)
+                .addModifiers(Modifier.PRIVATE)
                 .initializer("$L", -1)
                 .build());
 
-        builder.addField(FieldSpec.builder(BUNDLE_CLASSNAME, "extras").build());
+        builder.addField(FieldSpec.builder(BUNDLE_CLASSNAME, "extras")
+                .addModifiers(Modifier.PRIVATE).build());
 
         ClassName builderClass = ClassName.bestGuess(activityName + "Builder");
 
@@ -281,6 +283,7 @@ final class FileWriter {
             builder.addMethod(flagBuilder.build());
         }
         builder.addMethod(bundle);
+        builder.addMethod(setExtrasBuilder.build());
         TypeSpec builderInnerClass = builder.addMethod(constructorBuilder.build()).build();
 
         JavaFile file = JavaFile.builder("com.shaishavgandhi.navigator", builderInnerClass).build();
@@ -292,6 +295,8 @@ final class FileWriter {
         return MethodSpec.methodBuilder("setExtras")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
+                .addParameter(ParameterSpec.builder(BUNDLE_CLASSNAME, "extras")
+                .addModifiers(Modifier.FINAL).build())
                 .addStatement("this.$L = $L", "extras", "extras")
                 .addStatement("return this");
     }
