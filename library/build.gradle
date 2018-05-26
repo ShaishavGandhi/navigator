@@ -35,6 +35,7 @@ android {
 dependencies {
     testImplementation rootProject.ext.junit
     api project(":annotations")
+    testImplementation 'com.google.testing.compile:compile-testing:0.15'
 }
 repositories {
     mavenCentral()

@@ -74,15 +74,17 @@ public final class NavigatorProcessor extends AbstractProcessor {
             }
         }
 
-
         FileWriter writer = new FileWriter(typeUtils, elementUtils, annotationsPerClass);
-        JavaFile javaFile = writer.writeFile();
+        writer.writeFiles();
 
-        try {
-            javaFile.writeTo(filer);
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (JavaFile file: writer.getFiles()) {
+            try {
+                file.writeTo(filer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
         return true;
     }
 
