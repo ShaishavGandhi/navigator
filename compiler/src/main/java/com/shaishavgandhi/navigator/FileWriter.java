@@ -129,9 +129,6 @@ final class FileWriter {
 
             String extraName = getExtraTypeName(element.asType());
             if (extraName == null) {
-                String field = element.asType().toString();
-            }
-            if (extraName == null) {
                 // Add casting for serializable
                 builder.addStatement("$T $L = ($T) bundle.get(\"$L\")", name, varName, name, varName);
             } else {

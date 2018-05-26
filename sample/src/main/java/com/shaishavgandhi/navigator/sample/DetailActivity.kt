@@ -13,7 +13,7 @@ import com.shaishavgandhi.navigator.Navigator
 
 class DetailActivity : AppCompatActivity() {
 
-    @State @Extra lateinit var userList: ArrayList<User>
+    @Extra lateinit var userList: ArrayList<User>
     @Extra @Nullable var points: Points? = null
     @Extra var userId: Long? = null
     @Extra var source: String? = null
