@@ -11,9 +11,7 @@ import com.shaishavgandhi.navigator.Navigator
 class MainActivity : AppCompatActivity() {
 
     @Extra
-    var id: Int? = null
-    @Extra
-    var key: String? = null
+    var name: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
