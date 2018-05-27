@@ -20,12 +20,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import javax.tools.Diagnostic;
 
 import static com.shaishavgandhi.navigator.StringUtils.capitalize;
 
@@ -81,11 +83,14 @@ final class FileWriter {
     private Types typeUtils;
     private Elements elementUtils;
     private List<JavaFile> files = new ArrayList<>();
+    private Messager messager;
 
-    FileWriter(Types typeUtils, Elements elementUtils, LinkedHashMap<ClassName, LinkedHashSet<Element>> annotationsPerClass) {
+    FileWriter(Types typeUtils, Elements elementUtils, LinkedHashMap<ClassName,
+            LinkedHashSet<Element>> annotationsPerClass, Messager messager) {
         this.typeUtils = typeUtils;
         this.elementUtils = elementUtils;
         this.annotationsPerClass = annotationsPerClass;
+        this.messager = messager;
     }
 
     protected void writeFiles() {
@@ -116,6 +121,9 @@ final class FileWriter {
         } else if (isFragment(activity)) {
             builder.addStatement("$T bundle = $L.getArguments()", BUNDLE_CLASSNAME,
                     "binder");
+        } else {
+            messager.printMessage(Diagnostic.Kind.ERROR, "@Extra can only be applied to fields in" +
+                    " Activities or Fragments");
         }
 
         builder.beginControlFlow("if (bundle != null)");
@@ -152,21 +160,25 @@ final class FileWriter {
     }
 
     private boolean isFragment(ClassName className) {
-        TypeMirror supportFragment = elementUtils.getTypeElement("android.support.v4.app.Fragment")
-                .asType();
-        TypeMirror fragment = elementUtils.getTypeElement("android.app.Fragment")
-                .asType();
-        // TODO: Add support for androidx.fragment
         TypeMirror currentClass = elementUtils.getTypeElement(className.toString()).asType();
-        return typeUtils.isSubtype(currentClass, fragment) || typeUtils.isSubtype(currentClass,
-                supportFragment);
-
+        if (elementUtils.getTypeElement("android.support.v4.app.Fragment") != null) {
+            TypeMirror supportFragment = elementUtils.getTypeElement("android.support.v4.app.Fragment").asType();
+            // TODO: Add support for androidx.fragment
+            return  typeUtils.isSubtype(currentClass, supportFragment);
+        } else if (elementUtils.getTypeElement("android.app.Fragment") != null) {
+            TypeMirror fragment = elementUtils.getTypeElement("android.app.Fragment").asType();
+            return typeUtils.isSubtype(currentClass, fragment);
+        }
+        return false;
     }
 
     private boolean isActivity(ClassName className) {
-        TypeMirror activity = elementUtils.getTypeElement("android.app.Activity").asType();
-        TypeMirror currentClass = elementUtils.getTypeElement(className.toString()).asType();
-        return typeUtils.isSubtype(currentClass, activity);
+        if (elementUtils.getTypeElement("android.app.Activity") != null) {
+            TypeMirror activity = elementUtils.getTypeElement("android.app.Activity").asType();
+            TypeMirror currentClass = elementUtils.getTypeElement(className.toString()).asType();
+            return typeUtils.isSubtype(currentClass, activity);
+        }
+        return false;
     }
 
     private void writeBuilder(TypeSpec.Builder navigator, ClassName activity, LinkedHashSet<Element> elements) {

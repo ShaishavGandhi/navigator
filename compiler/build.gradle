@@ -1,11 +1,15 @@
 apply plugin: 'java-library'
 apply from: '../gradle/gradle-mvn-push.gradle'
 
+compileJava.dependsOn ":library:bundleRelease"
+
 dependencies {
     compileOnly rootProject.ext.autoservice
     implementation project(":annotations")
     implementation rootProject.ext.javapoet
     implementation rootProject.ext.annotations
+
+    testImplementation rootProject.ext.junit
 }
 
 sourceCompatibility = "7"
