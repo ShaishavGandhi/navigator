@@ -4,6 +4,7 @@ apply from: '../gradle/gradle-mvn-push.gradle'
 dependencies {
     compileOnly rootProject.ext.autoservice
     implementation project(":annotations")
+    implementation 'org.jetbrains:annotations:16.0.2'
     implementation rootProject.ext.javapoet
     implementation rootProject.ext.annotations
 
