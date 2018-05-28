@@ -8,7 +8,7 @@ Utility library that generates activity navigation boilerplate for you, along wi
 
 ## Download
 
-![Maven Central](https://img.shields.io/maven-central/v/com.shaishavgandhi.navigator/navigator.svg)
+[![Maven Central](https://img.shields.io/maven-central/v/com.shaishavgandhi.navigator/navigator.svg)](https://mvnrepository.com/artifact/com.shaishavgandhi.navigator/navigator)
 
 ```groovy
 dependencies {
@@ -35,7 +35,7 @@ public final class ActivityA extends Activity {
     intent.putString("source", source);
     intent.putString("title", title);
     intent.putString("subtitle", subtitle);
-    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK);
+    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK || Intent.FLAG_ACTIVITY_CLEAR_TASK);
     startActivity(intent);
   }
 
@@ -110,7 +110,7 @@ public final class ActivityA extends Activity {
   protected void openActivityB() {
     Navigator.prepareActivityB(title, subtitle) // Required extras by ActivityB go in constructor
       .setSource(source) // optional extras
-      .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+      .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK || Intent.FLAG_ACTIVITY_CLEAR_TASK)
       .start(this);
   }
 
@@ -124,17 +124,15 @@ The sample example would work in Kotlin as well.
 class ActivityB : Activity() {
   
   @Extra lateinit var title: String 
-  @Extra @Nullable var source: String? = null
+  @Extra var source: String? = null // null type indicates that it is optional
   @Extra lateinit var subtitle: String
  
   override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState);
-    Navigator.bind(this); // Automatically bind extras
+    super.onCreate(savedInstanceState)
+    Navigator.bind(this) // Automatically bind extras
   }
 }
 ```
-
-So far, Navigator cannot hook into Kotlin's null types and therefore you'll have to add a `@Nullable` annotation to nullable types. 
 
 ## Fragments
 
@@ -156,7 +154,7 @@ Navigator.prepareDetailFragment(userList)
 class DetailFragment : Fragment() {
 
     @Extra var user: User? = null
-    @Extra @Nullable var points: Point? = null
+    @Extra var points: Point? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
