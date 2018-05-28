@@ -24,10 +24,10 @@ android {
 }
 
 dependencies {
-    implementation rootProject.ext.kotlin
-    implementation rootProject.ext.appcompat
-    implementation rootProject.ext.constraintLayout
-    implementation rootProject.ext.design
+    implementation rootProject.kotlin
+    implementation rootProject.appcompat
+    implementation rootProject.constraintLayout
+    implementation rootProject.design
     implementation 'com.android.support:support-v4:27.1.1'
     testImplementation rootProject.junit
 
