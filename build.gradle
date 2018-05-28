@@ -30,6 +30,9 @@ ext {
     constraintLayout = "com.android.support.constraint:constraint-layout:1.1.0"
     design = "com.android.support:design:$supportVersion"
     annotations = "com.android.support:support-annotations:$supportVersion"
+    jetbrainsAnnotations = "org.jetbrains:annotations:16.0.2"
+
+    compileTesting = "com.google.testing.compile:compile-testing:0.15"
 
     junit = "junit:junit:4.12"
 

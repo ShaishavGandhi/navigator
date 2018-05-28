@@ -33,10 +33,10 @@ android {
 }
 
 dependencies {
-    testImplementation rootProject.ext.junit
+    testImplementation rootProject.junit
     api project(":annotations")
 
-    testImplementation 'com.google.testing.compile:compile-testing:0.15'
+    testImplementation rootProject.compileTesting
     testImplementation files(org.gradle.internal.jvm.Jvm.current().getToolsJar())
     testImplementation files(getRuntimeJar())
     testImplementation project(":compiler")
