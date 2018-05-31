@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -202,6 +203,14 @@ final class FileWriter {
 
         // Set intent flags
         MethodSpec.Builder flagBuilder = MethodSpec.methodBuilder("setFlags")
+                // Add Javadoc
+                .addJavadoc(CodeBlock.builder()
+                        .add("Set intent flags.\n")
+                        .add(("For the correct flag values see: {@link android.content.Intent}\n"))
+                        .add("\n")
+                        .add("@param $L The desired flags.\n", "flags ")
+                        .add("@return Returns the same Builder object for chaining multiple calls\n")
+                        .build())
                 .addParameter(ParameterSpec.builder(TypeName.INT, "flags", Modifier.FINAL).build())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
@@ -213,7 +222,7 @@ final class FileWriter {
                 builderClass);
 
         // Bundle builder
-        MethodSpec.Builder bundleBuilder = getExtrasBundle(activityName);
+        MethodSpec.Builder bundleBuilder = getExtrasBundle();
 
         // TODO: There must be a better way for this with JavaPoet. Right now
         // I manually append each parameter and remove commas and close the bracket
@@ -281,7 +290,7 @@ final class FileWriter {
         MethodSpec.Builder startResultExtrasBuilder = getStartForResultWithExtras(activityName,
                 bundle);
 
-        MethodSpec.Builder setExtrasBuilder = getExtrasMethod(builderClass);
+        MethodSpec.Builder setExtrasBuilder = getExtrasSetterMethod(builderClass);
 
         if (isActivity(activity)) {
             // Add activity specific methods
@@ -300,17 +309,29 @@ final class FileWriter {
         navigator.addMethod(prepareMethodBuilder.build());
     }
 
-    private MethodSpec.Builder getExtrasMethod(ClassName builderClass) {
+    private MethodSpec.Builder getExtrasSetterMethod(ClassName builderClass) {
         return MethodSpec.methodBuilder("setExtras")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
+                // Add JavaDoc
+                .addJavadoc(CodeBlock.builder()
+                        .add("Setter for adding a {@link android.os.Bundle} to the existing bundle \n")
+                        .add("that will be sent along with the {@link android.content.Intent}.\n")
+                        .add("\n")
+                        .add("Effectively serves as an overload for {@link android.content.Intent#putExtras\n")
+                        .add("\n")
+                        .add("@see #getBundle")
+                        .add("\n")
+                        .add("@param $L that will be appended to the current bundle\n", "extras")
+                        .add("@return Builder class for chaining other methods\n")
+                        .build())
                 .addParameter(ParameterSpec.builder(BUNDLE_CLASSNAME, "extras")
                 .addModifiers(Modifier.FINAL).build())
                 .addStatement("this.$L = $L", "extras", "extras")
                 .addStatement("return this");
     }
 
-    private MethodSpec.Builder getExtrasBundle(String activityName) {
+    private MethodSpec.Builder getExtrasBundle() {
         // TODO: This is a hack. We are creating an intent and then skipping type safety
         // by using intent.putExtra() and then getting bundle using intent.getExtras();
         // Will have to figure out how to know if element is ParcelableaArrayList
@@ -320,6 +341,24 @@ final class FileWriter {
         // that's the whole point of using annotation processors
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getBundle")
                 .addModifiers(Modifier.PUBLIC);
+        // Add javadoc
+        methodBuilder.addJavadoc(CodeBlock.builder()
+                .add("Returns a {@link android.os.Bundle} built from all extras that have been " +
+                                "set \n" +
+                        "using {@linkplain Navigator}'s prepare method.\n")
+                .add("\n")
+                .add("Used internally to simply get the {@link android.os.Bundle} that will be \n" +
+                        "sent along with the {@link android.content.Intent}.\n")
+                .add("\n")
+                .add("Exposed publicly to allow custom usage of the {@link android.os.Bundle}. \n")
+                .add("\n")
+                .add("Example: It can be useful while navigating to a {@link android.support.v4.app.Fragment}\n" +
+                        "to use {@linkplain Navigator}'s prepare method to \n" +
+                        "build your bundle and call this method to get extras that can be set as \n" +
+                        "arguments to your {@linkplain android.support.v4.app.Fragment}.")
+                .add("\n")
+                .build());
+        // Add code body
         methodBuilder.addStatement("$T intent = new $T()", INTENT_CLASSNAME,
                 INTENT_CLASSNAME);
         methodBuilder.returns(BUNDLE_CLASSNAME);
@@ -327,11 +366,22 @@ final class FileWriter {
     }
 
     private MethodSpec.Builder getStartActivityMethod(ClassName activity, MethodSpec bundle) {
+        final String parameterName = "context";
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("start")
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(CONTEXT_CLASSNAME, "context");
+                .addParameter(CONTEXT_CLASSNAME, parameterName);
         methodBuilder.addStatement("$T intent = new $T($L, $T.class)", INTENT_CLASSNAME,
-                INTENT_CLASSNAME, "context", activity);
+                INTENT_CLASSNAME, parameterName, activity);
+        // Add javadoc
+        methodBuilder.addJavadoc(CodeBlock.builder()
+                .add("Terminating method in the builder. Passes the built bundle, \n")
+                .add("sets any {@link android.content.Intent} flags if any and starts the \n")
+                .add("activity\n")
+                .add("\n")
+                .add("@see #getBundle")
+                .add("\n")
+                .add("@param $L\n", parameterName)
+                .build());
         // Put extras
         methodBuilder.addStatement("intent.putExtras($N())", bundle);
 
@@ -339,7 +389,7 @@ final class FileWriter {
         addOptionalAttributes(methodBuilder);
 
         // Start activity
-        methodBuilder.addStatement("$L.startActivity($L)", "context", "intent");
+        methodBuilder.addStatement("$L.startActivity($L)", parameterName, "intent");
         return methodBuilder;
     }
 
@@ -350,6 +400,22 @@ final class FileWriter {
                 .addParameter(BUNDLE_CLASSNAME, "extras");
         methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
                 INTENT_CLASSNAME, "context", activityName + ".class");
+
+        // Add Javadoc
+        methodBuilder.addJavadoc(CodeBlock.builder()
+                .add("Terminating method in builder. Passes the built bundle, \n")
+                .add("sets any {@link android.content.Intent} flags if any and additionally \n")
+                .add("starts the activity with the provided {@link android.os.Bundle bundle}.\n")
+                .add("\n")
+                .add("Example: When using Shared Element Transition or any kind of Activity \n")
+                .add("transition, you can use this method to pass the {@link android.os.Bundle} \n")
+                .add("created by {@link android.app.ActivityOptions}.\n")
+                .add("\n")
+                .add("@see #getBundle")
+                .add("\n")
+                .add("@param $L\n", "context")
+                .add("@param $L\n", "extras")
+                .build());
         // Put extras
         methodBuilder.addStatement("intent.putExtras($N())", bundle);
         // Set flags if any
@@ -379,6 +445,16 @@ final class FileWriter {
         methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
                 INTENT_CLASSNAME, "activity", activityName + ".class");
 
+        // Add JavaDoc
+        methodBuilder.addJavadoc(CodeBlock.builder()
+                .add("Terminating method in builder. Passes the built bundle, sets any \n")
+                .add("{@link android.content.Intent} flags if any and starts the activity with \n")
+                .add("the provided requestCode.\n")
+                .add("\n")
+                .add("@param $L\n", "activity")
+                .add("@param $L\n", "requestCode")
+                .build());
+
         // Put extras
         methodBuilder.addStatement("intent.putExtras($N())", bundle);
         //Add flags if any
@@ -398,6 +474,16 @@ final class FileWriter {
                 .addAnnotation(Nullable.class).build());
         methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
                 INTENT_CLASSNAME, "activity", activityName + ".class");
+
+        // Add JavaDoc
+        methodBuilder.addJavadoc(CodeBlock.builder()
+                .add("Terminating method in builder. Passes the built bundle, sets any \n")
+                .add("{@link android.content.Intent} flags if any and starts the activity with \n")
+                .add("the provided requestCode and {@link android.os.Bundle extras}.\n")
+                .add("\n")
+                .add("@param $L\n", "activity")
+                .add("@param $L\n", "requestCode")
+                .build());
 
         // Put extras
         methodBuilder.addStatement("intent.putExtras($N())", bundle);
