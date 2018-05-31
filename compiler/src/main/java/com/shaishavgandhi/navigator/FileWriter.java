@@ -434,7 +434,7 @@ final class FileWriter {
         return parameterBuilder.build();
     }
 
-    private @Nullable AnnotationSpec getNullabilityFor(Element element) {
+    @NonNull private AnnotationSpec getNullabilityFor(Element element) {
         TypeMirror typeMirror = element.asType();
         if (!typeMirror.getKind().isPrimitive()) {
             // Check both Jetbrains and Android nullable annotations since
@@ -446,7 +446,7 @@ final class FileWriter {
                 return AnnotationSpec.builder(ClassName.get(Nullable.class)).build();
             }
         }
-        return null;
+        return AnnotationSpec.builder(ClassName.get(NonNull.class)).build();
     }
 
     private String getExtraTypeName(TypeMirror typeMirror) {
