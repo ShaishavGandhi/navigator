@@ -159,6 +159,50 @@ public class NavigatorProcessorTest {
                 .hasSourceEquivalentTo(expected);
     }
 
+    @Test public void testSimpleClassNavigatorWithOptional() {
+        String className = "MainFragment";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import com.shaishavgandhi.navigator.Optional;\n"
+                + "import android.app.Fragment;\n"
+                + "import android.support.annotation.Nullable;"
+                + "\n"
+                + "public class MainFragment extends Fragment {\n"
+                + " @Extra @Optional public long points;\n"
+                +"}\n");
+
+        JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
+                + "package com.shaishavgandhi.navigator;\n"
+                + "\n"
+                + "import android.os.Bundle;\n"
+                + "import com.shaishavgandhi.navigator.test.MainFragment;\n"
+                + "\n"
+                + "public final class Navigator {\n"
+                + "  public static final MainFragmentBuilder prepareMainFragment()"
+                + " {\n"
+                + "    return new MainFragmentBuilder();\n"
+                + "  }\n"
+                + "\n"
+                + "  public static final void bind(MainFragment binder) {\n"
+                + "    Bundle bundle = binder.getArguments();\n"
+                + "    if (bundle != null) {\n"
+                + "      if (bundle.containsKey(\"points\")) {\n"
+                + "        long points = bundle.getLong(\"points\");\n"
+                + "        binder.points = points;\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.Navigator")
+                .hasSourceEquivalentTo(expected);
+    }
+
     @Test public void testSimpleFragmentWithNonNullPrimitive() {
         String className = "MainFragment";
 

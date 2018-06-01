@@ -522,17 +522,22 @@ final class FileWriter {
 
     @NonNull private AnnotationSpec getNullabilityFor(Element element) {
         TypeMirror typeMirror = element.asType();
-        if (!typeMirror.getKind().isPrimitive()) {
-            // Check both Jetbrains and Android nullable annotations since
-            // Kotlin nulls are annotated with Jetbrains @Nullable
-            if (element.getAnnotation(Nullable.class) == null &&
-                    element.getAnnotation(org.jetbrains.annotations.Nullable.class) == null) {
+        if (typeMirror.getKind().isPrimitive()) {
+            // The element is a primitive. Check for @Optional
+            if (element.getAnnotation(Optional.class) == null) {
                 return AnnotationSpec.builder(ClassName.get(NonNull.class)).build();
             } else {
                 return AnnotationSpec.builder(ClassName.get(Nullable.class)).build();
             }
         }
-        return AnnotationSpec.builder(ClassName.get(NonNull.class)).build();
+        // Check both Jetbrains and Android nullable annotations since
+        // Kotlin nulls are annotated with Jetbrains @Nullable
+        if (element.getAnnotation(Nullable.class) == null &&
+                element.getAnnotation(org.jetbrains.annotations.Nullable.class) == null) {
+            return AnnotationSpec.builder(ClassName.get(NonNull.class)).build();
+        } else {
+            return AnnotationSpec.builder(ClassName.get(Nullable.class)).build();
+        }
     }
 
     private String getExtraTypeName(TypeMirror typeMirror) {
