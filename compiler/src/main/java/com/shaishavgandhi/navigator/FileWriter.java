@@ -13,6 +13,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -133,16 +134,17 @@ final class FileWriter {
 
 
             TypeName name = TypeName.get(element.asType());
+            String varKey = getVariableKey(element);
             String varName = element.getSimpleName().toString();
-            builder.beginControlFlow("if ($L.containsKey(\"$L\"))", "bundle", varName);
+            builder.beginControlFlow("if ($L.containsKey(\"$L\"))", "bundle", varKey);
 
             String extraName = getExtraTypeName(element.asType());
             if (extraName == null) {
                 // Add casting for serializable
-                builder.addStatement("$T $L = ($T) bundle.get(\"$L\")", name, varName, name, varName);
+                builder.addStatement("$T $L = ($T) bundle.get(\"$L\")", name, varName, name, varKey);
             } else {
                 builder.addStatement("$T $L = bundle.get" + extraName + "(\"$L\")", name, varName,
-                        varName);
+                        varKey);
             }
 
             if (!modifiers.contains(Modifier.PUBLIC)) {
@@ -259,7 +261,7 @@ final class FileWriter {
             }
 
             // Put to bundle
-            bundleBuilder.addStatement("intent.putExtra(\"$L\", $L)", parameter.name, parameter.name);
+            bundleBuilder.addStatement("intent.putExtra(\"$L\", $L)", getVariableKey(element), parameter.name);
         }
 
         // Sanitize return statement
@@ -560,6 +562,14 @@ final class FileWriter {
     private boolean isSerializable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
         return typeUtils.isAssignable(typeMirror, elementUtils.getTypeElement("java.io.Serializable")
                 .asType());
+    }
+
+    String getVariableKey(Element element) {
+        if (element.getAnnotation(Extra.class).key().isEmpty()) {
+            return element.getSimpleName().toString();
+        } else {
+            return element.getAnnotation(Extra.class).key();
+        }
     }
 
     protected List<JavaFile> getFiles() {

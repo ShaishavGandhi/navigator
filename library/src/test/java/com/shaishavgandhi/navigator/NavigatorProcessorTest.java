@@ -246,4 +246,99 @@ public class NavigatorProcessorTest {
         assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.Navigator")
                 .hasSourceEquivalentTo(expected);
     }
+
+    @Test public void testSimpleClassWithCustomKey() {
+        String className = "MainFragment";
+        String customKey = "userPoints";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import android.app.Fragment;\n"
+                + "import android.support.annotation.Nullable;"
+                + "\n"
+                + "public class MainFragment extends Fragment {\n"
+                + " @Extra(key = \"" + customKey + "\")"
+                + " public long points = -1;\n"
+                +"}\n");
+
+        JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
+                + "package com.shaishavgandhi.navigator;\n"
+                + "\n"
+                + "import android.os.Bundle;\n"
+                + "import android.support.annotation.NonNull;\n"
+                + "import com.shaishavgandhi.navigator.test.MainFragment;\n"
+                + "\n"
+                + "public final class Navigator {\n"
+                + "  public static final MainFragmentBuilder prepareMainFragment(@NonNull final long points)"
+                + " {\n"
+                + "    return new MainFragmentBuilder(points);\n"
+                + "  }\n"
+                + "\n"
+                + "  public static final void bind(MainFragment binder) {\n"
+                + "    Bundle bundle = binder.getArguments();\n"
+                + "    if (bundle != null) {\n"
+                + "      if (bundle.containsKey(\"" + customKey + "\")) {\n"
+                + "        long points = bundle.getLong(\"" + customKey + "\");\n"
+                + "        binder.points = points;\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.Navigator")
+                .hasSourceEquivalentTo(expected);
+    }
+
+    @Test public void testSimpleClassWithSetters() {
+        String className = "MainFragment";
+        String customKey = "userPoints";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import android.app.Fragment;\n"
+                + "import android.support.annotation.Nullable;"
+                + "\n"
+                + "public class MainFragment extends Fragment {\n"
+                + " @Extra(key = \"" + customKey + "\")"
+                + " long points = -1;\n"
+                + " public void setPoints(long points) {"
+                + "   this.points = points;"
+                + " }"
+                +"}\n");
+
+        JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
+                + "package com.shaishavgandhi.navigator;\n"
+                + "\n"
+                + "import android.os.Bundle;\n"
+                + "import android.support.annotation.NonNull;\n"
+                + "import com.shaishavgandhi.navigator.test.MainFragment;\n"
+                + "\n"
+                + "public final class Navigator {\n"
+                + "  public static final MainFragmentBuilder prepareMainFragment(@NonNull final long points)"
+                + " {\n"
+                + "    return new MainFragmentBuilder(points);\n"
+                + "  }\n"
+                + "\n"
+                + "  public static final void bind(MainFragment binder) {\n"
+                + "    Bundle bundle = binder.getArguments();\n"
+                + "    if (bundle != null) {\n"
+                + "      if (bundle.containsKey(\"" + customKey + "\")) {\n"
+                + "        long points = bundle.getLong(\"" + customKey + "\");\n"
+                + "        binder.setPoints(points);\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.Navigator")
+                .hasSourceEquivalentTo(expected);
+    }
 }
