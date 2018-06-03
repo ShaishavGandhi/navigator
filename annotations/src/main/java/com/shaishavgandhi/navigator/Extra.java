@@ -9,4 +9,5 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 @Target(ElementType.FIELD)
 @Retention(SOURCE)
 public @interface Extra {
+    String key() default "";
 }

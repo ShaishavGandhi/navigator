@@ -10,7 +10,7 @@ import com.shaishavgandhi.navigator.Navigator
 
 class MainActivity : AppCompatActivity() {
 
-    @Extra
+    @Extra(key = "userName")
     var name: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
