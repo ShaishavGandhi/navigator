@@ -164,15 +164,19 @@ final class FileWriter {
 
     private boolean isFragment(ClassName className) {
         TypeMirror currentClass = elementUtils.getTypeElement(className.toString()).asType();
+        boolean isFragment = false;
         if (elementUtils.getTypeElement("android.support.v4.app.Fragment") != null) {
             TypeMirror supportFragment = elementUtils.getTypeElement("android.support.v4.app.Fragment").asType();
             // TODO: Add support for androidx.fragment
-            return  typeUtils.isSubtype(currentClass, supportFragment);
-        } else if (elementUtils.getTypeElement("android.app.Fragment") != null) {
-            TypeMirror fragment = elementUtils.getTypeElement("android.app.Fragment").asType();
-            return typeUtils.isSubtype(currentClass, fragment);
+            isFragment = typeUtils.isSubtype(currentClass, supportFragment);
         }
-        return false;
+        if (elementUtils.getTypeElement("android.app.Fragment") != null && !isFragment) {
+            messager.printMessage(Diagnostic.Kind.WARNING, "Got in");
+            messager.printMessage(Diagnostic.Kind.WARNING, currentClass.toString());
+            TypeMirror fragment = elementUtils.getTypeElement("android.app.Fragment").asType();
+            isFragment = typeUtils.isSubtype(currentClass, fragment);
+        }
+        return isFragment;
     }
 
     private boolean isActivity(ClassName className) {
