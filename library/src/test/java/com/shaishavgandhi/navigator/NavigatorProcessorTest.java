@@ -55,6 +55,42 @@ public class NavigatorProcessorTest {
 
     }
 
+    @Test public void testSimpleSupportFragmentCompilation() {
+        String className = "MainFragment";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import android.support.v4.app.Fragment;\n"
+                + "\n"
+                + "public class MainFragment extends Fragment {\n"
+                + " @Extra public String name;\n"
+                +"}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+
+    }
+
+    @Test public void testSimpleDialogFragmentCompilation() {
+        String className = "MainFragment";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import android.app.DialogFragment;\n"
+                + "\n"
+                + "public class MainFragment extends DialogFragment {\n"
+                + " @Extra public String name;\n"
+                +"}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+
+    }
+
     @Test public void testNonActivityCompileFails() {
         String className = "MainActivity";
 
