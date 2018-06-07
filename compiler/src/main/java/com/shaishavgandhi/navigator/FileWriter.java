@@ -39,11 +39,13 @@ final class FileWriter {
     private static final ClassName INTENT_CLASSNAME = ClassName.get("android.content", "Intent");
     private static final ClassName BUNDLE_CLASSNAME = ClassName.get("android.os", "Bundle");
     private static final ClassName ACTIVITY_CLASSNAME = ClassName.get("android.app", "Activity");
+    private static final ClassName STRING_CLASS = ClassName.bestGuess("java.lang.String");
 
 
     private static final String SERIALIZABLE = "Serializable";
     private static final String PARCELABLE = "Parcelable";
     private static final String FLAGS = "flags";
+    private static final String ACTION = "action";
 
     private HashMap<String, String> typeMapper = new HashMap<String, String>(){{
         put("java.lang.String", "String");
@@ -140,8 +142,11 @@ final class FileWriter {
 
             String extraName = getExtraTypeName(element.asType());
             if (extraName == null) {
-                // Add casting for serializable
-                builder.addStatement("$T $L = ($T) bundle.get(\"$L\")", name, varName, name, varKey);
+                if (isSerializable(typeUtils, elementUtils, element.asType())) {
+                    // Add casting for serializable
+                    builder.addStatement("$T $L = ($T) bundle.getSerializable(\"$L\")", name,
+                            varName, name, varKey);
+                }
             } else {
                 builder.addStatement("$T $L = bundle.get" + extraName + "(\"$L\")", name, varName,
                         varKey);
@@ -208,20 +213,7 @@ final class FileWriter {
                 .addModifiers(Modifier.PROTECTED);
 
         // Set intent flags
-        MethodSpec.Builder flagBuilder = MethodSpec.methodBuilder("setFlags")
-                // Add Javadoc
-                .addJavadoc(CodeBlock.builder()
-                        .add("Set intent flags.\n")
-                        .add(("For the correct flag values see: {@link android.content.Intent}\n"))
-                        .add("\n")
-                        .add("@param $L The desired flags.\n", "flags ")
-                        .add("@return Returns the same Builder object for chaining multiple calls\n")
-                        .build())
-                .addParameter(ParameterSpec.builder(TypeName.INT, "flags", Modifier.FINAL).build())
-                .addModifiers(Modifier.PUBLIC)
-                .returns(builderClass)
-                .addStatement("this.$1L = $1L", FLAGS)
-                .addStatement("return this");
+        MethodSpec.Builder flagBuilder = setFlagsMethod(builderClass);
 
         // Static method to prepare activity
         MethodSpec.Builder prepareMethodBuilder = getPrepareActivityMethod(activityName,
@@ -313,6 +305,23 @@ final class FileWriter {
         JavaFile file = JavaFile.builder("com.shaishavgandhi.navigator", builderInnerClass).build();
         files.add(file);
         navigator.addMethod(prepareMethodBuilder.build());
+    }
+
+    private MethodSpec.Builder setFlagsMethod(ClassName builderClass) {
+        return MethodSpec.methodBuilder("setFlags")
+                // Add Javadoc
+                .addJavadoc(CodeBlock.builder()
+                        .add("Set intent flags.\n")
+                        .add(("For the correct flag values see: {@link android.content.Intent}\n"))
+                        .add("\n")
+                        .add("@param $L The desired flags.\n", "flags ")
+                        .add("@return Returns the same Builder object for chaining multiple calls\n")
+                        .build())
+                .addParameter(ParameterSpec.builder(TypeName.INT, "flags", Modifier.FINAL).build())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(builderClass)
+                .addStatement("this.$1L = $1L", FLAGS)
+                .addStatement("return this");
     }
 
     private MethodSpec.Builder getExtrasSetterMethod(ClassName builderClass) {
@@ -540,7 +549,15 @@ final class FileWriter {
 
     private String getExtraTypeName(TypeMirror typeMirror) {
         TypeName typeName = TypeName.get(typeMirror);
-        return typeMapper.get(typeName.toString());
+        String result = typeMapper.get(typeName.toString());
+        if (result == null) {
+            if (isParcelable(typeUtils, elementUtils, typeMirror)) {
+                result = "Parcelable";
+            } else if (isParcelableList(typeUtils, elementUtils, typeMirror)) {
+                result = "ParcelableArrayList";
+            }
+        }
+        return result;
     }
 
     private boolean isParcelable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
@@ -552,7 +569,15 @@ final class FileWriter {
         DeclaredType type = typeUtils.getDeclaredType(elementUtils.getTypeElement("java.util" +
                         ".ArrayList"),
                 elementUtils.getTypeElement("android.os.Parcelable").asType());
-        return typeUtils.isAssignable(typeMirror, type);
+        if (typeUtils.isAssignable(typeUtils.erasure(typeMirror), type)) {
+            List<? extends TypeMirror> typeArguments = ((DeclaredType) typeMirror).getTypeArguments();
+            if (typeArguments != null && typeArguments.size() >= 1 &&
+                    typeUtils.isAssignable(typeArguments.get(0), elementUtils.getTypeElement
+                            ("android.os.Parcelable").asType())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isSerializable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
