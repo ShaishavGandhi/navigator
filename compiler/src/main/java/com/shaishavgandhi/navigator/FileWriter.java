@@ -39,11 +39,12 @@ final class FileWriter {
     private static final ClassName INTENT_CLASSNAME = ClassName.get("android.content", "Intent");
     private static final ClassName BUNDLE_CLASSNAME = ClassName.get("android.os", "Bundle");
     private static final ClassName ACTIVITY_CLASSNAME = ClassName.get("android.app", "Activity");
-
+    private static final ClassName STRING_CLASS = ClassName.bestGuess("java.lang.String");
 
     private static final String SERIALIZABLE = "Serializable";
     private static final String PARCELABLE = "Parcelable";
     private static final String FLAGS = "flags";
+    private static final String ACTION = "action";
 
     private HashMap<String, String> typeMapper = new HashMap<String, String>(){{
         put("java.lang.String", "String");
@@ -198,6 +199,10 @@ final class FileWriter {
                 .initializer("$L", -1)
                 .build());
 
+        builder.addField(FieldSpec.builder(STRING_CLASS, ACTION)
+                .addModifiers(Modifier.PRIVATE)
+                .build());
+
         builder.addField(FieldSpec.builder(BUNDLE_CLASSNAME, "extras")
                 .addModifiers(Modifier.PRIVATE).build());
 
@@ -208,20 +213,10 @@ final class FileWriter {
                 .addModifiers(Modifier.PROTECTED);
 
         // Set intent flags
-        MethodSpec.Builder flagBuilder = MethodSpec.methodBuilder("setFlags")
-                // Add Javadoc
-                .addJavadoc(CodeBlock.builder()
-                        .add("Set intent flags.\n")
-                        .add(("For the correct flag values see: {@link android.content.Intent}\n"))
-                        .add("\n")
-                        .add("@param $L The desired flags.\n", "flags ")
-                        .add("@return Returns the same Builder object for chaining multiple calls\n")
-                        .build())
-                .addParameter(ParameterSpec.builder(TypeName.INT, "flags", Modifier.FINAL).build())
-                .addModifiers(Modifier.PUBLIC)
-                .returns(builderClass)
-                .addStatement("this.$1L = $1L", FLAGS)
-                .addStatement("return this");
+        MethodSpec.Builder flagBuilder = setFlagsMethod(builderClass);
+
+        // Set action
+        MethodSpec.Builder setActionBuilder = setActionMethod(builderClass);
 
         // Static method to prepare activity
         MethodSpec.Builder prepareMethodBuilder = getPrepareActivityMethod(activityName,
@@ -305,6 +300,7 @@ final class FileWriter {
             builder.addMethod(startResultExtrasBuilder.build());
             builder.addMethod(startActivityExtrasBuilder.build());
             builder.addMethod(flagBuilder.build());
+            builder.addMethod(setActionBuilder.build());
         }
         builder.addMethod(bundle);
         builder.addMethod(setExtrasBuilder.build());
@@ -313,6 +309,40 @@ final class FileWriter {
         JavaFile file = JavaFile.builder("com.shaishavgandhi.navigator", builderInnerClass).build();
         files.add(file);
         navigator.addMethod(prepareMethodBuilder.build());
+    }
+
+    private MethodSpec.Builder setFlagsMethod(ClassName builderClass) {
+        return MethodSpec.methodBuilder("setFlags")
+                // Add Javadoc
+                .addJavadoc(CodeBlock.builder()
+                        .add("Set intent flags.\n")
+                        .add(("For the correct flag values see: {@link android.content.Intent}\n"))
+                        .add("\n")
+                        .add("@param $L The desired flags.\n", "flags ")
+                        .add("@return Returns the same Builder object for chaining multiple calls\n")
+                        .build())
+                .addParameter(ParameterSpec.builder(TypeName.INT, "flags", Modifier.FINAL).build())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(builderClass)
+                .addStatement("this.$1L = $1L", FLAGS)
+                .addStatement("return this");
+    }
+
+    private MethodSpec.Builder setActionMethod(ClassName builderClass) {
+        return MethodSpec.methodBuilder("setAction")
+                // Add Javadoc
+                .addJavadoc(CodeBlock.builder()
+                        .add("Set intent action.\n")
+                        .add(("For example: {@link android.content.Intent.ACTION_VIEW}\n"))
+                        .add("\n")
+                        .add("@param $L The desired action.\n", "action ")
+                        .add("@return Returns the same Builder object for chaining multiple calls\n")
+                        .build())
+                .addParameter(ParameterSpec.builder(STRING_CLASS, "action", Modifier.FINAL).build())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(builderClass)
+                .addStatement("this.$1L = $1L", ACTION)
+                .addStatement("return this");
     }
 
     private MethodSpec.Builder getExtrasSetterMethod(ClassName builderClass) {
@@ -512,6 +542,10 @@ final class FileWriter {
     private void addOptionalAttributes(MethodSpec.Builder builder) {
         builder.beginControlFlow("if ($L != -1)", FLAGS);
         builder.addStatement("$L.setFlags($L)", "intent", FLAGS);
+        builder.endControlFlow();
+
+        builder.beginControlFlow("if ($L != null)", ACTION);
+        builder.addStatement("$L.setAction($L)", "intent", ACTION);
         builder.endControlFlow();
     }
 
