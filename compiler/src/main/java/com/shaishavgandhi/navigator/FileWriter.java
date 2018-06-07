@@ -79,6 +79,7 @@ final class FileWriter {
         put("java.lang.Boolean", "Boolean");
         put("java.lang.Boolean[]", "BooleanArray");
         put("android.os.Parcelable", "Parcelable");
+        put("android.os.Parcelable[]", "ParcelableArray");
         put("java.util.ArrayList<android.os.Parcelable>", "ParcelableArrayList");
     }};
 
@@ -141,11 +142,20 @@ final class FileWriter {
 
             String extraName = getExtraTypeName(element.asType());
             if (extraName == null) {
-                // Add casting for serializable
-                builder.addStatement("$T $L = ($T) bundle.get(\"$L\")", name, varName, name, varKey);
+                if (isSerializable(typeUtils, elementUtils, element.asType())) {
+                    // Add casting for serializable
+                    builder.addStatement("$T $L = ($T) bundle.getSerializable(\"$L\")", name,
+                            varName, name, varKey);
+                }
             } else {
-                builder.addStatement("$T $L = bundle.get" + extraName + "(\"$L\")", name, varName,
-                        varKey);
+                if (extraName.equals("ParcelableArray")) {
+                    // Add extra casting. TODO: Refactor this to be more generic
+                    builder.addStatement("$T $L = ($T) bundle.get" + extraName + "(\"$L\")", name,
+                            varName, name, varKey);
+                } else {
+                    builder.addStatement("$T $L = bundle.get" + extraName + "(\"$L\")", name, varName,
+                            varKey);
+                }
             }
 
             if (!modifiers.contains(Modifier.PUBLIC)) {
@@ -259,8 +269,17 @@ final class FileWriter {
                 addFieldToBuilder(builder, element, builderClass);
             }
 
-            // Put to bundle
-            bundleBuilder.addStatement("intent.putExtra(\"$L\", $L)", getVariableKey(element), parameter.name);
+            String extraName = getExtraTypeName(element.asType());
+
+            if (extraName == null) {
+                // Put to bundle
+                bundleBuilder.addStatement("bundle.putSerializable(\"$L\", $L)", getVariableKey(element),
+                        parameter.name);
+            } else {
+                // Put to bundle
+                bundleBuilder.addStatement("bundle.put" + extraName + "(\"$L\", $L)", getVariableKey(element),
+                        parameter.name);
+            }
         }
 
         // Sanitize return statement
@@ -272,9 +291,9 @@ final class FileWriter {
         prepareMethodBuilder.addStatement(returnStatement.toString(), builderClass);
 
         bundleBuilder.beginControlFlow("if ($L != null)", "extras");
-        bundleBuilder.addStatement("intent.putExtras($L)", "extras");
+        bundleBuilder.addStatement("bundle.putAll($L)", "extras");
         bundleBuilder.endControlFlow();
-        bundleBuilder.addStatement("return intent.getExtras()");
+        bundleBuilder.addStatement("return bundle");
         MethodSpec bundle  = bundleBuilder.build();
 
         // Start activity
@@ -368,13 +387,6 @@ final class FileWriter {
     }
 
     private MethodSpec.Builder getExtrasBundle() {
-        // TODO: This is a hack. We are creating an intent and then skipping type safety
-        // by using intent.putExtra() and then getting bundle using intent.getExtras();
-        // Will have to figure out how to know if element is ParcelableaArrayList
-        // and other types. This isn't that bad since if the user uses the appropriate
-        // types, it should just work. Unfortunately, if they don't, this will
-        // result in a run time exception while casting and we want to avoid that since
-        // that's the whole point of using annotation processors
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getBundle")
                 .addModifiers(Modifier.PUBLIC);
         // Add javadoc
@@ -395,8 +407,8 @@ final class FileWriter {
                 .add("\n")
                 .build());
         // Add code body
-        methodBuilder.addStatement("$T intent = new $T()", INTENT_CLASSNAME,
-                INTENT_CLASSNAME);
+        methodBuilder.addStatement("$T bundle = new $T()", BUNDLE_CLASSNAME,
+                BUNDLE_CLASSNAME);
         methodBuilder.returns(BUNDLE_CLASSNAME);
         return methodBuilder;
     }
@@ -573,8 +585,19 @@ final class FileWriter {
     }
 
     private String getExtraTypeName(TypeMirror typeMirror) {
-        TypeName typeName = TypeName.get(typeMirror);
-        return typeMapper.get(typeName.toString());
+        String result = typeMapper.get(typeMirror.toString());
+        if (result == null) {
+            if (isParcelable(typeUtils, elementUtils, typeMirror)) {
+                result = "Parcelable";
+            } else if (isParcelableList(typeUtils, elementUtils, typeMirror)) {
+                result = "ParcelableArrayList";
+            } else if (isSparseParcelableArrayList(typeUtils, elementUtils, typeMirror)) {
+                result = "SparseParcelableArray";
+            } else if (isParcelableArray(typeUtils, elementUtils, typeMirror)) {
+                result = "ParcelableArray";
+            }
+        }
+        return result;
     }
 
     private boolean isParcelable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
@@ -582,11 +605,33 @@ final class FileWriter {
                 .asType());
     }
 
+    private boolean isParcelableArray(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
+        return typeUtils.isAssignable(typeMirror, typeUtils.getArrayType(elementUtils
+                .getTypeElement("android.os.Parcelable").asType()));
+    }
+
     private boolean isParcelableList(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
         DeclaredType type = typeUtils.getDeclaredType(elementUtils.getTypeElement("java.util" +
-                        ".ArrayList"),
+                        ".ArrayList"), elementUtils.getTypeElement("android.os.Parcelable").asType());
+        if (typeUtils.isAssignable(typeUtils.erasure(typeMirror), type)) {
+            List<? extends TypeMirror> typeArguments = ((DeclaredType) typeMirror).getTypeArguments();
+            return typeArguments != null && typeArguments.size() >= 1 &&
+                    typeUtils.isAssignable(typeArguments.get(0), elementUtils.getTypeElement
+                            ("android.os.Parcelable").asType());
+        }
+        return false;
+    }
+
+    private boolean isSparseParcelableArrayList(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
+        DeclaredType type = typeUtils.getDeclaredType(elementUtils.getTypeElement("android.util.SparseArray"),
                 elementUtils.getTypeElement("android.os.Parcelable").asType());
-        return typeUtils.isAssignable(typeMirror, type);
+        if (typeUtils.isAssignable(typeUtils.erasure(typeMirror), type)) {
+            List<? extends TypeMirror> typeArguments = ((DeclaredType) typeMirror).getTypeArguments();
+            return typeArguments != null && typeArguments.size() >= 1 &&
+                    typeUtils.isAssignable(typeArguments.get(0), elementUtils.getTypeElement
+                            ("android.os.Parcelable").asType());
+        }
+        return false;
     }
 
     private boolean isSerializable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
