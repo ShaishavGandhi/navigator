@@ -151,6 +151,342 @@ public class NavigatorProcessorTest {
                 .hasSourceEquivalentTo(expected);
     }
 
+    @Test public void testSimpleActivityNavigatorWithSerializable() {
+        String className = "MainActivity";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import java.io.Serializable;"
+                + "import android.app.Activity;\n"
+                + "\n"
+                + "public class MainActivity extends Activity {\n"
+                + " @Extra public User name;\n"
+                + " public class User implements Serializable {}\n"
+                +"}\n");
+
+        JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
+                + "package com.shaishavgandhi.navigator;\n"
+                + "\n"
+                + "import android.os.Bundle;\n"
+                + "import android.support.annotation.NonNull;\n"
+                + "import com.shaishavgandhi.navigator.test.MainActivity;\n"
+                + "\n"
+                + "public final class Navigator {\n"
+                + "  public static final MainActivityBuilder prepareMainActivity(@NonNull final MainActivity.User name) {\n"
+                + "    return new MainActivityBuilder(name);\n"
+                + "  }\n"
+                + "\n"
+                + "  public static final void bind(MainActivity binder) {\n"
+                + "    Bundle bundle = binder.getIntent().getExtras();\n"
+                + "    if (bundle != null) {\n"
+                + "      if (bundle.containsKey(\"name\")) {\n"
+                + "        MainActivity.User name = (MainActivity.User) bundle.getSerializable(\"name\");\n"
+                + "        binder.name = name;\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.Navigator")
+                .hasSourceEquivalentTo(expected);
+    }
+
+    @Test public void testSimpleActivityNavigatorWithParcelable() {
+        String className = "MainActivity";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import java.io.Serializable;"
+                + "import android.app.Activity;\n"
+                + "import android.os.Parcelable;\n"
+                + "import android.os.Parcel;\n"
+                + "\n"
+                + "public class MainActivity extends Activity {\n"
+                + " @Extra public User name;\n"
+                + " public class User implements Parcelable {\n"
+                + "  String name;"
+                + "  protected User(Parcel in) {\n"
+                + "   name = in.readString();\n"
+                + "  }\n"
+                + "\n"
+                + "  public final Creator<User> CREATOR = new Creator<User>() {\n"
+                + "   @Override\n"
+                + "   public User createFromParcel(Parcel in) {\n"
+                + "    return new User(in);\n"
+                + "   }\n"
+                + "\n"
+                + "   @Override\n"
+                + "   public User[] newArray(int size) {\n"
+                + "    return new User[size];\n"
+                + "   }\n"
+                + "  };"
+                + "  @Override\n"
+                + "  public int describeContents() {\n"
+                + "   return 0;\n"
+                + "  }\n"
+                + "\n"
+                + "  @Override\n"
+                + "  public void writeToParcel(Parcel dest, int flags) {\n"
+                + "   dest.writeString(name);\n"
+                + "  }\n"
+                + " }"
+                +"}\n");
+
+        JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
+                + "package com.shaishavgandhi.navigator;\n"
+                + "\n"
+                + "import android.os.Bundle;\n"
+                + "import android.support.annotation.NonNull;\n"
+                + "import com.shaishavgandhi.navigator.test.MainActivity;\n"
+                + "\n"
+                + "public final class Navigator {\n"
+                + "  public static final MainActivityBuilder prepareMainActivity(@NonNull final MainActivity.User name) {\n"
+                + "    return new MainActivityBuilder(name);\n"
+                + "  }\n"
+                + "\n"
+                + "  public static final void bind(MainActivity binder) {\n"
+                + "    Bundle bundle = binder.getIntent().getExtras();\n"
+                + "    if (bundle != null) {\n"
+                + "      if (bundle.containsKey(\"name\")) {\n"
+                + "        MainActivity.User name = bundle.getParcelable(\"name\");\n"
+                + "        binder.name = name;\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.Navigator")
+                .hasSourceEquivalentTo(expected);
+    }
+
+    @Test public void testSimpleActivityNavigatorWithParcelableArrayList() {
+        String className = "MainActivity";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import java.io.Serializable;"
+                + "import android.app.Activity;\n"
+                + "import android.os.Parcelable;\n"
+                + "import android.os.Parcel;\n"
+                + "import java.util.ArrayList;\n"
+                + "\n"
+                + "public class MainActivity extends Activity {\n"
+                + " @Extra public ArrayList<User> name;\n"
+                + " public class User implements Parcelable {\n"
+                + "  String name;"
+                + "  protected User(Parcel in) {\n"
+                + "   name = in.readString();\n"
+                + "  }\n"
+                + "\n"
+                + "  public final Creator<User> CREATOR = new Creator<User>() {\n"
+                + "   @Override\n"
+                + "   public User createFromParcel(Parcel in) {\n"
+                + "    return new User(in);\n"
+                + "   }\n"
+                + "\n"
+                + "   @Override\n"
+                + "   public User[] newArray(int size) {\n"
+                + "    return new User[size];\n"
+                + "   }\n"
+                + "  };"
+                + "  @Override\n"
+                + "  public int describeContents() {\n"
+                + "   return 0;\n"
+                + "  }\n"
+                + "\n"
+                + "  @Override\n"
+                + "  public void writeToParcel(Parcel dest, int flags) {\n"
+                + "   dest.writeString(name);\n"
+                + "  }\n"
+                + " }"
+                +"}\n");
+
+        JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
+                + "package com.shaishavgandhi.navigator;\n"
+                + "\n"
+                + "import android.os.Bundle;\n"
+                + "import android.support.annotation.NonNull;\n"
+                + "import com.shaishavgandhi.navigator.test.MainActivity;\n"
+                + "import java.util.ArrayList;\n"
+                + "\n"
+                + "public final class Navigator {\n"
+                + "  public static final MainActivityBuilder prepareMainActivity(@NonNull final ArrayList<MainActivity.User> name) {\n"
+                + "    return new MainActivityBuilder(name);\n"
+                + "  }\n"
+                + "\n"
+                + "  public static final void bind(MainActivity binder) {\n"
+                + "    Bundle bundle = binder.getIntent().getExtras();\n"
+                + "    if (bundle != null) {\n"
+                + "      if (bundle.containsKey(\"name\")) {\n"
+                + "        ArrayList<MainActivity.User> name = bundle.getParcelableArrayList(\"name\");\n"
+                + "        binder.name = name;\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.Navigator")
+                .hasSourceEquivalentTo(expected);
+    }
+
+    @Test public void testSimpleActivityNavigatorWithParcelableArray() {
+        String className = "MainActivity";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import java.io.Serializable;"
+                + "import android.app.Activity;\n"
+                + "import android.os.Parcelable;\n"
+                + "import android.os.Parcel;\n"
+                + "\n"
+                + "public class MainActivity extends Activity {\n"
+                + " @Extra public User[] name;\n"
+                + " public class User implements Parcelable {\n"
+                + "  String name;"
+                + "  protected User(Parcel in) {\n"
+                + "   name = in.readString();\n"
+                + "  }\n"
+                + "\n"
+                + "  public final Creator<User> CREATOR = new Creator<User>() {\n"
+                + "   @Override\n"
+                + "   public User createFromParcel(Parcel in) {\n"
+                + "    return new User(in);\n"
+                + "   }\n"
+                + "\n"
+                + "   @Override\n"
+                + "   public User[] newArray(int size) {\n"
+                + "    return new User[size];\n"
+                + "   }\n"
+                + "  };"
+                + "  @Override\n"
+                + "  public int describeContents() {\n"
+                + "   return 0;\n"
+                + "  }\n"
+                + "\n"
+                + "  @Override\n"
+                + "  public void writeToParcel(Parcel dest, int flags) {\n"
+                + "   dest.writeString(name);\n"
+                + "  }\n"
+                + " }"
+                +"}\n");
+
+        JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
+                + "package com.shaishavgandhi.navigator;\n"
+                + "\n"
+                + "import android.os.Bundle;\n"
+                + "import android.support.annotation.NonNull;\n"
+                + "import com.shaishavgandhi.navigator.test.MainActivity;\n"
+                + "\n"
+                + "public final class Navigator {\n"
+                + "  public static final MainActivityBuilder prepareMainActivity(@NonNull final MainActivity.User[] name) {\n"
+                + "    return new MainActivityBuilder(name);\n"
+                + "  }\n"
+                + "\n"
+                + "  public static final void bind(MainActivity binder) {\n"
+                + "    Bundle bundle = binder.getIntent().getExtras();\n"
+                + "    if (bundle != null) {\n"
+                + "      if (bundle.containsKey(\"name\")) {\n"
+                + "        MainActivity.User[] name = (MainActivity.User[])bundle.getParcelableArray(\"name\");\n"
+                + "        binder.name = name;\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.Navigator")
+                .hasSourceEquivalentTo(expected);
+    }
+
+    @Test public void testSimpleActivityNavigatorWithSparseParcelableArray() {
+        String className = "MainActivity";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import java.io.Serializable;"
+                + "import android.app.Activity;\n"
+                + "import android.os.Parcelable;\n"
+                + "import android.os.Parcel;\n"
+                + "import android.util.SparseArray;\n"
+                + "\n"
+                + "public class MainActivity extends Activity {\n"
+                + " @Extra public SparseArray<User> name;\n"
+                + " public class User implements Parcelable {\n"
+                + "  String name;"
+                + "  protected User(Parcel in) {\n"
+                + "   name = in.readString();\n"
+                + "  }\n"
+                + "\n"
+                + "  public final Creator<User> CREATOR = new Creator<User>() {\n"
+                + "   @Override\n"
+                + "   public User createFromParcel(Parcel in) {\n"
+                + "    return new User(in);\n"
+                + "   }\n"
+                + "\n"
+                + "   @Override\n"
+                + "   public User[] newArray(int size) {\n"
+                + "    return new User[size];\n"
+                + "   }\n"
+                + "  };"
+                + "  @Override\n"
+                + "  public int describeContents() {\n"
+                + "   return 0;\n"
+                + "  }\n"
+                + "\n"
+                + "  @Override\n"
+                + "  public void writeToParcel(Parcel dest, int flags) {\n"
+                + "   dest.writeString(name);\n"
+                + "  }\n"
+                + " }"
+                +"}\n");
+
+        JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
+                + "package com.shaishavgandhi.navigator;\n"
+                + "\n"
+                + "import android.os.Bundle;\n"
+                + "import android.support.annotation.NonNull;\n"
+                + "import android.util.SparseArray;\n"
+                + "import com.shaishavgandhi.navigator.test.MainActivity;\n"
+                + "\n"
+                + "public final class Navigator {\n"
+                + "  public static final MainActivityBuilder prepareMainActivity(@NonNull final SparseArray<MainActivity.User> name) {\n"
+                + "    return new MainActivityBuilder(name);\n"
+                + "  }\n"
+                + "\n"
+                + "  public static final void bind(MainActivity binder) {\n"
+                + "    Bundle bundle = binder.getIntent().getExtras();\n"
+                + "    if (bundle != null) {\n"
+                + "      if (bundle.containsKey(\"name\")) {\n"
+                + "        SparseArray<MainActivity.User> name = bundle.getSparseParcelableArray(\"name\");\n"
+                + "        binder.name = name;\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.Navigator")
+                .hasSourceEquivalentTo(expected);
+    }
+
     @Test public void testSimpleFragmentNavigatorWithNullables() {
         String className = "MainFragment";
 
