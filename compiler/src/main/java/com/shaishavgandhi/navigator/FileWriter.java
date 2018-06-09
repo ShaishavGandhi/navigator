@@ -182,8 +182,6 @@ final class FileWriter {
             isFragment = typeUtils.isSubtype(currentClass, supportFragment);
         }
         if (elementUtils.getTypeElement("android.app.Fragment") != null && !isFragment) {
-            messager.printMessage(Diagnostic.Kind.WARNING, "Got in");
-            messager.printMessage(Diagnostic.Kind.WARNING, currentClass.toString());
             TypeMirror fragment = elementUtils.getTypeElement("android.app.Fragment").asType();
             isFragment = typeUtils.isSubtype(currentClass, fragment);
         }
@@ -204,14 +202,16 @@ final class FileWriter {
         TypeSpec.Builder builder = TypeSpec.classBuilder(activityName + "Builder")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
-        builder.addField(FieldSpec.builder(TypeName.INT, FLAGS)
-                .addModifiers(Modifier.PRIVATE)
-                .initializer("$L", -1)
-                .build());
+        if (isActivity(activity)) {
+            builder.addField(FieldSpec.builder(TypeName.INT, FLAGS)
+                    .addModifiers(Modifier.PRIVATE)
+                    .initializer("$L", -1)
+                    .build());
 
-        builder.addField(FieldSpec.builder(STRING_CLASS, ACTION)
-                .addModifiers(Modifier.PRIVATE)
-                .build());
+            builder.addField(FieldSpec.builder(STRING_CLASS, ACTION)
+                    .addModifiers(Modifier.PRIVATE)
+                    .build());
+        }
 
         builder.addField(FieldSpec.builder(BUNDLE_CLASSNAME, "extras")
                 .addModifiers(Modifier.PRIVATE).build());

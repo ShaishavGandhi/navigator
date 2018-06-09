@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,6 +31,7 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import javax.tools.Diagnostic;
 
 @AutoService(Processor.class)
 public final class NavigatorProcessor extends AbstractProcessor {
@@ -53,7 +55,6 @@ public final class NavigatorProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
-
         for (Element element : roundEnvironment.getElementsAnnotatedWith(Extra.class)) {
 
 
@@ -72,13 +73,15 @@ public final class NavigatorProcessor extends AbstractProcessor {
         FileWriter writer = new FileWriter(typeUtils, elementUtils, annotationsPerClass, messager);
         writer.writeFiles();
 
-        for (JavaFile file: writer.getFiles()) {
+        List<JavaFile> files = writer.getFiles();
+        for (JavaFile file: files) {
             try {
                 file.writeTo(filer);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        annotationsPerClass.clear();
 
         return true;
     }

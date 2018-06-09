@@ -15,7 +15,7 @@ public class NavigatorProcessorTest {
 
     private static final String PACKAGE = "com.shaishavgandhi.navigator.test.";
 
-    private static String getName(String className) {
+    public static String getName(String className) {
         return PACKAGE + className;
     }
 
