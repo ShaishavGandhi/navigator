@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 @FixMethodOrder(MethodSorters.JVM)
 public class NavigatorProcessorTest {
 
-    private static final String PACKAGE = "com.shaishavgandhi.navigator.test.";
+    private static final String PACKAGE = "com.shaishavgandhi.sampleapp.test.";
 
     public static String getName(String className) {
         return PACKAGE + className;

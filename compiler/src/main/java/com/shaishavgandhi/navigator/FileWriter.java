@@ -105,9 +105,9 @@ final class FileWriter {
             ClassName className = item.getKey();
             LinkedHashSet<Element> annotations = item.getValue();
 
+            writeBinder(navigator, className, annotations);
+
             writeBuilder(navigator, className, annotations);
-            MethodSpec bindMethod = getBindMethod(className, annotations);
-            navigator.addMethod(bindMethod);
         }
 
         files.add(JavaFile.builder("com.shaishavgandhi.navigator", navigator.build())
@@ -158,7 +158,7 @@ final class FileWriter {
                 }
             }
 
-            if (!modifiers.contains(Modifier.PUBLIC)) {
+            if (modifiers.contains(Modifier.PRIVATE)) {
                 // Use getter and setter
                 builder.addStatement("$L.set$L($L)", "binder", capitalize(varName), varName);
 
@@ -197,6 +197,35 @@ final class FileWriter {
         return false;
     }
 
+    private void writeBinder(TypeSpec.Builder navigator, ClassName className, LinkedHashSet<Element> annotations) {
+        ClassName binderClass = getBinderClass(className);
+
+        TypeSpec.Builder binder = TypeSpec.classBuilder(binderClass.simpleName())
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+
+        MethodSpec bindMethod = getBindMethod(className, annotations);
+        binder.addMethod(bindMethod);
+
+        TypeSpec binderResolved = binder.build();
+        files.add(JavaFile.builder(className.packageName(), binderResolved).build());
+
+        MethodSpec.Builder staticBinder = MethodSpec.methodBuilder("bind")
+                .addParameter(className, "binder")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .addStatement("$T.bind(binder)", binderClass);
+        navigator.addMethod(staticBinder.build());
+    }
+
+    private ClassName getBinderClass(ClassName className) {
+        return ClassName.bestGuess(className.packageName() + "." + className.simpleName() +
+                "Binder");
+    }
+
+    private ClassName getBuilderClass(ClassName className) {
+        return ClassName.bestGuess(className.packageName() + "." + className.simpleName() +
+                "Builder");
+    }
+
     private void writeBuilder(TypeSpec.Builder navigator, ClassName activity, LinkedHashSet<Element> elements) {
         String activityName = activity.simpleName();
         TypeSpec.Builder builder = TypeSpec.classBuilder(activityName + "Builder")
@@ -216,11 +245,11 @@ final class FileWriter {
         builder.addField(FieldSpec.builder(BUNDLE_CLASSNAME, "extras")
                 .addModifiers(Modifier.PRIVATE).build());
 
-        ClassName builderClass = ClassName.bestGuess(activityName + "Builder");
+        ClassName builderClass = getBuilderClass(activity);
 
         // Constructor
         MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PROTECTED);
+                .addModifiers(Modifier.PUBLIC);
 
         // Set intent flags
         MethodSpec.Builder flagBuilder = setFlagsMethod(builderClass);
@@ -229,7 +258,7 @@ final class FileWriter {
         MethodSpec.Builder setActionBuilder = setActionMethod(builderClass);
 
         // Static method to prepare activity
-        MethodSpec.Builder prepareMethodBuilder = getPrepareActivityMethod(activityName,
+        MethodSpec.Builder prepareMethodBuilder = getPrepareActivityMethod(activity,
                 builderClass);
 
         // Bundle builder
@@ -325,7 +354,7 @@ final class FileWriter {
         builder.addMethod(setExtrasBuilder.build());
         TypeSpec builderInnerClass = builder.addMethod(constructorBuilder.build()).build();
 
-        JavaFile file = JavaFile.builder("com.shaishavgandhi.navigator", builderInnerClass).build();
+        JavaFile file = JavaFile.builder(activity.packageName(), builderInnerClass).build();
         files.add(file);
         navigator.addMethod(prepareMethodBuilder.build());
     }
@@ -543,9 +572,9 @@ final class FileWriter {
         return methodBuilder;
     }
 
-    private MethodSpec.Builder getPrepareActivityMethod(String activityName, ClassName builderClass) {
+    private MethodSpec.Builder getPrepareActivityMethod(ClassName activity, ClassName builderClass) {
         MethodSpec.Builder prepareMethodBuilder = MethodSpec.methodBuilder("prepare" +
-                activityName);
+                activity.simpleName());
         prepareMethodBuilder.addModifiers(Modifier.STATIC, Modifier.FINAL, Modifier.PUBLIC);
         prepareMethodBuilder.returns(builderClass);
         return prepareMethodBuilder;
