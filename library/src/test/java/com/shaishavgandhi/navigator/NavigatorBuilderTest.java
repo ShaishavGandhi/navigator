@@ -20,7 +20,7 @@ public class NavigatorBuilderTest {
         String className = "MainFragment";
 
         JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
-                + "package com.shaishavgandhi.navigator.test;\n"
+                + "package com.shaishavgandhi.sampleapp.test;\n"
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
                 + "import android.app.Fragment;\n"
@@ -30,7 +30,7 @@ public class NavigatorBuilderTest {
                 + "}\n");
 
         JavaFileObject expected = JavaFileObjects.forSourceString("MainFragmentBuilder", ""
-                + "package com.shaishavgandhi.navigator;\n" +
+                + "package com.shaishavgandhi.sampleapp.test;\n" +
                 "\n" +
                 "import android.os.Bundle;\n" +
                 "import android.support.annotation.NonNull;\n" +
@@ -42,7 +42,7 @@ public class NavigatorBuilderTest {
                 "  @NonNull\n" +
                 "  private String name;\n" +
                 "\n" +
-                "  protected MainFragmentBuilder(@NonNull final String name) {\n" +
+                "  public MainFragmentBuilder(@NonNull final String name) {\n" +
                 "    this.name = name;\n" +
                 "  }\n" +
                 "\n" +
@@ -87,7 +87,7 @@ public class NavigatorBuilderTest {
         );
         Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
         assertThat(compilation).succeeded();
-        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.MainFragmentBuilder")
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.sampleapp.test.MainFragmentBuilder")
                 .hasSourceEquivalentTo(expected);
     }
 
@@ -95,7 +95,7 @@ public class NavigatorBuilderTest {
         String className = "MainFragment";
 
         JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
-                + "package com.shaishavgandhi.navigator.test;\n"
+                + "package com.shaishavgandhi.sampleapp.test;\n"
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
                 + "import android.app.Fragment;\n"
@@ -106,7 +106,7 @@ public class NavigatorBuilderTest {
                 + "}\n");
 
         JavaFileObject expected = JavaFileObjects.forSourceString("MainFragmentBuilder", ""
-                + "package com.shaishavgandhi.navigator;\n" +
+                + "package com.shaishavgandhi.sampleapp.test;\n" +
                 "\n" +
                 "import android.os.Bundle;\n" +
                 "import android.support.annotation.Nullable;\n" +
@@ -118,7 +118,7 @@ public class NavigatorBuilderTest {
                 "  @Nullable\n" +
                 "  private String name;\n" +
                 "\n" +
-                "  protected MainFragmentBuilder() {\n" +
+                "  public MainFragmentBuilder() {\n" +
                 "  }\n" +
                 "\n" +
                 "  public final MainFragmentBuilder setName(String name) {\n" +
@@ -167,7 +167,7 @@ public class NavigatorBuilderTest {
         );
         Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
         assertThat(compilation).succeeded();
-        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.MainFragmentBuilder")
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.sampleapp.test.MainFragmentBuilder")
                 .hasSourceEquivalentTo(expected);
     }
 
@@ -175,7 +175,7 @@ public class NavigatorBuilderTest {
         String className = "MainFragment";
 
         JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
-                + "package com.shaishavgandhi.navigator.test;\n"
+                + "package com.shaishavgandhi.sampleapp.test;\n"
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
                 + "import java.io.Serializable;"
@@ -187,11 +187,10 @@ public class NavigatorBuilderTest {
                 + "}\n");
 
         JavaFileObject expected = JavaFileObjects.forSourceString("MainFragmentBuilder", ""
-                + "package com.shaishavgandhi.navigator;\n" +
+                + "package com.shaishavgandhi.sampleapp.test;\n" +
                 "\n" +
                 "import android.os.Bundle;\n" +
                 "import android.support.annotation.NonNull;\n" +
-                "import com.shaishavgandhi.navigator.test.MainFragment;\n" +
                 "\n" +
                 "public final class MainFragmentBuilder {\n" +
                 "  private Bundle extras;\n" +
@@ -199,7 +198,7 @@ public class NavigatorBuilderTest {
                 "  @NonNull\n" +
                 "  private MainFragment.User name;\n" +
                 "\n" +
-                "  protected MainFragmentBuilder(@NonNull final MainFragment.User name) {\n" +
+                "  public MainFragmentBuilder(@NonNull final MainFragment.User name) {\n" +
                 "    this.name = name;\n" +
                 "  }\n" +
                 "\n" +
@@ -245,7 +244,7 @@ public class NavigatorBuilderTest {
         );
         Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
         assertThat(compilation).succeeded();
-        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.MainFragmentBuilder")
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.sampleapp.test.MainFragmentBuilder")
                 .hasSourceEquivalentTo(expected);
     }
 
@@ -253,7 +252,7 @@ public class NavigatorBuilderTest {
         String className = "MainFragment";
 
         JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
-                + "package com.shaishavgandhi.navigator.test;\n"
+                + "package com.shaishavgandhi.sampleapp.test;\n"
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
                 + "import android.os.Parcelable;\n"
@@ -297,12 +296,11 @@ public class NavigatorBuilderTest {
                 + "}\n");
 
         JavaFileObject expected = JavaFileObjects.forSourceString("MainFragmentBuilder", ""
-                + "package com.shaishavgandhi.navigator;\n" +
+                + "package com.shaishavgandhi.sampleapp.test;\n" +
                 "\n" +
                 "import android.os.Bundle;\n" +
                 "import android.support.annotation.NonNull;\n" +
                 "import android.util.SparseArray;\n" +
-                "import com.shaishavgandhi.navigator.test.MainFragment;\n" +
                 "import java.util.ArrayList;\n" +
                 "\n" +
                 "public final class MainFragmentBuilder {\n" +
@@ -320,7 +318,7 @@ public class NavigatorBuilderTest {
                 "  @NonNull\n" +
                 "  private SparseArray<MainFragment.User> sparseArray;\n" +
                 "\n" +
-                "  protected MainFragmentBuilder(@NonNull final MainFragment.User name, \n" +
+                "  public MainFragmentBuilder(@NonNull final MainFragment.User name, \n" +
                 "      @NonNull final ArrayList<MainFragment.User> users, @NonNull final " +
                 "MainFragment.User[] userArray, @NonNull final SparseArray<MainFragment.User> " +
                 "sparseArray) {\n" +
@@ -375,14 +373,14 @@ public class NavigatorBuilderTest {
         );
         Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
         assertThat(compilation).succeeded();
-        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.MainFragmentBuilder")
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.sampleapp.test.MainFragmentBuilder")
                 .hasSourceEquivalentTo(expected);
     }
 
     @Test public void testSimpleActivityBuilder() {
         String className = "MainActivity";
         JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
-                + "package com.shaishavgandhi.navigator.test;\n"
+                + "package com.shaishavgandhi.sampleapp.test;\n"
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
                 + "import android.app.Activity;\n"
@@ -392,7 +390,7 @@ public class NavigatorBuilderTest {
                 +"}\n");
 
         JavaFileObject expected = JavaFileObjects.forSourceString("MainActivityBuilder", "" +
-                "package com.shaishavgandhi.navigator;\n" +
+                "package com.shaishavgandhi.sampleapp.test;\n" +
                 "\n" +
                 "import android.app.Activity;\n" +
                 "import android.content.Context;\n" +
@@ -400,7 +398,6 @@ public class NavigatorBuilderTest {
                 "import android.os.Bundle;\n" +
                 "import android.support.annotation.NonNull;\n" +
                 "import android.support.annotation.Nullable;\n" +
-                "import com.shaishavgandhi.navigator.test.MainActivity;\n" +
                 "import java.lang.String;\n" +
                 "\n" +
                 "public final class MainActivityBuilder {\n" +
@@ -413,7 +410,7 @@ public class NavigatorBuilderTest {
                 "  @NonNull\n" +
                 "  private String name;\n" +
                 "\n" +
-                "  protected MainActivityBuilder(@NonNull final String name) {\n" +
+                "  public MainActivityBuilder(@NonNull final String name) {\n" +
                 "    this.name = name;\n" +
                 "  }\n" +
                 "\n" +
@@ -568,7 +565,7 @@ public class NavigatorBuilderTest {
 
         Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
         assertThat(compilation).succeeded();
-        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.MainActivityBuilder")
+        assertThat(compilation).generatedSourceFile(NavigatorProcessorTest.PACKAGE + "MainActivityBuilder")
                 .hasSourceEquivalentTo(expected);
     }
 
