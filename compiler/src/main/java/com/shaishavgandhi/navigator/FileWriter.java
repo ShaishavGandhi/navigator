@@ -83,13 +83,13 @@ final class FileWriter {
         put("java.util.ArrayList<android.os.Parcelable>", "ParcelableArrayList");
     }};
 
-    private LinkedHashMap<ClassName, LinkedHashSet<Element>> annotationsPerClass;
+    private LinkedHashMap<QualifiedClassName, LinkedHashSet<Element>> annotationsPerClass;
     private Types typeUtils;
     private Elements elementUtils;
     private List<JavaFile> files = new ArrayList<>();
     private Messager messager;
 
-    FileWriter(Types typeUtils, Elements elementUtils, LinkedHashMap<ClassName,
+    FileWriter(Types typeUtils, Elements elementUtils, LinkedHashMap<QualifiedClassName,
             LinkedHashSet<Element>> annotationsPerClass, Messager messager) {
         this.typeUtils = typeUtils;
         this.elementUtils = elementUtils;
@@ -101,8 +101,8 @@ final class FileWriter {
         TypeSpec.Builder navigator = TypeSpec.classBuilder("Navigator")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
-        for (Map.Entry<ClassName, LinkedHashSet<Element>> item : annotationsPerClass.entrySet()) {
-            ClassName className = item.getKey();
+        for (Map.Entry<QualifiedClassName, LinkedHashSet<Element>> item : annotationsPerClass.entrySet()) {
+            ClassName className = item.getKey().getJavaClass();
             LinkedHashSet<Element> annotations = item.getValue();
 
             writeBinder(navigator, className, annotations);

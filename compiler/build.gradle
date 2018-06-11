@@ -10,6 +10,7 @@ dependencies {
     implementation rootProject.annotations
 
     testImplementation rootProject.junit
+    compile 'com.squareup:kotlinpoet:0.7.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 

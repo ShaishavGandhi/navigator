@@ -35,10 +35,11 @@ import javax.lang.model.util.Types;
 @AutoService(Processor.class)
 public final class NavigatorProcessor extends AbstractProcessor {
 
-    private LinkedHashMap<ClassName, LinkedHashSet<Element>> annotationsPerClass;
+    private LinkedHashMap<QualifiedClassName, LinkedHashSet<Element>> annotationsPerClass;
     private Types typeUtils;
     private Elements elementUtils;
     private Messager messager;
+    private ExtensionWriter extensionWriter;
 
     private Filer filer;
 
@@ -50,13 +51,14 @@ public final class NavigatorProcessor extends AbstractProcessor {
         elementUtils = processingEnv.getElementUtils();
         filer = processingEnvironment.getFiler();
         annotationsPerClass = new LinkedHashMap<>();
+        extensionWriter = new ExtensionWriter(processingEnvironment);
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
         for (Element element : roundEnvironment.getElementsAnnotatedWith(Extra.class)) {
 
-            ClassName className = getClassName(element);
+            QualifiedClassName className = getClassName(element);
             if (annotationsPerClass.containsKey(className)) {
                 LinkedHashSet<Element> annotations = annotationsPerClass.get(className);
                 annotations.add(element);
@@ -70,6 +72,7 @@ public final class NavigatorProcessor extends AbstractProcessor {
 
         FileWriter writer = new FileWriter(typeUtils, elementUtils, annotationsPerClass, messager);
         writer.writeFiles();
+        extensionWriter.generateExtensions(annotationsPerClass);
 
         List<JavaFile> files = writer.getFiles();
         for (JavaFile file: files) {
@@ -79,12 +82,13 @@ public final class NavigatorProcessor extends AbstractProcessor {
                 e.printStackTrace();
             }
         }
+        // TODO: Fix this
         annotationsPerClass.clear();
 
         return true;
     }
 
-    private ClassName getClassName(Element element) {
+    private QualifiedClassName getClassName(Element element) {
         String classname = element.getEnclosingElement().getSimpleName().toString();
         String packageName;
         Element enclosing = element;
@@ -94,7 +98,7 @@ public final class NavigatorProcessor extends AbstractProcessor {
         PackageElement packageElement = ((PackageElement) enclosing);
         packageName = packageElement.toString();
 
-        return ClassName.bestGuess(packageName + "." + classname);
+        return new QualifiedClassName(packageName + "." + classname);
     }
 
     @Override
