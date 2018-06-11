@@ -31,7 +31,6 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-import javax.tools.Diagnostic;
 
 @AutoService(Processor.class)
 public final class NavigatorProcessor extends AbstractProcessor {
@@ -56,7 +55,6 @@ public final class NavigatorProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
         for (Element element : roundEnvironment.getElementsAnnotatedWith(Extra.class)) {
-
 
             ClassName className = getClassName(element);
             if (annotationsPerClass.containsKey(className)) {
