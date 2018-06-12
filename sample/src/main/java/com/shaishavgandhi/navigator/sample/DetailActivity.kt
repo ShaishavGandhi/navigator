@@ -9,7 +9,6 @@ import android.widget.TextView
 import com.evernote.android.state.State
 import com.shaishavgandhi.navigato.sampler.R
 import com.shaishavgandhi.navigator.Extra
-import com.shaishavgandhi.navigator.Navigator
 
 class DetailActivity : AppCompatActivity() {
 
