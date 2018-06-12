@@ -122,12 +122,9 @@ public class NavigatorProcessorTest {
                 +"}\n");
 
         JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
-                + "package com.shaishavgandhi.navigator;\n"
+                + "package com.shaishavgandhi.navigator.test;\n"
                 + "\n"
                 + "import android.support.annotation.NonNull;\n"
-                + "import com.shaishavgandhi.navigator.test.MainActivity;\n"
-                + "import com.shaishavgandhi.navigator.test.MainActivityBinder;\n"
-                + "import com.shaishavgandhi.navigator.test.MainActivityBuilder;"
                 + "import java.lang.String;\n"
                 + "\n"
                 + "public final class Navigator {\n"
@@ -142,7 +139,7 @@ public class NavigatorProcessorTest {
 
         Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
         assertThat(compilation).succeeded();
-        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.Navigator")
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.test.Navigator")
                 .hasSourceEquivalentTo(expected);
     }
 
@@ -161,11 +158,8 @@ public class NavigatorProcessorTest {
                 +"}\n");
 
         JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
-                + "package com.shaishavgandhi.navigator;\n"
+                + "package com.shaishavgandhi.navigator.test;\n"
                 + "\n"
-                + "import com.shaishavgandhi.navigator.test.MainActivity;\n"
-                + "import com.shaishavgandhi.navigator.test.MainActivityBinder;\n"
-                + "import com.shaishavgandhi.navigator.test.MainActivityBuilder;"
                 + "\n"
                 + "public final class Navigator {\n"
                 + "  public static final void bind(MainActivity binder) {\n"
@@ -178,7 +172,7 @@ public class NavigatorProcessorTest {
 
         Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
         assertThat(compilation).succeeded();
-        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.Navigator")
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.test.Navigator")
                 .hasSourceEquivalentTo(expected);
     }
 
@@ -198,12 +192,9 @@ public class NavigatorProcessorTest {
                 +"}\n");
 
         JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
-                + "package com.shaishavgandhi.navigator;\n"
+                + "package com.shaishavgandhi.navigator.test;\n"
                 + "\n"
                 + "import android.support.annotation.NonNull;\n"
-                + "import com.shaishavgandhi.navigator.test.MainActivity;\n"
-                + "import com.shaishavgandhi.navigator.test.MainActivityBinder;\n"
-                + "import com.shaishavgandhi.navigator.test.MainActivityBuilder;"
                 + "\n"
                 + "public final class Navigator {\n"
                 + "  public static final void bind(MainActivity binder) {\n"
@@ -217,7 +208,7 @@ public class NavigatorProcessorTest {
 
         Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
         assertThat(compilation).succeeded();
-        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.Navigator")
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.navigator.test.Navigator")
                 .hasSourceEquivalentTo(expected);
     }
 

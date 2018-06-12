@@ -101,8 +101,10 @@ final class FileWriter {
         TypeSpec.Builder navigator = TypeSpec.classBuilder("Navigator")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
+        String packageName = "";
         for (Map.Entry<ClassName, LinkedHashSet<Element>> item : annotationsPerClass.entrySet()) {
             ClassName className = item.getKey();
+            packageName = className.packageName();
             LinkedHashSet<Element> annotations = item.getValue();
 
             writeBinder(navigator, className, annotations);
@@ -110,7 +112,7 @@ final class FileWriter {
             writeBuilder(navigator, className, annotations);
         }
 
-        files.add(JavaFile.builder("com.shaishavgandhi.navigator", navigator.build())
+        files.add(JavaFile.builder(packageName, navigator.build())
                 .build());
     }
 

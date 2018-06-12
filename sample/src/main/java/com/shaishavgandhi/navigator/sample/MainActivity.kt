@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.View
 import com.shaishavgandhi.navigato.sampler.R
 import com.shaishavgandhi.navigator.Extra
-import com.shaishavgandhi.navigator.Navigator
 
 class MainActivity : AppCompatActivity() {
 
