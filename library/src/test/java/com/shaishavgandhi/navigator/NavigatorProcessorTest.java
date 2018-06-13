@@ -73,6 +73,24 @@ public class NavigatorProcessorTest {
 
     }
 
+    @Test public void testSimpleClassWithFinalVariable() {
+        String className = "MainFragment";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import android.support.v4.app.Fragment;\n"
+                + "\n"
+                + "public class MainFragment extends Fragment {\n"
+                + " @Extra final String name;\n"
+                +"}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).failed();
+
+    }
+
     @Test public void testSimpleDialogFragmentCompilation() {
         String className = "MainFragment";
 

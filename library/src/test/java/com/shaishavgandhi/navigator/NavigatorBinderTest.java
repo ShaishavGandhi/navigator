@@ -16,8 +16,7 @@ import static com.shaishavgandhi.navigator.NavigatorProcessorTest.getName;
 @FixMethodOrder(MethodSorters.JVM)
 public class NavigatorBinderTest {
 
-    @Test
-    public void testSimpleActivityBinder() {
+    @Test public void testSimpleActivityBinder() {
         String className = "MainActivity";
 
         JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
@@ -54,8 +53,7 @@ public class NavigatorBinderTest {
                 .hasSourceEquivalentTo(expected);
     }
 
-    @Test
-    public void testSimpleActivityBinderWithProtected() {
+    @Test public void testSimpleActivityBinderWithProtected() {
         String className = "MainActivity";
 
         JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
@@ -66,6 +64,43 @@ public class NavigatorBinderTest {
                 + "\n"
                 + "public class MainActivity extends Activity {\n"
                 + " @Extra protected String name;\n"
+                +"}\n");
+
+        JavaFileObject expected = JavaFileObjects.forSourceString("com.shaishavgandhi.sampleapp.test.MainActivityBinder", ""
+                + "package com.shaishavgandhi.sampleapp.test;\n"
+                + "\n"
+                + "import android.os.Bundle;\n"
+                + "import java.lang.String;\n"
+                + "\n"
+                + "public final class MainActivityBinder {\n"
+                + "  public static final void bind(MainActivity binder) {\n"
+                + "    Bundle bundle = binder.getIntent().getExtras();\n"
+                + "    if (bundle != null) {\n"
+                + "      if (bundle.containsKey(\"name\")) {\n"
+                + "        String name = bundle.getString(\"name\");\n"
+                + "        binder.name = name;\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.sampleapp.test.MainActivityBinder")
+                .hasSourceEquivalentTo(expected);
+    }
+
+    @Test public void testSimpleActivityBinderWithStatic() {
+        String className = "MainActivity";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.sampleapp.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import android.app.Activity;\n"
+                + "\n"
+                + "public class MainActivity extends Activity {\n"
+                + " @Extra static String name;\n"
                 +"}\n");
 
         JavaFileObject expected = JavaFileObjects.forSourceString("com.shaishavgandhi.sampleapp.test.MainActivityBinder", ""

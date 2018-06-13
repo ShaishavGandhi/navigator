@@ -27,6 +27,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
@@ -57,6 +58,10 @@ public final class NavigatorProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
         for (Element element : roundEnvironment.getElementsAnnotatedWith(Extra.class)) {
 
+            Set<Modifier> modifiers = element.getModifiers();
+            if (modifiers.contains(Modifier.FINAL)) {
+                messager.printMessage(Diagnostic.Kind.ERROR, "Cannot set annotation @Extra on final variable");
+            }
 
             ClassName className = getClassName(element);
             if (annotationsPerClass.containsKey(className)) {
