@@ -9,11 +9,10 @@ import android.widget.TextView
 import com.evernote.android.state.State
 import com.shaishavgandhi.navigato.sampler.R
 import com.shaishavgandhi.navigator.Extra
-import com.shaishavgandhi.navigator.Navigator
 
 class DetailActivity : AppCompatActivity() {
 
-    @Extra lateinit var userList: ArrayList<User>
+    @Extra @Nullable lateinit var userList: ArrayList<User>
     @Extra @Nullable lateinit var userSparseArray: SparseArray<User>
     @Extra @Nullable lateinit var userArray: Array<User>
     @Extra var points: Points? = null

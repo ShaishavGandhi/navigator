@@ -36,9 +36,16 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
 
             messager.printMessage(Diagnostic.Kind.WARNING, className.simpleName())
 
+            val lambdaTypeName = LambdaTypeName.get(
+                receiver = ClassName.bestGuess("${className}Builder"),
+                returnType = ClassName.bestGuess("kotlin.Unit")
+            )
             fileBuilder.addFunction(FunSpec.builder("prepare${className.simpleName()}")
                 .receiver(ClassName.bestGuess("android.app.Activity"))
-                .addStatement("// This is a comment")
+                .addParameter(ParameterSpec.builder("builder", lambdaTypeName).build())
+                .beginControlFlow("%T().apply", ClassName.bestGuess("${className}Builder"))
+                .addStatement("builder()")
+                .endControlFlow()
                 .build())
         }
 

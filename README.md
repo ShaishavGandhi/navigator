@@ -143,9 +143,12 @@ Navigator does support binding of arguments passed to the fragment as well as co
 #### Get arguments
 
 ```java
-Navigator.prepareDetailFragment(userList)
+Bundle arguments = Navigator.prepareDetailFragment(userList)
                 .setPoints(points)
-                .getBundle()
+                .getBundle();
+
+MyFragment fragment = new MyFragment();
+fragment.setArguments(arguments);
 ```
 
 #### Bind arguments
@@ -182,6 +185,27 @@ Navigator.prepareDetailActivity(users, source)
                .setPoints(points)
                .startWithExtras(activity, transitionBundle)
 ```
+
+#### Supply your own keys
+
+It is easy to transition to Navigator in a large codebase. For example, you can mark a variable 
+as `@Extra` in an existing class, which already has logic to parse out the Bundle. But you cannot
+ possibly change the key to that particular variable in every place from which it's called. With 
+ Navigator, you can easily specify your own custom key which will be used to execute the binding 
+ of all the extras. Example:
+ 
+ ```java
+ public final class MyActivity extends Activity {
+    
+    @Extra(key = FragmentExtras.CUSTOM_KEY) // Custom key that other classes use when invoking MyActivity
+    String extra;
+    
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Navigator.bind(this);
+    }
+ }
+ ```
 
 #### Bundle
 
