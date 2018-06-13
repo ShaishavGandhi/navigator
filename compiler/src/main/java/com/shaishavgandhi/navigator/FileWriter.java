@@ -148,6 +148,8 @@ final class FileWriter {
                     // Add casting for serializable
                     builder.addStatement("$T $L = ($T) bundle.getSerializable(\"$L\")", name,
                             varName, name, varKey);
+                } else {
+                    messager.printMessage(Diagnostic.Kind.ERROR, element.getSimpleName().toString() + " cannot be put in Bundle");
                 }
             } else {
                 if (extraName.equals("ParcelableArray")) {
