@@ -37,6 +37,24 @@ public class NavigatorProcessorTest {
 
     }
 
+    @Test public void testSimpleFragmentActivityCompilation() {
+        String className = "MainActivity";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import android.support.v4.app.FragmentActivity;\n"
+                + "\n"
+                + "public class MainActivity extends FragmentActivity {\n"
+                + " @Extra public String name;\n"
+                +"}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+
+    }
+
     @Test public void testSimpleFragmentCompilation() {
         String className = "MainFragment";
 
@@ -45,6 +63,24 @@ public class NavigatorProcessorTest {
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
                 + "import android.app.Fragment;\n"
+                + "\n"
+                + "public class MainFragment extends Fragment {\n"
+                + " @Extra public String name;\n"
+                +"}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+
+    }
+
+    @Test public void testSimpleAndroidXFragmentCompilation() {
+        String className = "MainFragment";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import androidx.fragment.app.Fragment;\n"
                 + "\n"
                 + "public class MainFragment extends Fragment {\n"
                 + " @Extra public String name;\n"
