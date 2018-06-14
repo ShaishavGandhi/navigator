@@ -30,6 +30,8 @@ ext {
     design = "com.android.support:design:$supportVersion"
     annotations = "com.android.support:support-annotations:$supportVersion"
     jetbrainsAnnotations = "org.jetbrains:annotations:16.0.2"
+    supportLibrary = "com.android.support:support-v4:27.1.1"
+    androidxFragment = "androidx.fragment:fragment:1.0.0-alpha3"
 
     compileTesting = "com.google.testing.compile:compile-testing:0.15"
 

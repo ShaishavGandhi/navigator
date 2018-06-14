@@ -189,6 +189,10 @@ final class FileWriter {
             TypeMirror fragment = elementUtils.getTypeElement("android.app.Fragment").asType();
             isFragment = typeUtils.isSubtype(currentClass, fragment);
         }
+        if (elementUtils.getTypeElement("androidx.fragment.app.Fragment") != null && !isFragment) {
+            TypeMirror fragment = elementUtils.getTypeElement("androidx.fragment.app.Fragment").asType();
+            isFragment = typeUtils.isSubtype(currentClass, fragment);
+        }
         return isFragment;
     }
 

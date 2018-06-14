@@ -471,6 +471,44 @@ public class NavigatorBinderTest {
                 .hasSourceEquivalentTo(expected);
     }
 
+    @Test public void testSimpleAndroidXFragmentNavigatorWithNullables() {
+        String className = "MainFragment";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.sampleapp.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import androidx.fragment.app.Fragment;\n"
+                + "import android.support.annotation.Nullable;"
+                + "\n"
+                + "public class MainFragment extends Fragment {\n"
+                + " @Extra @Nullable public Long points;\n"
+                +"}\n");
+
+        JavaFileObject expected = JavaFileObjects.forSourceString("MainFragmentBinder", ""
+                + "package com.shaishavgandhi.sampleapp.test;\n"
+                + "\n"
+                + "import android.os.Bundle;\n"
+                + "import java.lang.Long;"
+                + "\n"
+                + "public final class MainFragmentBinder {\n"
+                + "  public static final void bind(MainFragment binder) {\n"
+                + "    Bundle bundle = binder.getArguments();\n"
+                + "    if (bundle != null) {\n"
+                + "      if (bundle.containsKey(\"points\")) {\n"
+                + "        Long points = bundle.getLong(\"points\");\n"
+                + "        binder.points = points;\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.sampleapp.test.MainFragmentBinder")
+                .hasSourceEquivalentTo(expected);
+    }
+
     @Test public void testSimpleClassNavigatorWithOptional() {
         String className = "MainFragment";
 

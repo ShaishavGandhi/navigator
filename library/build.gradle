@@ -37,7 +37,8 @@ dependencies {
     api project(":annotations")
 
     testImplementation rootProject.compileTesting
-    testImplementation 'com.android.support:support-v4:27.1.1'
+    testImplementation rootProject.supportLibrary
+    testImplementation rootProject.androidxFragment
     testImplementation files(org.gradle.internal.jvm.Jvm.current().getToolsJar())
     testImplementation files(getRuntimeJar())
     testImplementation project(":compiler")
