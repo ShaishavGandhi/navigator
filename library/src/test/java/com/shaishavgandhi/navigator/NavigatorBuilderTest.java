@@ -37,6 +37,7 @@ public class NavigatorBuilderTest {
                 "import java.lang.String;\n" +
                 "\n" +
                 "public final class MainFragmentBuilder {\n" +
+                "  public static final String EXTRA_NAME = \"name\";\n\n" +
                 "  private Bundle extras;\n" +
                 "\n" +
                 "  @NonNull\n" +
@@ -62,7 +63,7 @@ public class NavigatorBuilderTest {
                 "   */\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
-                "    bundle.putString(\"name\", name);\n" +
+                "    bundle.putString(EXTRA_NAME, name);\n" +
                 "    if (extras != null) {\n" +
                 "      bundle.putAll(extras);\n" +
                 "    }\n" +
@@ -113,6 +114,7 @@ public class NavigatorBuilderTest {
                 "import java.lang.String;\n" +
                 "\n" +
                 "public final class MainFragmentBuilder {\n" +
+                "  public static final String EXTRA_NAME = \"name\";\n\n" +
                 "  private Bundle extras;\n" +
                 "\n" +
                 "  @Nullable\n" +
@@ -142,7 +144,7 @@ public class NavigatorBuilderTest {
                 "   */\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
-                "    bundle.putString(\"name\", name);\n" +
+                "    bundle.putString(EXTRA_NAME, name);\n" +
                 "    if (extras != null) {\n" +
                 "      bundle.putAll(extras);\n" +
                 "    }\n" +
@@ -191,8 +193,10 @@ public class NavigatorBuilderTest {
                 "\n" +
                 "import android.os.Bundle;\n" +
                 "import android.support.annotation.NonNull;\n" +
+                "import java.lang.String;\n" +
                 "\n" +
                 "public final class MainFragmentBuilder {\n" +
+                "  public static final String EXTRA_NAME = \"name\";\n\n" +
                 "  private Bundle extras;\n" +
                 "\n" +
                 "  @NonNull\n" +
@@ -219,7 +223,7 @@ public class NavigatorBuilderTest {
                 "   */\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
-                "    bundle.putSerializable(\"name\", name);\n" +
+                "    bundle.putSerializable(EXTRA_NAME, name);\n" +
                 "    if (extras != null) {\n" +
                 "      bundle.putAll(extras);\n" +
                 "    }\n" +
@@ -301,9 +305,18 @@ public class NavigatorBuilderTest {
                 "import android.os.Bundle;\n" +
                 "import android.support.annotation.NonNull;\n" +
                 "import android.util.SparseArray;\n" +
+                "import java.lang.String;\n" +
                 "import java.util.ArrayList;\n" +
                 "\n" +
                 "public final class MainFragmentBuilder {\n" +
+                "  public static final String EXTRA_NAME = \"name\";\n" +
+                "\n" +
+                "  public static final String EXTRA_USERS = \"users\";\n" +
+                "\n" +
+                "  public static final String EXTRA_USER_ARRAY = \"userArray\";\n" +
+                "\n" +
+                "  public static final String EXTRA_SPARSE_ARRAY = \"sparseArray\";\n" +
+                "\n" +
                 "  private Bundle extras;\n" +
                 "\n" +
                 "  @NonNull\n" +
@@ -345,10 +358,10 @@ public class NavigatorBuilderTest {
                 "   */\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
-                "    bundle.putParcelable(\"name\", name);\n" +
-                "    bundle.putParcelableArrayList(\"users\", users);\n" +
-                "    bundle.putParcelableArray(\"userArray\", userArray);\n" +
-                "    bundle.putSparseParcelableArray(\"sparseArray\", sparseArray);\n" +
+                "    bundle.putParcelable(EXTRA_NAME, name);\n" +
+                "    bundle.putParcelableArrayList(EXTRA_USERS, users);\n" +
+                "    bundle.putParcelableArray(EXTRA_USER_ARRAY, userArray);\n" +
+                "    bundle.putSparseParcelableArray(EXTRA_SPARSE_ARRAY, sparseArray);\n" +
                 "    if (extras != null) {\n" +
                 "      bundle.putAll(extras);\n" +
                 "    }\n" +
@@ -401,6 +414,8 @@ public class NavigatorBuilderTest {
                 "import java.lang.String;\n" +
                 "\n" +
                 "public final class MainActivityBuilder {\n" +
+                "  public static final String EXTRA_NAME = \"name\";\n" +
+                "\n" +
                 "  private int flags = -1;\n" +
                 "\n" +
                 "  private String action;\n" +
@@ -539,7 +554,7 @@ public class NavigatorBuilderTest {
                 "   */\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
-                "    bundle.putString(\"name\", name);\n" +
+                "    bundle.putString(EXTRA_NAME, name);\n" +
                 "    if (extras != null) {\n" +
                 "      bundle.putAll(extras);\n" +
                 "    }\n" +
