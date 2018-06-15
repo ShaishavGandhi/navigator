@@ -138,15 +138,15 @@ final class FileWriter {
 
 
             TypeName name = TypeName.get(element.asType());
-            String varKey = getVariableKey(element);
+            String varKey = getQualifiedExtraFieldName(activity, element);
             String varName = element.getSimpleName().toString();
-            builder.beginControlFlow("if ($L.containsKey(\"$L\"))", "bundle", varKey);
+            builder.beginControlFlow("if ($L.containsKey($L))", "bundle", varKey);
 
             String extraName = getExtraTypeName(element.asType());
             if (extraName == null) {
                 if (isSerializable(typeUtils, elementUtils, element.asType())) {
                     // Add casting for serializable
-                    builder.addStatement("$T $L = ($T) bundle.getSerializable(\"$L\")", name,
+                    builder.addStatement("$T $L = ($T) bundle.getSerializable($L)", name,
                             varName, name, varKey);
                 } else {
                     messager.printMessage(Diagnostic.Kind.ERROR, element.getSimpleName().toString() + " cannot be put in Bundle");
@@ -154,10 +154,10 @@ final class FileWriter {
             } else {
                 if (extraName.equals("ParcelableArray")) {
                     // Add extra casting. TODO: Refactor this to be more generic
-                    builder.addStatement("$T $L = ($T) bundle.get" + extraName + "(\"$L\")", name,
+                    builder.addStatement("$T $L = ($T) bundle.get" + extraName + "($L)", name,
                             varName, name, varKey);
                 } else {
-                    builder.addStatement("$T $L = bundle.get" + extraName + "(\"$L\")", name, varName,
+                    builder.addStatement("$T $L = bundle.get" + extraName + "($L)", name, varName,
                             varKey);
                 }
             }
@@ -288,6 +288,9 @@ final class FileWriter {
                     .addAnnotation(nullability)
                     .build());
 
+            // Add the extra name as public static variable
+            addKeyToClass(element, builder);
+
             // Add to constructor
             ParameterSpec parameter = getParameter(element);
 
@@ -310,11 +313,11 @@ final class FileWriter {
 
             if (extraName == null) {
                 // Put to bundle
-                bundleBuilder.addStatement("bundle.putSerializable(\"$L\", $L)", getVariableKey(element),
+                bundleBuilder.addStatement("bundle.putSerializable($L, $L)", getExtraFieldName(element),
                         parameter.name);
             } else {
                 // Put to bundle
-                bundleBuilder.addStatement("bundle.put" + extraName + "(\"$L\", $L)", getVariableKey(element),
+                bundleBuilder.addStatement("bundle.put" + extraName + "($L, $L)", getExtraFieldName(element),
                         parameter.name);
             }
         }
@@ -365,6 +368,36 @@ final class FileWriter {
         JavaFile file = JavaFile.builder(activity.packageName(), builderInnerClass).build();
         files.add(file);
         navigator.addMethod(prepareMethodBuilder.build());
+    }
+
+    private void addKeyToClass(Element element, TypeSpec.Builder builder) {
+        String extraName = getVariableKey(element);
+
+        builder.addField(FieldSpec.builder(STRING_CLASS, getExtraFieldName(extraName),
+                Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .initializer("\"$L\"", extraName)
+                .build());
+    }
+
+    private String getExtraFieldName(Element element) {
+        return getExtraFieldName(getVariableKey(element));
+    }
+
+    private String getQualifiedExtraFieldName(ClassName bindingClass, Element element) {
+        return bindingClass.simpleName() + "Builder." + getExtraFieldName(getVariableKey(element));
+    }
+
+    private String getExtraFieldName(String extraName) {
+        StringBuilder builder = new StringBuilder("EXTRA");
+        for (String word: splitByCasing(extraName)) {
+            builder.append("_");
+            builder.append(word.toUpperCase());
+        }
+        return builder.toString();
+    }
+
+    private String[] splitByCasing(String variable) {
+        return variable.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");
     }
 
     private MethodSpec.Builder setFlagsMethod(ClassName builderClass) {
