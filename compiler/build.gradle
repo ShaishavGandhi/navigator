@@ -1,4 +1,5 @@
 apply plugin: 'java-library'
+apply plugin: 'kotlin'
 apply from: '../gradle/gradle-mvn-push.gradle'
 
 dependencies {
@@ -9,15 +10,30 @@ dependencies {
     implementation rootProject.annotations
 
     testImplementation rootProject.junit
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
 sourceCompatibility = "7"
 targetCompatibility = "7"
 buildscript {
+    ext.kotlin_version = '1.2.50'
     repositories {
         mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 repositories {
     mavenCentral()
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
