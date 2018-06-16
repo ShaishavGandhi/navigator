@@ -586,7 +586,7 @@ public class NavigatorBinderTest {
 
     @Test public void testSimpleClassWithCustomKey() {
         String className = "MainFragment";
-        String customKey = "userPoints";
+        String customKey = "com.navigator.weird_key";
 
         JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
                 + "package com.shaishavgandhi.sampleapp.test;\n"
@@ -609,8 +609,8 @@ public class NavigatorBinderTest {
                 + "  public static final void bind(MainFragment binder) {\n"
                 + "    Bundle bundle = binder.getArguments();\n"
                 + "    if (bundle != null) {\n"
-                + "      if (bundle.containsKey(MainFragmentBuilder.EXTRA_USER_POINTS)) {\n"
-                + "        long points = bundle.getLong(MainFragmentBuilder.EXTRA_USER_POINTS);\n"
+                + "      if (bundle.containsKey(\"" + customKey + "\")) {\n"
+                + "        long points = bundle.getLong(\"" + customKey + "\");\n"
                 + "        binder.points = points;\n"
                 + "      }\n"
                 + "    }\n"
@@ -625,7 +625,7 @@ public class NavigatorBinderTest {
 
     @Test public void testSimpleClassWithSetters() {
         String className = "MainFragment";
-        String customKey = "userPoints";
+        String customKey = "com.navigator.something-weird";
 
         JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
                 + "package com.shaishavgandhi.sampleapp.test;\n"
@@ -651,8 +651,8 @@ public class NavigatorBinderTest {
                 + "  public static final void bind(MainFragment binder) {\n"
                 + "    Bundle bundle = binder.getArguments();\n"
                 + "    if (bundle != null) {\n"
-                + "      if (bundle.containsKey(MainFragmentBuilder.EXTRA_USER_POINTS)) {\n"
-                + "        long points = bundle.getLong(MainFragmentBuilder.EXTRA_USER_POINTS);\n"
+                + "      if (bundle.containsKey(\"" + customKey + "\")) {\n"
+                + "        long points = bundle.getLong(\"" + customKey + "\");\n"
                 + "        binder.setPoints(points);\n"
                 + "      }\n"
                 + "    }\n"

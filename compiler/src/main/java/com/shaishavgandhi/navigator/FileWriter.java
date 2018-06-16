@@ -371,12 +371,14 @@ final class FileWriter {
     }
 
     private void addKeyToClass(Element element, TypeSpec.Builder builder) {
-        String extraName = getVariableKey(element);
+        NParameter extraName = getVariableKey(element);
 
-        builder.addField(FieldSpec.builder(STRING_CLASS, getExtraFieldName(extraName),
-                Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                .initializer("\"$L\"", extraName)
-                .build());
+        if (!extraName.getCustomKey()) {
+            builder.addField(FieldSpec.builder(STRING_CLASS, getExtraFieldName(extraName),
+                    Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                    .initializer("\"$L\"", extraName.getName())
+                    .build());
+        }
     }
 
     private String getExtraFieldName(Element element) {
@@ -384,16 +386,24 @@ final class FileWriter {
     }
 
     private String getQualifiedExtraFieldName(ClassName bindingClass, Element element) {
-        return bindingClass.simpleName() + "Builder." + getExtraFieldName(getVariableKey(element));
+        NParameter param = getVariableKey(element);
+        if (!param.getCustomKey()) {
+            return bindingClass.simpleName() + "Builder." + getExtraFieldName(getVariableKey(element));
+        }
+        return getExtraFieldName(param);
     }
 
-    private String getExtraFieldName(String extraName) {
+    private String getExtraFieldName(NParameter parameter) {
         StringBuilder builder = new StringBuilder("EXTRA");
-        for (String word: splitByCasing(extraName)) {
-            builder.append("_");
-            builder.append(word.toUpperCase());
+        if (!parameter.getCustomKey()) {
+            for (String word : splitByCasing(parameter.getName())) {
+                builder.append("_");
+                builder.append(word.toUpperCase());
+            }
+            return builder.toString();
+        } else {
+            return "\""+ parameter.getName() +"\"";
         }
-        return builder.toString();
     }
 
     private String[] splitByCasing(String variable) {
@@ -709,11 +719,11 @@ final class FileWriter {
                 .asType());
     }
 
-    String getVariableKey(Element element) {
+    NParameter getVariableKey(Element element) {
         if (element.getAnnotation(Extra.class).key().isEmpty()) {
-            return element.getSimpleName().toString();
+            return new NParameter(element.asType(), element.getSimpleName().toString(), false);
         } else {
-            return element.getAnnotation(Extra.class).key();
+            return new NParameter(element.asType(), element.getAnnotation(Extra.class).key(), true);
         }
     }
 
