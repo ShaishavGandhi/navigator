@@ -10,7 +10,7 @@ dependencies {
     implementation rootProject.annotations
 
     testImplementation rootProject.junit
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation rootProject.kotlin
 }
 
 sourceCompatibility = "7"
