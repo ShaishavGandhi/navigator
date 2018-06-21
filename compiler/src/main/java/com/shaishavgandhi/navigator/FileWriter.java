@@ -367,7 +367,6 @@ final class FileWriter {
 
         JavaFile file = JavaFile.builder(activity.packageName(), builderInnerClass).build();
         files.add(file);
-        navigator.addMethod(prepareMethodBuilder.build());
     }
 
     private void addKeyToClass(Element element, TypeSpec.Builder builder) {
@@ -473,7 +472,7 @@ final class FileWriter {
         methodBuilder.addJavadoc(CodeBlock.builder()
                 .add("Returns a {@link android.os.Bundle} built from all extras that have been " +
                                 "set \n" +
-                        "using {@linkplain Navigator}'s prepare method.\n")
+                        "using the builder methods.\n")
                 .add("\n")
                 .add("Used internally to simply get the {@link android.os.Bundle} that will be \n" +
                         "sent along with the {@link android.content.Intent}.\n")
@@ -481,8 +480,9 @@ final class FileWriter {
                 .add("Exposed publicly to allow custom usage of the {@link android.os.Bundle}. \n")
                 .add("\n")
                 .add("Example: It can be useful while navigating to a {@link android.support.v4.app.Fragment}\n" +
-                        "to use {@linkplain Navigator}'s prepare method to \n" +
-                        "build your bundle and call this method to get extras that can be set as \n" +
+                        "to use the builder methods to \n" +
+                        "construct your bundle and call this method to get extras that can be set" +
+                        " as \n" +
                         "arguments to your {@linkplain android.support.v4.app.Fragment}.")
                 .add("\n")
                 .build());

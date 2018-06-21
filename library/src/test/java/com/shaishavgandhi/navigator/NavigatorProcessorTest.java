@@ -197,16 +197,11 @@ public class NavigatorProcessorTest {
         JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
                 + "package com.shaishavgandhi.navigator.test;\n"
                 + "\n"
-                + "import android.support.annotation.NonNull;\n"
-                + "import java.lang.String;\n"
                 + "\n"
                 + "public final class Navigator {\n"
                 + "  public static final void bind(MainActivity binder) {\n"
                 + "    MainActivityBinder.bind(binder);\n"
                 + "  }\n\n"
-                + "  public static final MainActivityBuilder prepareMainActivity(@NonNull final String name) {\n"
-                + "    return new MainActivityBuilder(name);\n"
-                + "  }\n"
                 + "\n"
                 + "}\n");
 
@@ -238,9 +233,6 @@ public class NavigatorProcessorTest {
                 + "  public static final void bind(MainActivity binder) {\n"
                 + "    MainActivityBinder.bind(binder);\n"
                 + "  }\n\n"
-                + "  public static final MainActivityBuilder prepareMainActivity() {\n"
-                + "    return new MainActivityBuilder();\n"
-                + "  }\n"
                 + "}\n");
 
         Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
@@ -267,15 +259,11 @@ public class NavigatorProcessorTest {
         JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
                 + "package com.shaishavgandhi.navigator.test;\n"
                 + "\n"
-                + "import android.support.annotation.NonNull;\n"
                 + "\n"
                 + "public final class Navigator {\n"
                 + "  public static final void bind(MainActivity binder) {\n"
                 + "    MainActivityBinder.bind(binder);\n"
                 + "  }\n\n"
-                + "  public static final MainActivityBuilder prepareMainActivity(@NonNull final MainActivity.User name) {\n"
-                + "    return new MainActivityBuilder(name);\n"
-                + "  }\n"
                 + "\n"
                 + "}\n");
 
