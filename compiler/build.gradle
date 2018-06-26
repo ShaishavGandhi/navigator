@@ -10,11 +10,14 @@ dependencies {
     implementation rootProject.annotations
 
     testImplementation rootProject.junit
+    compile rootProject.kotlinpoet
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation rootProject.kotlin
 }
 
 sourceCompatibility = "7"
 targetCompatibility = "7"
+
 buildscript {
     ext.kotlin_version = '1.2.50'
     repositories {

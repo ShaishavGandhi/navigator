@@ -20,14 +20,14 @@ class MainActivity : AppCompatActivity() {
             val users = arrayListOf(User(name = "Shaishav", age = 10),
                     User("Dimple", 13))
 
-            DetailActivityBuilder(users)
+            DetailActivityBuilder()
+                .setUserList(users)
                 .setSource("source")
                 .setUserId(100)
                 .setPoints(Points(100))
                 // Clears the task
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 .start(this)
-
 
         }
 

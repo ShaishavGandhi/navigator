@@ -83,13 +83,13 @@ final class FileWriter {
         put("java.util.ArrayList<android.os.Parcelable>", "ParcelableArrayList");
     }};
 
-    private LinkedHashMap<ClassName, LinkedHashSet<Element>> annotationsPerClass;
+    private LinkedHashMap<QualifiedClassName, LinkedHashSet<Element>> annotationsPerClass;
     private Types typeUtils;
     private Elements elementUtils;
     private List<JavaFile> files = new ArrayList<>();
     private Messager messager;
 
-    FileWriter(Types typeUtils, Elements elementUtils, LinkedHashMap<ClassName,
+    FileWriter(Types typeUtils, Elements elementUtils, LinkedHashMap<QualifiedClassName,
             LinkedHashSet<Element>> annotationsPerClass, Messager messager) {
         this.typeUtils = typeUtils;
         this.elementUtils = elementUtils;
@@ -98,22 +98,13 @@ final class FileWriter {
     }
 
     protected void writeFiles() {
-        TypeSpec.Builder navigator = TypeSpec.classBuilder("Navigator")
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
-
-        String packageName = "";
-        for (Map.Entry<ClassName, LinkedHashSet<Element>> item : annotationsPerClass.entrySet()) {
-            ClassName className = item.getKey();
-            packageName = className.packageName();
+        for (Map.Entry<QualifiedClassName, LinkedHashSet<Element>> item : annotationsPerClass.entrySet()) {
+            ClassName className = item.getKey().getJavaClass();
             LinkedHashSet<Element> annotations = item.getValue();
 
-            writeBinder(navigator, className, annotations);
-
-            writeBuilder(navigator, className, annotations);
+            writeBinder(className, annotations);
+            writeBuilder(className, annotations);
         }
-
-        files.add(JavaFile.builder(packageName, navigator.build())
-                .build());
     }
 
     private MethodSpec getBindMethod(ClassName activity, LinkedHashSet<Element> annotations) {
@@ -205,7 +196,7 @@ final class FileWriter {
         return false;
     }
 
-    private void writeBinder(TypeSpec.Builder navigator, ClassName className, LinkedHashSet<Element> annotations) {
+    private void writeBinder(ClassName className, LinkedHashSet<Element> annotations) {
         ClassName binderClass = getBinderClass(className);
 
         TypeSpec.Builder binder = TypeSpec.classBuilder(binderClass.simpleName())
@@ -216,12 +207,6 @@ final class FileWriter {
 
         TypeSpec binderResolved = binder.build();
         files.add(JavaFile.builder(className.packageName(), binderResolved).build());
-
-        MethodSpec.Builder staticBinder = MethodSpec.methodBuilder("bind")
-                .addParameter(className, "binder")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                .addStatement("$T.bind(binder)", binderClass);
-        navigator.addMethod(staticBinder.build());
     }
 
     private ClassName getBinderClass(ClassName className) {
@@ -234,7 +219,7 @@ final class FileWriter {
                 "Builder");
     }
 
-    private void writeBuilder(TypeSpec.Builder navigator, ClassName activity, LinkedHashSet<Element> elements) {
+    private void writeBuilder(ClassName activity, LinkedHashSet<Element> elements) {
         String activityName = activity.simpleName();
         TypeSpec.Builder builder = TypeSpec.classBuilder(activityName + "Builder")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);

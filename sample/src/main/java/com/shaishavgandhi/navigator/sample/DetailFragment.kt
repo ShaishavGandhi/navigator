@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.shaishavgandhi.navigato.sampler.R
 import com.shaishavgandhi.navigator.Extra
+import com.shaishavgandhi.navigator.Navigator
 
 
 // TODO: Rename parameter arguments, choose names that match
