@@ -89,7 +89,6 @@ public final class NavigatorProcessor extends AbstractProcessor {
                 e.printStackTrace();
             }
         }
-        // TODO: Fix this
         annotationsPerClass.clear();
 
         return true;

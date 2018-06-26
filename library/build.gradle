@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 apply from: '../gradle/gradle-mvn-push.gradle'
 
 android {
@@ -42,6 +43,7 @@ dependencies {
     testImplementation files(org.gradle.internal.jvm.Jvm.current().getToolsJar())
     testImplementation files(getRuntimeJar())
     testImplementation project(":compiler")
+    implementation rootProject.kotlin
 }
 repositories {
     mavenCentral()

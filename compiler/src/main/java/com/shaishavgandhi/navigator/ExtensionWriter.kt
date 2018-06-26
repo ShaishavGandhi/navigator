@@ -14,6 +14,8 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
     val elementUtil = processingEnvironment.elementUtils
     val messager = processingEnvironment.messager
 
+    val navigatorClass = ClassName.bestGuess("com.shaishavgandhi.navigator.Navigator")
+
     fun generateExtensions(annotations: LinkedHashMap<QualifiedClassName, LinkedHashSet<Element>>) {
         val annotationsPerClass = LinkedHashMap<QualifiedClassName, LinkedHashSet<Element>>()
         annotationsPerClass.putAll(annotations)
@@ -29,26 +31,30 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
             return
         }
 
-        val fileBuilder = FileSpec.builder("com.shaishavgandhi.navigator.sample", "NavigatorExtensions")
-        val extensionClass = TypeSpec.classBuilder("NavigatorExtensions")
         for (entry in annotationsPerClass.entries) {
             val className = entry.key.kotlinClass
 
-            messager.printMessage(Diagnostic.Kind.WARNING, className.simpleName())
+            val extensionFileName = "${className.simpleName()}NavigatorExtensions"
+            val fileBuilder = FileSpec.builder(className.packageName(), extensionFileName)
 
-            val lambdaTypeName = LambdaTypeName.get(
-                receiver = ClassName.bestGuess("${className}Builder"),
-                returnType = ClassName.bestGuess("kotlin.Unit")
-            )
-            fileBuilder.addFunction(FunSpec.builder("prepare${className.simpleName()}")
-                .receiver(ClassName.bestGuess("android.app.Activity"))
-                .addParameter(ParameterSpec.builder("builder", lambdaTypeName).build())
-                .beginControlFlow("%T().apply", ClassName.bestGuess("${className}Builder"))
-                .addStatement("builder()")
-                .endControlFlow()
+            val classBinder = ClassName.bestGuess("${className.packageName()}.${className.simpleName()}Binder")
+
+            // Static method to add to Navigator
+            fileBuilder.addFunction(FunSpec.builder("bind")
+                .receiver(navigatorClass)
+                .addParameter("binder", className)
+                .addStatement("%T.bind(binder)", classBinder)
                 .build())
+
+            // Extension on the activity/fragment
+            fileBuilder.addFunction(FunSpec.builder("bind")
+                .receiver(className)
+                .addParameter("binder", className)
+                .addStatement("%T.bind(binder)", classBinder)
+                .build())
+
+            fileBuilder.build().writeTo(File(kaptGeneratedDirPath))
         }
 
-        fileBuilder.build().writeTo(File(kaptGeneratedDirPath))
     }
 }
