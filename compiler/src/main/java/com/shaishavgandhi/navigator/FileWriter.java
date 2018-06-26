@@ -139,24 +139,26 @@ final class FileWriter {
 
 
             TypeName name = TypeName.get(element.asType());
-            String varKey = getVariableKey(element);
+            String varKey = getQualifiedExtraFieldName(activity, element);
             String varName = element.getSimpleName().toString();
-            builder.beginControlFlow("if ($L.containsKey(\"$L\"))", "bundle", varKey);
+            builder.beginControlFlow("if ($L.containsKey($L))", "bundle", varKey);
 
             String extraName = getExtraTypeName(element.asType());
             if (extraName == null) {
                 if (isSerializable(typeUtils, elementUtils, element.asType())) {
                     // Add casting for serializable
-                    builder.addStatement("$T $L = ($T) bundle.getSerializable(\"$L\")", name,
+                    builder.addStatement("$T $L = ($T) bundle.getSerializable($L)", name,
                             varName, name, varKey);
+                } else {
+                    messager.printMessage(Diagnostic.Kind.ERROR, element.getSimpleName().toString() + " cannot be put in Bundle");
                 }
             } else {
                 if (extraName.equals("ParcelableArray")) {
                     // Add extra casting. TODO: Refactor this to be more generic
-                    builder.addStatement("$T $L = ($T) bundle.get" + extraName + "(\"$L\")", name,
+                    builder.addStatement("$T $L = ($T) bundle.get" + extraName + "($L)", name,
                             varName, name, varKey);
                 } else {
-                    builder.addStatement("$T $L = bundle.get" + extraName + "(\"$L\")", name, varName,
+                    builder.addStatement("$T $L = bundle.get" + extraName + "($L)", name, varName,
                             varKey);
                 }
             }
@@ -186,6 +188,10 @@ final class FileWriter {
         }
         if (elementUtils.getTypeElement("android.app.Fragment") != null && !isFragment) {
             TypeMirror fragment = elementUtils.getTypeElement("android.app.Fragment").asType();
+            isFragment = typeUtils.isSubtype(currentClass, fragment);
+        }
+        if (elementUtils.getTypeElement("androidx.fragment.app.Fragment") != null && !isFragment) {
+            TypeMirror fragment = elementUtils.getTypeElement("androidx.fragment.app.Fragment").asType();
             isFragment = typeUtils.isSubtype(currentClass, fragment);
         }
         return isFragment;
@@ -283,6 +289,9 @@ final class FileWriter {
                     .addAnnotation(nullability)
                     .build());
 
+            // Add the extra name as public static variable
+            addKeyToClass(element, builder);
+
             // Add to constructor
             ParameterSpec parameter = getParameter(element);
 
@@ -305,11 +314,11 @@ final class FileWriter {
 
             if (extraName == null) {
                 // Put to bundle
-                bundleBuilder.addStatement("bundle.putSerializable(\"$L\", $L)", getVariableKey(element),
+                bundleBuilder.addStatement("bundle.putSerializable($L, $L)", getExtraFieldName(element),
                         parameter.name);
             } else {
                 // Put to bundle
-                bundleBuilder.addStatement("bundle.put" + extraName + "(\"$L\", $L)", getVariableKey(element),
+                bundleBuilder.addStatement("bundle.put" + extraName + "($L, $L)", getExtraFieldName(element),
                         parameter.name);
             }
         }
@@ -359,7 +368,46 @@ final class FileWriter {
 
         JavaFile file = JavaFile.builder(activity.packageName(), builderInnerClass).build();
         files.add(file);
-        navigator.addMethod(prepareMethodBuilder.build());
+    }
+
+    private void addKeyToClass(Element element, TypeSpec.Builder builder) {
+        NParameter extraName = getVariableKey(element);
+
+        if (!extraName.getCustomKey()) {
+            builder.addField(FieldSpec.builder(STRING_CLASS, getExtraFieldName(extraName),
+                    Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                    .initializer("\"$L\"", extraName.getName())
+                    .build());
+        }
+    }
+
+    private String getExtraFieldName(Element element) {
+        return getExtraFieldName(getVariableKey(element));
+    }
+
+    private String getQualifiedExtraFieldName(ClassName bindingClass, Element element) {
+        NParameter param = getVariableKey(element);
+        if (!param.getCustomKey()) {
+            return bindingClass.simpleName() + "Builder." + getExtraFieldName(getVariableKey(element));
+        }
+        return getExtraFieldName(param);
+    }
+
+    private String getExtraFieldName(NParameter parameter) {
+        StringBuilder builder = new StringBuilder("EXTRA");
+        if (!parameter.getCustomKey()) {
+            for (String word : splitByCasing(parameter.getName())) {
+                builder.append("_");
+                builder.append(word.toUpperCase());
+            }
+            return builder.toString();
+        } else {
+            return "\""+ parameter.getName() +"\"";
+        }
+    }
+
+    private String[] splitByCasing(String variable) {
+        return variable.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");
     }
 
     private MethodSpec.Builder setFlagsMethod(ClassName builderClass) {
@@ -425,7 +473,7 @@ final class FileWriter {
         methodBuilder.addJavadoc(CodeBlock.builder()
                 .add("Returns a {@link android.os.Bundle} built from all extras that have been " +
                                 "set \n" +
-                        "using {@linkplain Navigator}'s prepare method.\n")
+                        "using the builder methods.\n")
                 .add("\n")
                 .add("Used internally to simply get the {@link android.os.Bundle} that will be \n" +
                         "sent along with the {@link android.content.Intent}.\n")
@@ -433,8 +481,9 @@ final class FileWriter {
                 .add("Exposed publicly to allow custom usage of the {@link android.os.Bundle}. \n")
                 .add("\n")
                 .add("Example: It can be useful while navigating to a {@link android.support.v4.app.Fragment}\n" +
-                        "to use {@linkplain Navigator}'s prepare method to \n" +
-                        "build your bundle and call this method to get extras that can be set as \n" +
+                        "to use the builder methods to \n" +
+                        "construct your bundle and call this method to get extras that can be set" +
+                        " as \n" +
                         "arguments to your {@linkplain android.support.v4.app.Fragment}.")
                 .add("\n")
                 .build());
@@ -671,11 +720,11 @@ final class FileWriter {
                 .asType());
     }
 
-    String getVariableKey(Element element) {
+    NParameter getVariableKey(Element element) {
         if (element.getAnnotation(Extra.class).key().isEmpty()) {
-            return element.getSimpleName().toString();
+            return new NParameter(element.asType(), element.getSimpleName().toString(), false);
         } else {
-            return element.getAnnotation(Extra.class).key();
+            return new NParameter(element.asType(), element.getAnnotation(Extra.class).key(), true);
         }
     }
 

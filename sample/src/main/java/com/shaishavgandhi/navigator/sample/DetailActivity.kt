@@ -25,7 +25,7 @@ class DetailActivity : AppCompatActivity() {
 
         Navigator.bind(this)
 
-        Navigator.prepareDetailFragment()
+        DetailFragmentBuilder()
                 .setUser(userList[0])
                 .bundle
         findViewById<TextView>(R.id.whatever).text = userList.first().name

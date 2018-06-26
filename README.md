@@ -91,7 +91,7 @@ Using the same example:
 
 ```java
 
-public final class ActivityB extends Activity {
+public final class ActivityC extends Activity {
   
   @Extra String title; // Annotate with @Extra to tell Navigator that this is required when opening activity
   @Extra @Nullable String source; // @Nullable tells Navigator that this is an optional extra
@@ -107,8 +107,8 @@ public final class ActivityB extends Activity {
 ```java
 public final class ActivityA extends Activity {
   
-  protected void openActivityB() {
-    Navigator.prepareActivityB(title, subtitle) // Required extras by ActivityB go in constructor
+  protected void openActivityC() {
+    ActivityCBuilder(title, subtitle) // Required extras by ActivityC go in constructor
       .setSource(source) // optional extras
       .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK || Intent.FLAG_ACTIVITY_CLEAR_TASK)
       .start(this);
@@ -121,7 +121,7 @@ The sample example would work in Kotlin as well.
 
 ```kotlin
 
-class ActivityB : Activity() {
+class ActivityC : Activity() {
   
   @Extra lateinit var title: String 
   @Extra var source: String? = null // null type indicates that it is optional
@@ -143,7 +143,7 @@ Navigator does support binding of arguments passed to the fragment as well as co
 #### Get arguments
 
 ```java
-Bundle arguments = Navigator.prepareDetailFragment(userList)
+Bundle arguments = new DetailFragmentBuilder(userList)
                 .setPoints(points)
                 .getBundle();
 
@@ -174,14 +174,14 @@ Navigator exposes most ways to start an activity.
 #### Start Activity For Result
 
 ```kotlin
-Navigator.prepareDetailActivity(users, source)
+DetailActivityBuilder(users, source)
                .setPoints(points)
                .startForResult(activity, requestCode)
 ```
 
 #### Start Activity With Transition Bundle
 ```kotlin
-Navigator.prepareDetailActivity(users, source)
+DetailActivityBuilder(users, source)
                .setPoints(points)
                .startWithExtras(activity, transitionBundle)
 ```
@@ -212,7 +212,7 @@ as `@Extra` in an existing class, which already has logic to parse out the Bundl
 In cases where you just want to use the type-safety and implicit contract of Navigator, you can easily use the builder to get the bundle created by Navigator
 
 ```java
-Bundle bundle = Navigator.prepareDetailActivity(users, source)
+Bundle bundle = new DetailActivityBuilder(users, source)
                .setPoints(points)
                .getBundle();
 ```

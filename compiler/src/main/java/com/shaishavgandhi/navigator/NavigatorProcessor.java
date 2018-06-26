@@ -27,10 +27,12 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import javax.tools.Diagnostic;
 
 @AutoService(Processor.class)
 public final class NavigatorProcessor extends AbstractProcessor {
@@ -59,6 +61,11 @@ public final class NavigatorProcessor extends AbstractProcessor {
         for (Element element : roundEnvironment.getElementsAnnotatedWith(Extra.class)) {
 
             QualifiedClassName className = getClassName(element);
+            Set<Modifier> modifiers = element.getModifiers();
+            if (modifiers.contains(Modifier.FINAL)) {
+                messager.printMessage(Diagnostic.Kind.ERROR, "Cannot set annotation @Extra on final variable");
+            }
+
             if (annotationsPerClass.containsKey(className)) {
                 LinkedHashSet<Element> annotations = annotationsPerClass.get(className);
                 annotations.add(element);

@@ -20,22 +20,13 @@ class MainActivity : AppCompatActivity() {
             val users = arrayListOf(User(name = "Shaishav", age = 10),
                     User("Dimple", 13))
 
-//            Navigator.prepareDetailActivity()
-//                    .setUserList(users)
-//                    .setSource("source")
-//                    .setUserId(100)
-//                    .setPoints(Points(100))
-//                    // Clears the task
-//                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-//                    .start(this)
-
-            prepareDetailActivity {
-                setUserList(users)
-                setSource("source")
-                setUserId(100)
-                setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                start(this@MainActivity)
-            }
+            DetailActivityBuilder(users)
+                .setSource("source")
+                .setUserId(100)
+                .setPoints(Points(100))
+                // Clears the task
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                .start(this)
 
         }
 

@@ -37,6 +37,24 @@ public class NavigatorProcessorTest {
 
     }
 
+    @Test public void testSimpleFragmentActivityCompilation() {
+        String className = "MainActivity";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import android.support.v4.app.FragmentActivity;\n"
+                + "\n"
+                + "public class MainActivity extends FragmentActivity {\n"
+                + " @Extra public String name;\n"
+                +"}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+
+    }
+
     @Test public void testSimpleFragmentCompilation() {
         String className = "MainFragment";
 
@@ -45,6 +63,24 @@ public class NavigatorProcessorTest {
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
                 + "import android.app.Fragment;\n"
+                + "\n"
+                + "public class MainFragment extends Fragment {\n"
+                + " @Extra public String name;\n"
+                +"}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+
+    }
+
+    @Test public void testSimpleAndroidXFragmentCompilation() {
+        String className = "MainFragment";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import androidx.fragment.app.Fragment;\n"
                 + "\n"
                 + "public class MainFragment extends Fragment {\n"
                 + " @Extra public String name;\n"
@@ -70,6 +106,43 @@ public class NavigatorProcessorTest {
 
         Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
         assertThat(compilation).succeeded();
+
+    }
+
+    @Test public void testSimpleClassWithFinalVariable() {
+        String className = "MainFragment";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import android.support.v4.app.Fragment;\n"
+                + "\n"
+                + "public class MainFragment extends Fragment {\n"
+                + " @Extra final String name;\n"
+                +"}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).failed();
+
+    }
+
+    @Test public void testNonSerializableVariable() {
+        String className = "MainFragment";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.navigator.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import android.support.v4.app.Fragment;\n"
+                + "\n"
+                + "public class MainFragment extends Fragment {\n"
+                + " @Extra User user;\n"
+                + " public class User {}\n"
+                +"}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).failed();
 
     }
 
@@ -124,16 +197,11 @@ public class NavigatorProcessorTest {
         JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
                 + "package com.shaishavgandhi.navigator.test;\n"
                 + "\n"
-                + "import android.support.annotation.NonNull;\n"
-                + "import java.lang.String;\n"
                 + "\n"
                 + "public final class Navigator {\n"
                 + "  public static final void bind(MainActivity binder) {\n"
                 + "    MainActivityBinder.bind(binder);\n"
                 + "  }\n\n"
-                + "  public static final MainActivityBuilder prepareMainActivity(@NonNull final String name) {\n"
-                + "    return new MainActivityBuilder(name);\n"
-                + "  }\n"
                 + "\n"
                 + "}\n");
 
@@ -165,9 +233,6 @@ public class NavigatorProcessorTest {
                 + "  public static final void bind(MainActivity binder) {\n"
                 + "    MainActivityBinder.bind(binder);\n"
                 + "  }\n\n"
-                + "  public static final MainActivityBuilder prepareMainActivity() {\n"
-                + "    return new MainActivityBuilder();\n"
-                + "  }\n"
                 + "}\n");
 
         Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
@@ -194,15 +259,11 @@ public class NavigatorProcessorTest {
         JavaFileObject expected = JavaFileObjects.forSourceString("Navigator", ""
                 + "package com.shaishavgandhi.navigator.test;\n"
                 + "\n"
-                + "import android.support.annotation.NonNull;\n"
                 + "\n"
                 + "public final class Navigator {\n"
                 + "  public static final void bind(MainActivity binder) {\n"
                 + "    MainActivityBinder.bind(binder);\n"
                 + "  }\n\n"
-                + "  public static final MainActivityBuilder prepareMainActivity(@NonNull final MainActivity.User name) {\n"
-                + "    return new MainActivityBuilder(name);\n"
-                + "  }\n"
                 + "\n"
                 + "}\n");
 
