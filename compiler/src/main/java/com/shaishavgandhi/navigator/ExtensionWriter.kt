@@ -49,8 +49,7 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
             // Extension on the activity/fragment
             fileBuilder.addFunction(FunSpec.builder("bind")
                 .receiver(className)
-                .addParameter("binder", className)
-                .addStatement("%T.bind(binder)", classBinder)
+                .addStatement("%T.bind(this)", classBinder)
                 .build())
 
             fileBuilder.build().writeTo(File(kaptGeneratedDirPath))
