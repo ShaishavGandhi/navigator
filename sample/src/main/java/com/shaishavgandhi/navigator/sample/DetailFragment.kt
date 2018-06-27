@@ -26,7 +26,7 @@ class DetailFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Navigator.bind(this)
+        bind()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
