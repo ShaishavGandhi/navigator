@@ -39,6 +39,9 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
 
             val classBinder = ClassName.bestGuess("${className.packageName()}.${className.simpleName()}Binder")
 
+            fileBuilder.addAnnotation(AnnotationSpec.builder(JvmName::class)
+                .addMember("name = \"%L\"", "${className.simpleName()}Navigator")
+                .build())
             // Static method to add to Navigator
             fileBuilder.addFunction(FunSpec.builder("bind")
                 .receiver(navigatorClass)
@@ -49,8 +52,7 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
             // Extension on the activity/fragment
             fileBuilder.addFunction(FunSpec.builder("bind")
                 .receiver(className)
-                .addParameter("binder", className)
-                .addStatement("%T.bind(binder)", classBinder)
+                .addStatement("%T.bind(this)", classBinder)
                 .build())
 
             fileBuilder.build().writeTo(File(kaptGeneratedDirPath))
