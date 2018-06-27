@@ -27,10 +27,10 @@ Navigating to another activity requires a lot of boilerplate code in both activi
 
 Source activity:
 ```java
-public final class ActivityA extends Activity {
+public final class MainActivity extends Activity {
   
-  protected void openActivityB() {
-    Intent intent = new Intent(context, ActivityB.class);
+  protected void openDetailActivity() {
+    Intent intent = new Intent(context, DetailActivity.class);
     intent.putParcelableExtra("user", user);
     intent.putString("source", source);
     intent.putString("title", title);
@@ -46,7 +46,7 @@ The destination activity is even more complicated:
 
 ```java
 
-public final class ActivityB extends Activity {
+public final class DetailActivity extends Activity {
   
   String title;
   String source;
@@ -91,7 +91,7 @@ Using the same example:
 
 ```java
 
-public final class ActivityC extends Activity {
+public final class DetailActivity extends Activity {
   
   @Extra String title; // Annotate with @Extra to tell Navigator that this is required when opening activity
   @Extra @Nullable String source; // @Nullable tells Navigator that this is an optional extra
@@ -99,16 +99,16 @@ public final class ActivityC extends Activity {
  
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    Navigator.bind(this); // Automatically bind extras
+    DetailActivityBinder.bind(this); // Automatically bind extras
   }
 }
 ```
 
 ```java
-public final class ActivityA extends Activity {
+public final class MainActivity extends Activity {
   
-  protected void openActivityC() {
-    ActivityCBuilder(title, subtitle) // Required extras by ActivityC go in constructor
+  protected void openDetailActivity() {
+    new DetailActivityBuilder(title, subtitle) // Required extras by ActivityC go in constructor
       .setSource(source) // optional extras
       .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK || Intent.FLAG_ACTIVITY_CLEAR_TASK)
       .start(this);
@@ -118,21 +118,6 @@ public final class ActivityA extends Activity {
 ```
 
 The sample example would work in Kotlin as well. 
-
-```kotlin
-
-class ActivityC : Activity() {
-  
-  @Extra lateinit var title: String 
-  @Extra var source: String? = null // null type indicates that it is optional
-  @Extra lateinit var subtitle: String
- 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    Navigator.bind(this) // Automatically bind extras
-  }
-}
-```
 
 ## Fragments
 
@@ -153,17 +138,55 @@ fragment.setArguments(arguments);
 
 #### Bind arguments
 
-```kotlin
-class DetailFragment : Fragment() {
+```java
+class DetailFragment extends Fragment {
 
-    @Extra var user: User? = null
-    @Extra var points: Point? = null
+    @Extra User user;
+    @Extra Point points;
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Navigator.bind(this)
+    @Override public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        DetailFragmentBinder.bind(this);
     }
 
+}
+```
+
+## Kotlin
+
+Navigator has first class support for Kotlin and it's language features. If you use `kapt` as your annotation processor, 
+Navigator will generate handy Kotlin extensions for you which simplify the API.
+
+
+#### Bind arguments
+
+```kotlin
+
+class DetailActivity : Activity() {
+  
+  @Extra lateinit var title: String 
+  @Extra var source: String? = null // null type indicates that it is optional
+  @Extra lateinit var subtitle: String
+ 
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    bind() // Simply call bind extension on DetailActivity
+  }
+}
+```
+
+Using kapt will also simplify your API when using it in a Java class. 
+
+```java
+public class DetailActivity extends Activity {
+    
+    @Extra String message;
+    
+    @Override protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        DetailActivityNavigator.bind(this); // Generated kotlin extension with a nicer API
+    }
+    
 }
 ```
 
@@ -202,7 +225,7 @@ as `@Extra` in an existing class, which already has logic to parse out the Bundl
     
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Navigator.bind(this);
+        MyActivityNavigator.bind(this);
     }
  }
  ```
