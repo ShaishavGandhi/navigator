@@ -17,6 +17,8 @@
             </intent-filter>
         </activity>
         <activity android:name="com.shaishavgandhi.navigator.sample.DetailActivity" />
+
+        <activity android:name="com.shaishavgandhi.navigator.sample.SampleActivity"/>
     </application>
 
 </manifest>

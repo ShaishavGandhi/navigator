@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.shaishavgandhi.navigator.Extra;
 
-import static com.shaishavgandhi.navigator.sample.SampleActivityNavigatorExtensionsKt.bind;
 
 
 public class SampleActivity extends AppCompatActivity {
@@ -16,6 +15,6 @@ public class SampleActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        bind(this);
+        SampleActivityNavigator.bind(this);
     }
 }
