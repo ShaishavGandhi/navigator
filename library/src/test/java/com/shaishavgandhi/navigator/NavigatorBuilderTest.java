@@ -46,6 +46,9 @@ public class NavigatorBuilderTest {
                 "  public MainFragmentBuilder(@NonNull final String name) {\n" +
                 "    this.name = name;\n" +
                 "  }\n" +
+                "  public static final MainFragmentBuilder builder(@NonNull final String name) {\n" +
+                "    return new MainFragmentBuilder(name);\n" +
+                "  }" +
                 "\n" +
                 "  /**\n" +
                 "   * Returns a {@link android.os.Bundle} built from all extras that have been set \n" +
@@ -127,6 +130,9 @@ public class NavigatorBuilderTest {
                 "    this.name = name;\n" +
                 "    return this;\n" +
                 "  }\n" +
+                "  public static final MainFragmentBuilder builder() {\n" +
+                "    return new MainFragmentBuilder();\n" +
+                "  }" +
                 "\n" +
                 "  /**\n" +
                 "   * Returns a {@link android.os.Bundle} built from all extras that have been set \n" +
@@ -205,6 +211,9 @@ public class NavigatorBuilderTest {
                 "  public MainFragmentBuilder(@NonNull final MainFragment.User name) {\n" +
                 "    this.name = name;\n" +
                 "  }\n" +
+                "  public static final MainFragmentBuilder builder(@NonNull final MainFragment.User name) {\n" +
+                "    return new MainFragmentBuilder(name);\n" +
+                "  }" +
                 "\n" +
                 "\n" +
                 "  /**\n" +
@@ -340,6 +349,12 @@ public class NavigatorBuilderTest {
                 "    this.userArray = userArray;\n" +
                 "    this.sparseArray = sparseArray;\n" +
                 "  }\n" +
+                "  public static final MainFragmentBuilder builder(@NonNull final MainFragment.User name,\n" +
+                "      @NonNull final ArrayList<MainFragment.User> users,\n" +
+                "      @NonNull final MainFragment.User[] userArray,\n" +
+                "      @NonNull final SparseArray<MainFragment.User> sparseArray) {\n" +
+                "    return new MainFragmentBuilder(name, users, userArray, sparseArray);\n" +
+                "  }" +
                 "\n" +
                 "\n" +
                 "  /**\n" +
@@ -428,6 +443,9 @@ public class NavigatorBuilderTest {
                 "  public MainActivityBuilder(@NonNull final String name) {\n" +
                 "    this.name = name;\n" +
                 "  }\n" +
+                "  public static final MainActivityBuilder builder(@NonNull final String name) {\n" +
+                "    return new MainActivityBuilder(name);\n" +
+                "  }" +
                 "\n" +
                 "  /**\n" +
                 "   * Terminating method in the builder. Passes the built bundle, \n" +

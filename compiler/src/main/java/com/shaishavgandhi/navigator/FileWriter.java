@@ -337,6 +337,7 @@ final class FileWriter {
 
         MethodSpec.Builder setExtrasBuilder = getExtrasSetterMethod(builderClass);
 
+        builder.addMethod(prepareMethodBuilder.build());
         if (isActivity(activity)) {
             // Add activity specific methods
             builder.addMethod(startActivityBuilder.build());
@@ -609,8 +610,7 @@ final class FileWriter {
     }
 
     private MethodSpec.Builder getPrepareActivityMethod(ClassName activity, ClassName builderClass) {
-        MethodSpec.Builder prepareMethodBuilder = MethodSpec.methodBuilder("prepare" +
-                activity.simpleName());
+        MethodSpec.Builder prepareMethodBuilder = MethodSpec.methodBuilder("builder");
         prepareMethodBuilder.addModifiers(Modifier.STATIC, Modifier.FINAL, Modifier.PUBLIC);
         prepareMethodBuilder.returns(builderClass);
         return prepareMethodBuilder;
