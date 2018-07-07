@@ -108,7 +108,7 @@ public final class DetailActivity extends Activity {
 public final class MainActivity extends Activity {
   
   protected void openDetailActivity() {
-    new DetailActivityBuilder(title, subtitle) // Required extras by ActivityC go in constructor
+    DetailActivityBuilder.builder(title, subtitle) // Required extras by ActivityC go in static factory method
       .setSource(source) // optional extras
       .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK || Intent.FLAG_ACTIVITY_CLEAR_TASK)
       .start(this);
@@ -128,7 +128,7 @@ Navigator does support binding of arguments passed to the fragment as well as co
 #### Get arguments
 
 ```java
-Bundle arguments = new DetailFragmentBuilder(userList)
+Bundle arguments = DetailFragmentBuilder.builder(userList)
                 .setPoints(points)
                 .getBundle();
 
@@ -197,14 +197,14 @@ Navigator exposes most ways to start an activity.
 #### Start Activity For Result
 
 ```kotlin
-DetailActivityBuilder(users, source)
+DetailActivityBuilder.builder(users, source)
                .setPoints(points)
                .startForResult(activity, requestCode)
 ```
 
 #### Start Activity With Transition Bundle
 ```kotlin
-DetailActivityBuilder(users, source)
+DetailActivityBuilder.builder(users, source)
                .setPoints(points)
                .startWithExtras(activity, transitionBundle)
 ```
@@ -235,7 +235,7 @@ as `@Extra` in an existing class, which already has logic to parse out the Bundl
 In cases where you just want to use the type-safety and implicit contract of Navigator, you can easily use the builder to get the bundle created by Navigator
 
 ```java
-Bundle bundle = new DetailActivityBuilder(users, source)
+Bundle bundle = DetailActivityBuilder.builder(users, source)
                .setPoints(points)
                .getBundle();
 ```
