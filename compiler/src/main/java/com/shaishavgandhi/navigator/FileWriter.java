@@ -41,8 +41,6 @@ final class FileWriter {
     private static final ClassName ACTIVITY_CLASSNAME = ClassName.get("android.app", "Activity");
     private static final ClassName STRING_CLASS = ClassName.bestGuess("java.lang.String");
 
-    private static final String SERIALIZABLE = "Serializable";
-    private static final String PARCELABLE = "Parcelable";
     private static final String FLAGS = "flags";
     private static final String ACTION = "action";
 
@@ -168,12 +166,18 @@ final class FileWriter {
         return builder.build();
     }
 
+
+    /**
+     * Returns whether the given class is a Fragment or not.
+     *
+     * @param className Class of element annotated with {@link Extra}
+     * @return boolean
+     */
     private boolean isFragment(ClassName className) {
         TypeMirror currentClass = elementUtils.getTypeElement(className.toString()).asType();
         boolean isFragment = false;
         if (elementUtils.getTypeElement("android.support.v4.app.Fragment") != null) {
             TypeMirror supportFragment = elementUtils.getTypeElement("android.support.v4.app.Fragment").asType();
-            // TODO: Add support for androidx.fragment
             isFragment = typeUtils.isSubtype(currentClass, supportFragment);
         }
         if (elementUtils.getTypeElement("android.app.Fragment") != null && !isFragment) {
@@ -187,6 +191,12 @@ final class FileWriter {
         return isFragment;
     }
 
+    /**
+     * Returns whether the given class is an Activity or not.
+     *
+     * @param className Class of element annotated with {@link Extra}
+     * @return boolean
+     */
     private boolean isActivity(ClassName className) {
         if (elementUtils.getTypeElement("android.app.Activity") != null) {
             TypeMirror activity = elementUtils.getTypeElement("android.app.Activity").asType();
@@ -209,11 +219,27 @@ final class FileWriter {
         files.add(JavaFile.builder(className.packageName(), binderResolved).build());
     }
 
+    /**
+     * Get the `Binder` class of the given Activity/Fragment which is responsible
+     * for the binding logic of the `Bundle` to the `@Extra` . For example:
+     * MainActivity -> MainActivityBinder
+     *
+     * @param className Class of element annotated with {@link Extra}
+     * @return binder class
+     */
     private ClassName getBinderClass(ClassName className) {
         return ClassName.bestGuess(className.packageName() + "." + className.simpleName() +
                 "Binder");
     }
 
+    /**
+     * Get the `Builder` class of the given Activity/Fragment which is responsible
+     * for the builder logic and starting of the Activity. Given class `MainActivity`,
+     * builder would be `MainActivityBuilder`.
+     *
+     * @param className Class of element annotated with {@link Extra}
+     * @return builder class
+     */
     private ClassName getBuilderClass(ClassName className) {
         return ClassName.bestGuess(className.packageName() + "." + className.simpleName() +
                 "Builder");
@@ -245,14 +271,13 @@ final class FileWriter {
                 .addModifiers(Modifier.PUBLIC);
 
         // Set intent flags
-        MethodSpec.Builder flagBuilder = setFlagsMethod(builderClass);
+        MethodSpec setFlagsMethod = setFlagsMethod(builderClass);
 
         // Set action
-        MethodSpec.Builder setActionBuilder = setActionMethod(builderClass);
+        MethodSpec setActionMethod = setActionMethod(builderClass);
 
         // Static method to prepare activity
-        MethodSpec.Builder prepareMethodBuilder = getPrepareActivityMethod(activity,
-                builderClass);
+        MethodSpec.Builder prepareMethodBuilder = getPrepareActivityMethod(builderClass);
 
         // Bundle builder
         MethodSpec.Builder bundleBuilder = getExtrasBundle();
@@ -322,39 +347,45 @@ final class FileWriter {
         MethodSpec bundle  = bundleBuilder.build();
 
         // Start activity
-        MethodSpec.Builder startActivityBuilder = getStartActivityMethod(activity, bundle);
+        MethodSpec startActivityMethod = getStartActivityMethod(activity, bundle);
 
         // Start activity with extras
-        MethodSpec.Builder startActivityExtrasBuilder = getStartActivityWithExtras(activityName,
+        MethodSpec startActivityExtrasMethod = getStartActivityWithExtras(activityName,
                 bundle);
 
         // Start for result
-        MethodSpec.Builder startForResultBuilder = getStartForResultMethod(activityName, bundle);
+        MethodSpec startForResultMethod = getStartForResultMethod(activityName, bundle);
 
         // Start result with extras
-        MethodSpec.Builder startResultExtrasBuilder = getStartForResultWithExtras(activityName,
-                bundle);
+        MethodSpec startResultExtrasMethod = getStartForResultWithExtras(activityName, bundle);
 
-        MethodSpec.Builder setExtrasBuilder = getExtrasSetterMethod(builderClass);
+        MethodSpec setExtrasMethod = getExtrasSetterMethod(builderClass);
 
         builder.addMethod(prepareMethodBuilder.build());
         if (isActivity(activity)) {
             // Add activity specific methods
-            builder.addMethod(startActivityBuilder.build());
-            builder.addMethod(startForResultBuilder.build());
-            builder.addMethod(startResultExtrasBuilder.build());
-            builder.addMethod(startActivityExtrasBuilder.build());
-            builder.addMethod(flagBuilder.build());
-            builder.addMethod(setActionBuilder.build());
+            builder.addMethod(startActivityMethod);
+            builder.addMethod(startForResultMethod);
+            builder.addMethod(startResultExtrasMethod);
+            builder.addMethod(startActivityExtrasMethod);
+            builder.addMethod(setFlagsMethod);
+            builder.addMethod(setActionMethod);
         }
         builder.addMethod(bundle);
-        builder.addMethod(setExtrasBuilder.build());
+        builder.addMethod(setExtrasMethod);
         TypeSpec builderInnerClass = builder.addMethod(constructorBuilder.build()).build();
 
         JavaFile file = JavaFile.builder(activity.packageName(), builderInnerClass).build();
         files.add(file);
     }
 
+    /**
+     * Add static final key that is used to bind each extra
+     * from the bundle.
+     *
+     * @param element to be added
+     * @param builder `Builder` class
+     */
     private void addKeyToClass(Element element, TypeSpec.Builder builder) {
         NParameter extraName = getVariableKey(element);
 
@@ -395,7 +426,15 @@ final class FileWriter {
         return variable.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");
     }
 
-    private MethodSpec.Builder setFlagsMethod(ClassName builderClass) {
+    /**
+     * Returns a generated `setFlags` method that can be added to the
+     * `Builder` class. The method sets the given flags to the Intent
+     * that is used to start an Activity
+     *
+     * @param builderClass `Builder` class
+     * @return `setFlags` method
+     */
+    private MethodSpec setFlagsMethod(ClassName builderClass) {
         return MethodSpec.methodBuilder("setFlags")
                 // Add Javadoc
                 .addJavadoc(CodeBlock.builder()
@@ -409,10 +448,18 @@ final class FileWriter {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
                 .addStatement("this.$1L = $1L", FLAGS)
-                .addStatement("return this");
+                .addStatement("return this").build();
     }
 
-    private MethodSpec.Builder setActionMethod(ClassName builderClass) {
+    /**
+     * Returns generated method `setAction` that is added to the
+     * `Builder` class. Sets the given action to the Intent
+     * while starting the activity.
+     *
+     * @param builderClass `Builder` class
+     * @return `setAction` method
+     */
+    private MethodSpec setActionMethod(ClassName builderClass) {
         return MethodSpec.methodBuilder("setAction")
                 // Add Javadoc
                 .addJavadoc(CodeBlock.builder()
@@ -426,10 +473,18 @@ final class FileWriter {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
                 .addStatement("this.$1L = $1L", ACTION)
-                .addStatement("return this");
+                .addStatement("return this").build();
     }
 
-    private MethodSpec.Builder getExtrasSetterMethod(ClassName builderClass) {
+    /**
+     * Returns generated code for `setExtras` method that is added to
+     * the `Builder`. This appends the supplied `Bundle` with any
+     * extras that are added while starting the Activity.
+     *
+     * @param builderClass `Builder` class
+     * @return `setExtras` method
+     */
+    private MethodSpec getExtrasSetterMethod(ClassName builderClass) {
         return MethodSpec.methodBuilder("setExtras")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
@@ -448,9 +503,16 @@ final class FileWriter {
                 .addParameter(ParameterSpec.builder(BUNDLE_CLASSNAME, "extras")
                 .addModifiers(Modifier.FINAL).build())
                 .addStatement("this.$L = $L", "extras", "extras")
-                .addStatement("return this");
+                .addStatement("return this").build();
     }
 
+    /**
+     * Returns a partially generated `getBundle` method which is the
+     * central cog to the `Builder` class. All extras are added to
+     * the bundle in later part of the processing.
+     *
+     * @return partially generated `getExtras` method
+     */
     private MethodSpec.Builder getExtrasBundle() {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getBundle")
                 .addModifiers(Modifier.PUBLIC);
@@ -479,7 +541,15 @@ final class FileWriter {
         return methodBuilder;
     }
 
-    private MethodSpec.Builder getStartActivityMethod(ClassName activity, MethodSpec bundle) {
+    /**
+     * Returns the generated `startActivity` method which is added to the
+     * `Builder` class.
+     *
+     * @param activity which is being navigated to.
+     * @param bundle extras that are added to the `Intent`
+     * @return `startActivity` method
+     */
+    private MethodSpec getStartActivityMethod(ClassName activity, MethodSpec bundle) {
         final String parameterName = "context";
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("start")
                 .addModifiers(Modifier.PUBLIC)
@@ -504,10 +574,18 @@ final class FileWriter {
 
         // Start activity
         methodBuilder.addStatement("$L.startActivity($L)", parameterName, "intent");
-        return methodBuilder;
+        return methodBuilder.build();
     }
 
-    private MethodSpec.Builder getStartActivityWithExtras(String activityName, MethodSpec bundle) {
+    /**
+     * Generates the `startActivity` method with an overload for a `Bundle`
+     * which is added to the `Builder` class.
+     *
+     * @param activityName of Activity being navigated to.
+     * @param bundle that is added to the `Intent`
+     * @return `startActivity` method.
+     */
+    private MethodSpec getStartActivityWithExtras(String activityName, MethodSpec bundle) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startWithExtras")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(CONTEXT_CLASSNAME, "context")
@@ -536,9 +614,18 @@ final class FileWriter {
         addOptionalAttributes(methodBuilder);
         // Start activity
         methodBuilder.addStatement("$L.startActivity($L, $L)", "context", "intent", "extras");
-        return methodBuilder;
+        return methodBuilder.build();
     }
 
+    /**
+     * Adds a setter to the `Builder` class for the given element.
+     * Example: `setUserId(long id)`
+     *
+     * @param builder `Builder` class
+     * @param element to be added to the `Builder` as a setter.
+     * @param builderClass {@link ClassName} representation of `Builder` which is returned
+     *                                      to have a fluent API.
+     */
     private void addFieldToBuilder(TypeSpec.Builder builder, Element element, ClassName builderClass) {
         String variableName = element.getSimpleName().toString();
         MethodSpec.Builder setter = MethodSpec.methodBuilder("set" + capitalize(variableName))
@@ -551,7 +638,15 @@ final class FileWriter {
         builder.addMethod(setter.build());
     }
 
-    private MethodSpec.Builder getStartForResultMethod(String activityName, MethodSpec bundle) {
+    /**
+     * Generates the `startForResult` method which is added to
+     * the `Builder` class.
+     *
+     * @param activityName name of the Activity being started.
+     * @param bundle added to the `Intent`
+     * @return `startForResult` method.
+     */
+    private MethodSpec getStartForResultMethod(String activityName, MethodSpec bundle) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startForResult")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ACTIVITY_CLASSNAME, "activity")
@@ -576,10 +671,18 @@ final class FileWriter {
         // Start for result
         methodBuilder.addStatement("$L.startActivityForResult($L, $L)", "activity",
                 "intent", "requestCode");
-        return methodBuilder;
+        return methodBuilder.build();
     }
 
-    private MethodSpec.Builder getStartForResultWithExtras(String activityName, MethodSpec bundle) {
+    /**
+     * Generates the `startForResult` method with overload for a `Bundle`. This
+     * is added to the `Builder` class to start an Activity with a result.
+     *
+     * @param activityName name of Activity that is being started
+     * @param bundle that is added to Intent
+     * @return `startForResult` method
+     */
+    private MethodSpec getStartForResultWithExtras(String activityName, MethodSpec bundle) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startForResult")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ACTIVITY_CLASSNAME, "activity")
@@ -606,16 +709,29 @@ final class FileWriter {
         // Start activity for result
         methodBuilder.addStatement("$L.startActivityForResult($L, $L, $L)", "activity",
                 "intent", "requestCode", "extras");
-        return methodBuilder;
+        return methodBuilder.build();
     }
 
-    private MethodSpec.Builder getPrepareActivityMethod(ClassName activity, ClassName builderClass) {
+    /**
+     * Returns a partially generated static factory method that is added to the
+     * `Builder` for easy access. i.e `MainActivityBuilder.builder(args)`
+     *
+     * @param builderClass `Builder` returned for a chaining API
+     * @return Partially generated method that is appended later.
+     */
+    private MethodSpec.Builder getPrepareActivityMethod(ClassName builderClass) {
         MethodSpec.Builder prepareMethodBuilder = MethodSpec.methodBuilder("builder");
         prepareMethodBuilder.addModifiers(Modifier.STATIC, Modifier.FINAL, Modifier.PUBLIC);
         prepareMethodBuilder.returns(builderClass);
         return prepareMethodBuilder;
     }
 
+    /**
+     * Adds optional attributes like `setFlags` and `setAction`
+     * to the given builder.
+     *
+     * @param builder `Builder` class
+     */
     private void addOptionalAttributes(MethodSpec.Builder builder) {
         builder.beginControlFlow("if ($L != -1)", FLAGS);
         builder.addStatement("$L.setFlags($L)", "intent", FLAGS);
@@ -626,6 +742,14 @@ final class FileWriter {
         builder.endControlFlow();
     }
 
+    /**
+     * Get {@link ParameterSpec} from given element.
+     * Checks for nullability, types etc and returns
+     * the parameter.
+     *
+     * @param element to be converted to Parameter
+     * @return {@link ParameterSpec}
+     */
     private ParameterSpec getParameter(Element element) {
         TypeMirror typeMirror = element.asType();
         String name = element.getSimpleName().toString();
@@ -637,6 +761,14 @@ final class FileWriter {
         return parameterBuilder.build();
     }
 
+    /**
+     * Returns nullability annotation for given element.
+     * Checks for Jetbrains' {@link org.jetbrains.annotations.Nullable}
+     * as well as Android's {@link Nullable}.
+     *
+     * @param element annotated with {@link Extra}
+     * @return Nullability annotation
+     */
     @NonNull private AnnotationSpec getNullabilityFor(Element element) {
         // Check both Jetbrains and Android nullable annotations since
         // Kotlin nulls are annotated with Jetbrains @Nullable
@@ -649,6 +781,15 @@ final class FileWriter {
         }
     }
 
+    /**
+     * Returns the extra type name for given type.
+     * This method is useful in mapping from types
+     * like Parcelable, ParcelableArrayList etc. to
+     * the appropriate bundle type.
+     *
+     * @param typeMirror of the element
+     * @return type
+     */
     private String getExtraTypeName(TypeMirror typeMirror) {
         String result = typeMapper.get(typeMirror.toString());
         if (result == null) {
@@ -703,6 +844,7 @@ final class FileWriter {
         return typeUtils.isAssignable(typeMirror, elementUtils.getTypeElement("java.io.Serializable")
                 .asType());
     }
+
 
     NParameter getVariableKey(Element element) {
         if (element.getAnnotation(Extra.class).key().isEmpty()) {
