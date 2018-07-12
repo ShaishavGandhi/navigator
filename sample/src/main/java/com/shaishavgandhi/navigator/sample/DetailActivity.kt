@@ -17,6 +17,7 @@ class DetailActivity : AppCompatActivity() {
     @Extra var points: Points? = null
     @Extra var userId: Long? = null
     @Extra var source: String? = null
+    @Extra var intArray: IntArray? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

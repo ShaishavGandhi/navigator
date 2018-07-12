@@ -623,6 +623,61 @@ public class NavigatorBinderTest {
                 .hasSourceEquivalentTo(expected);
     }
 
+    @Test public void testSimpleClassWithObjectTypes() {
+        String className = "MainFragment";
+
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString(getName(className), ""
+                + "package com.shaishavgandhi.sampleapp.test;\n"
+                + "\n"
+                + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import android.app.Fragment;\n"
+                + "import java.lang.Long;\n"
+
+                + "import android.support.annotation.Nullable;"
+                + "\n"
+                + "public class MainFragment extends Fragment {\n"
+                + " @Extra\n"
+                + " Long points = -1L;\n"
+                + " @Extra\n"
+                + " Integer javaInt = -1;\n"
+                + " @Extra\n"
+                + " Double javaDouble = 1.0;\n"
+                +"}\n");
+
+        JavaFileObject expected = JavaFileObjects.forSourceString("MainFragmentBinder", ""
+                + "package com.shaishavgandhi.sampleapp.test;\n"
+                + "\n"
+                + "import android.os.Bundle;\n"
+                + "import java.lang.Double;\n"
+                + "import java.lang.Integer;\n"
+                + "import java.lang.Long;\n"
+                + "\n"
+                + "public final class MainFragmentBinder {\n"
+                + "  public static final void bind(MainFragment binder) {\n"
+                + "    Bundle bundle = binder.getArguments();\n"
+                + "    if (bundle != null) {\n"
+                + "      if (bundle.containsKey(MainFragmentBuilder.EXTRA_POINTS)) {\n"
+                + "        Long points = bundle.getLong(MainFragmentBuilder.EXTRA_POINTS);\n"
+                + "        binder.points = points;\n"
+                + "      }\n"
+                + "      if (bundle.containsKey(MainFragmentBuilder.EXTRA_JAVA_INT)) {\n"
+                + "        Integer javaInt = bundle.getInt(MainFragmentBuilder.EXTRA_JAVA_INT);\n"
+                + "        binder.javaInt = javaInt;\n"
+                + "      }\n"
+                + "      if (bundle.containsKey(MainFragmentBuilder.EXTRA_JAVA_DOUBLE)) {\n"
+                + "        Double javaDouble = bundle.getDouble(MainFragmentBuilder.EXTRA_JAVA_DOUBLE);\n"
+                + "        binder.javaDouble = javaDouble;\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
+
+        Compilation compilation = Compiler.javac().withProcessors(new NavigatorProcessor()).compile(javaFileObject);
+        assertThat(compilation).succeeded();
+        assertThat(compilation).generatedSourceFile("com.shaishavgandhi.sampleapp.test.MainFragmentBinder")
+                .hasSourceEquivalentTo(expected);
+    }
+
     @Test public void testSimpleClassWithSetters() {
         String className = "MainFragment";
         String customKey = "com.navigator.something-weird";

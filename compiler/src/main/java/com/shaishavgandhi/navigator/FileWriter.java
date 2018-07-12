@@ -62,10 +62,13 @@ final class FileWriter {
         put("java.lang.Float","Float");
         put("float[]", "FloatArray");
         put("byte", "Byte");
+        put("java.lang.Byte", "Byte");
         put("byte[]", "ByteArray");
         put("short", "Short");
+        put("java.lang.Short", "Short");
         put("short[]", "ShortArray");
         put("char", "Char");
+        put("java.lang.Character", "Char");
         put("char[]", "CharArray");
         put("java.lang.CharSequence", "CharSequence");
         put("java.lang.CharSequence[]", "CharSequenceArray");
