@@ -3,6 +3,9 @@
 
 ![CircleCI branch](https://img.shields.io/circleci/project/github/shaishavgandhi05/navigator/master.svg)
 
+<img src="assets/navigator-logo.png" width="275px"/>
+
+
 
 Utility library that generates activity navigation boilerplate for you, along with all it's bindings. 
 
@@ -243,6 +246,11 @@ Bundle bundle = DetailActivityBuilder.builder(users, source)
 ## Future Plans
 
 * Generate Kotlin code to hook into Kotlin language features like optional parameters, null types etc. 
+
+## Thanks
+
+* [Baran Pirincal](https://github.com/baranpirincal) for the excellent logo.
+* [Jake Wharton](https://github.com/JakeWharton) and [ButterKnife](https://github.com/JakeWharton/butterknife) for the annotation processing references. 
 
 ## License
     
