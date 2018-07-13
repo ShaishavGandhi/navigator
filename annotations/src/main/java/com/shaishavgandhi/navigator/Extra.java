@@ -15,7 +15,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  *
  * Fields annotated with {@link Extra} are non-null by default and will
  * be added to the static factory method of the `Builder`. If the field
- * is optional, then you should use the {@link android.support.Nullable}
+ * is optional, then you should use the android.support.Nullable
  * annotation (if you're using Java) or make the field nullable in Kotlin
  * with the "?".
  *
