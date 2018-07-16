@@ -243,9 +243,44 @@ Bundle bundle = DetailActivityBuilder.builder(users, source)
                .getBundle();
 ```
 
+## Add Ons
+
+If you're using Kotlin, [BundleX](https://github.com/shaishavgandhi05/BundleX) is a useful add-on to Navigator. [BundleX](https://github.com/shaishavgandhi05/BundleX) generates extensions on the `Bundle` using the same `@Extra` annotation. 
+
+```kotlin
+class MyActivity: AppcompatActivity {
+  
+  @Extra lateinit var message: String
+  
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
+        
+    val bundle = intent.extras
+    message = bundle.getMessage(defaultValue = "hello world") // Generated extension
+  }
+  
+  fun startActivity(message: String) {
+    val bundle = Bundle()
+    bundle.putMessage(message) // Use generated setter 
+    // Start activity with bundle
+  }
+    
+}
+```
+
+Simply add to your build.gradle
+```groovy
+dependencies {
+  kapt 'com.shaishavgandhi:bundlex-compiler:x.y.z'
+}
+```
+
+
 ## Future Plans
 
 * Generate Kotlin code to hook into Kotlin language features like optional parameters, null types etc. 
+
 
 ## Thanks
 
