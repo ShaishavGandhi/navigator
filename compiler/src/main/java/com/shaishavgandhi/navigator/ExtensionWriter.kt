@@ -34,13 +34,13 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
         for (entry in annotationsPerClass.entries) {
             val className = entry.key.kotlinClass
 
-            val extensionFileName = "${className.simpleName()}NavigatorExtensions"
-            val fileBuilder = FileSpec.builder(className.packageName(), extensionFileName)
+            val extensionFileName = "${className.simpleName}NavigatorExtensions"
+            val fileBuilder = FileSpec.builder(className.packageName, extensionFileName)
 
-            val classBinder = ClassName.bestGuess("${className.packageName()}.${className.simpleName()}Binder")
+            val classBinder = ClassName.bestGuess("${className.packageName}.${className.simpleName}Binder")
 
             fileBuilder.addAnnotation(AnnotationSpec.builder(JvmName::class)
-                .addMember("name = \"%L\"", "${className.simpleName()}Navigator")
+                .addMember("name = \"%L\"", "${className.simpleName}Navigator")
                 .build())
             // Static method to add to Navigator
             fileBuilder.addFunction(FunSpec.builder("bind")
