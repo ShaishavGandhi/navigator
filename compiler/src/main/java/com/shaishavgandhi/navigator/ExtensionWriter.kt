@@ -42,6 +42,7 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
             fileBuilder.addAnnotation(AnnotationSpec.builder(JvmName::class)
                 .addMember("name = \"%L\"", "${className.simpleName}Navigator")
                 .build())
+
             // Static method to add to Navigator
             fileBuilder.addFunction(FunSpec.builder("bind")
                 .receiver(navigatorClass)
@@ -52,6 +53,12 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
             // Extension on the activity/fragment
             fileBuilder.addFunction(FunSpec.builder("bind")
                 .receiver(className)
+                .addKdoc(CodeBlock.builder()
+                    .addStatement("Extension method on [$className] that binds the variables ")
+                    .addStatement("in the class annotated with [com.shaishavgandhi.navigator.Extra]")
+                    .add("\n")
+                    .addStatement("@see $classBinder")
+                    .build())
                 .addStatement("%T.bind(this)", classBinder)
                 .build())
 
