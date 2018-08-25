@@ -22,7 +22,7 @@ private const val ARG_PARAM2 = "param2"
  */
 class DetailFragment : Fragment() {
 
-    @Extra var user: User? = null
+    @Extra lateinit var user: User
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

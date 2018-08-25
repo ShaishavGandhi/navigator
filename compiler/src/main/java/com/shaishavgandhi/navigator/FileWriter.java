@@ -44,6 +44,9 @@ final class FileWriter {
     private static final String FLAGS = "flags";
     private static final String ACTION = "action";
 
+    private List<ParameterSpec> constructorParams = new ArrayList<>();
+    private List<ClassBuilder> classBuilders = new ArrayList<>();
+
     private HashMap<String, String> typeMapper = new HashMap<String, String>(){{
         put("java.lang.String", "String");
         put("java.lang.String[]", "StringArray");
@@ -103,8 +106,8 @@ final class FileWriter {
             ClassName className = item.getKey().getJavaClass();
             LinkedHashSet<Element> annotations = item.getValue();
 
-            writeBinder(className, annotations);
-            writeBuilder(className, annotations);
+            writeBinder(item.getKey(), annotations);
+            writeBuilder(item.getKey(), annotations);
         }
     }
 
@@ -209,7 +212,8 @@ final class FileWriter {
         return false;
     }
 
-    private void writeBinder(ClassName className, LinkedHashSet<Element> annotations) {
+    private void writeBinder(QualifiedClassName qualifiedClassName, LinkedHashSet<Element> annotations) {
+        ClassName className = qualifiedClassName.getJavaClass();
         ClassName binderClass = getBinderClass(className);
 
         TypeSpec.Builder binder = TypeSpec.classBuilder(binderClass.simpleName())
@@ -248,7 +252,8 @@ final class FileWriter {
                 "Builder");
     }
 
-    private void writeBuilder(ClassName activity, LinkedHashSet<Element> elements) {
+    private void writeBuilder(QualifiedClassName qualifiedClassName, LinkedHashSet<Element> elements) {
+        ClassName activity = qualifiedClassName.getJavaClass();
         String activityName = activity.simpleName();
         TypeSpec.Builder builder = TypeSpec.classBuilder(activityName + "Builder")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
@@ -314,6 +319,7 @@ final class FileWriter {
 
                 // Add to static prepare method
                 prepareMethodBuilder.addParameter(parameter);
+                constructorParams.add(parameter);
 
                 // Append to return statement
                 returnStatement.append(parameter.name);
@@ -334,6 +340,9 @@ final class FileWriter {
                         parameter.name);
             }
         }
+
+        classBuilders.add(new ClassBuilder(qualifiedClassName, constructorParams));
+        constructorParams = new ArrayList<>();
 
         // Sanitize return statement
         if (returnStatement.charAt(returnStatement.length() - 1) == ' ') {
@@ -861,4 +870,7 @@ final class FileWriter {
         return files;
     }
 
+    public List<ClassBuilder> getClassBuilders() {
+        return classBuilders;
+    }
 }

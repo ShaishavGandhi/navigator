@@ -79,7 +79,7 @@ public final class NavigatorProcessor extends AbstractProcessor {
 
         FileWriter writer = new FileWriter(typeUtils, elementUtils, annotationsPerClass, messager);
         writer.writeFiles();
-        extensionWriter.generateExtensions(annotationsPerClass);
+        extensionWriter.generateExtensions(annotationsPerClass, writer.getClassBuilders());
 
         List<JavaFile> files = writer.getFiles();
         for (JavaFile file: files) {
@@ -94,7 +94,7 @@ public final class NavigatorProcessor extends AbstractProcessor {
         return true;
     }
 
-    private QualifiedClassName getClassName(Element element) {
+    private static QualifiedClassName getClassName(Element element) {
         String classname = element.getEnclosingElement().getSimpleName().toString();
         String packageName;
         Element enclosing = element;
