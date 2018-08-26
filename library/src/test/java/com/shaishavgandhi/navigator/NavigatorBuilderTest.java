@@ -43,7 +43,7 @@ public class NavigatorBuilderTest {
                 "  @NonNull\n" +
                 "  private String name;\n" +
                 "\n" +
-                "  public MainFragmentBuilder(@NonNull final String name) {\n" +
+                "  private MainFragmentBuilder(@NonNull final String name) {\n" +
                 "    this.name = name;\n" +
                 "  }\n" +
                 "  public static final MainFragmentBuilder builder(@NonNull final String name) {\n" +
@@ -123,7 +123,7 @@ public class NavigatorBuilderTest {
                 "  @Nullable\n" +
                 "  private String name;\n" +
                 "\n" +
-                "  public MainFragmentBuilder() {\n" +
+                "  private MainFragmentBuilder() {\n" +
                 "  }\n" +
                 "\n" +
                 "  public final MainFragmentBuilder setName(String name) {\n" +
@@ -208,7 +208,7 @@ public class NavigatorBuilderTest {
                 "  @NonNull\n" +
                 "  private MainFragment.User name;\n" +
                 "\n" +
-                "  public MainFragmentBuilder(@NonNull final MainFragment.User name) {\n" +
+                "  private MainFragmentBuilder(@NonNull final MainFragment.User name) {\n" +
                 "    this.name = name;\n" +
                 "  }\n" +
                 "  public static final MainFragmentBuilder builder(@NonNull final MainFragment.User name) {\n" +
@@ -340,7 +340,7 @@ public class NavigatorBuilderTest {
                 "  @NonNull\n" +
                 "  private SparseArray<MainFragment.User> sparseArray;\n" +
                 "\n" +
-                "  public MainFragmentBuilder(@NonNull final MainFragment.User name, \n" +
+                "  private MainFragmentBuilder(@NonNull final MainFragment.User name, \n" +
                 "      @NonNull final ArrayList<MainFragment.User> users, @NonNull final " +
                 "MainFragment.User[] userArray, @NonNull final SparseArray<MainFragment.User> " +
                 "sparseArray) {\n" +
@@ -440,7 +440,7 @@ public class NavigatorBuilderTest {
                 "  @NonNull\n" +
                 "  private String name;\n" +
                 "\n" +
-                "  public MainActivityBuilder(@NonNull final String name) {\n" +
+                "  private MainActivityBuilder(@NonNull final String name) {\n" +
                 "    this.name = name;\n" +
                 "  }\n" +
                 "  public static final MainActivityBuilder builder(@NonNull final String name) {\n" +
