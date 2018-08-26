@@ -276,7 +276,7 @@ final class FileWriter {
 
         // Constructor
         MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PUBLIC);
+                .addModifiers(Modifier.PRIVATE);
 
         // Set intent flags
         MethodSpec setFlagsMethod = setFlagsMethod(builderClass);

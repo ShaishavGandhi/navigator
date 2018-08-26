@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
             val users = arrayListOf(User(name = "Shaishav", age = 10),
                     User("Dimple", 13))
 
-            DetailActivityBuilder()
+            DetailActivityBuilder.builder()
                 .setUserList(users)
                 .setSource("source")
                 .setUserId(100)
