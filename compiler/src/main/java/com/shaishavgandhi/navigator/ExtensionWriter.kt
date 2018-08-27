@@ -128,7 +128,7 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
                 .build())
 
             // Replacement for static constructor
-            val prepareFunctionBuilder = FunSpec.builder("prepare${className.simpleName}")
+            val prepareFunctionBuilder = FunSpec.builder("${className.simpleName.decapitalize()}Builder")
                 .receiver(anyClass)
                 .returns(ClassName.bestGuess("${className.simpleName}Builder"))
 
