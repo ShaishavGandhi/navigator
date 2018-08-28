@@ -12,6 +12,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.kotlinpoet.ParameterizedTypeName;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -81,7 +82,6 @@ final class FileWriter {
         put("boolean", "Boolean");
         put("boolean[]", "BooleanArray");
         put("java.lang.Boolean", "Boolean");
-        put("java.lang.Boolean[]", "BooleanArray");
         put("android.os.Parcelable", "Parcelable");
         put("android.os.Parcelable[]", "ParcelableArray");
         put("java.util.ArrayList<android.os.Parcelable>", "ParcelableArrayList");
@@ -147,7 +147,7 @@ final class FileWriter {
                     messager.printMessage(Diagnostic.Kind.ERROR, element.getSimpleName().toString() + " cannot be put in Bundle");
                 }
             } else {
-                if (extraName.equals("ParcelableArray")) {
+                if (extraName.equals("ParcelableArray") || extraName.equals("Serializable")) {
                     // Add extra casting. TODO: Refactor this to be more generic
                     builder.addStatement("$T $L = ($T) bundle.get" + extraName + "($L)", name,
                             varName, name, varKey);
@@ -171,7 +171,6 @@ final class FileWriter {
 
         return builder.build();
     }
-
 
     /**
      * Returns whether the given class is a Fragment or not.
@@ -818,17 +817,17 @@ final class FileWriter {
         return result;
     }
 
-    private boolean isParcelable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
+    public static boolean isParcelable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
         return typeUtils.isAssignable(typeMirror, elementUtils.getTypeElement("android.os.Parcelable")
                 .asType());
     }
 
-    private boolean isParcelableArray(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
+    public static boolean isParcelableArray(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
         return typeUtils.isAssignable(typeMirror, typeUtils.getArrayType(elementUtils
                 .getTypeElement("android.os.Parcelable").asType()));
     }
 
-    private boolean isParcelableList(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
+    public static boolean isParcelableList(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
         DeclaredType type = typeUtils.getDeclaredType(elementUtils.getTypeElement("java.util" +
                         ".ArrayList"), elementUtils.getTypeElement("android.os.Parcelable").asType());
         if (typeUtils.isAssignable(typeUtils.erasure(typeMirror), type)) {
@@ -840,7 +839,7 @@ final class FileWriter {
         return false;
     }
 
-    private boolean isSparseParcelableArrayList(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
+    public static boolean isSparseParcelableArrayList(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
         DeclaredType type = typeUtils.getDeclaredType(elementUtils.getTypeElement("android.util.SparseArray"),
                 elementUtils.getTypeElement("android.os.Parcelable").asType());
         if (typeUtils.isAssignable(typeUtils.erasure(typeMirror), type)) {
@@ -852,7 +851,7 @@ final class FileWriter {
         return false;
     }
 
-    private boolean isSerializable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
+    public static boolean isSerializable(Types typeUtils, Elements elementUtils, TypeMirror typeMirror) {
         return typeUtils.isAssignable(typeMirror, elementUtils.getTypeElement("java.io.Serializable")
                 .asType());
     }

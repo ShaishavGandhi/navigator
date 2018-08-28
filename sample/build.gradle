@@ -36,6 +36,9 @@ dependencies {
 
     implementation project(":library")
     kapt project(":compiler")
+    kaptTest project(":compiler")
+    testImplementation project(":library")
+
 
 //    implementation 'com.shaishavgandhi.navigator:navigator:0.1.1'
 //    kapt 'com.shaishavgandhi.navigator:navigator-compiler:0.1.1'
