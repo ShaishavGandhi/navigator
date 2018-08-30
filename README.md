@@ -193,6 +193,24 @@ public class DetailActivity extends Activity {
 }
 ```
 
+#### Creating Builder
+
+You can also use a handy Kotlin extension to get rid of the static factory builders. If you're preparing `Bundle` for DetailFragment, you can do:
+```kotlin
+class MainFragment: Fragment() {
+  
+  fun showDetail(post: Post, authors: List<Author>?) {
+    val bundle = detailFragmentBuilder(post)
+                   .setAuthors(authors)
+                   
+    val fragment = DetailFragment()
+    fragment.setArguments(bundle)
+    replaceFragment(fragment)
+  }
+
+}
+```
+
 ## Advanced Usage
 
 Navigator exposes most ways to start an activity. 
@@ -276,10 +294,6 @@ dependencies {
 }
 ```
 
-
-## Future Plans
-
-* Generate Kotlin code to hook into Kotlin language features like optional parameters, null types etc. 
 
 
 ## Thanks
