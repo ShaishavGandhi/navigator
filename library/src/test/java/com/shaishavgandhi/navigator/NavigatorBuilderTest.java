@@ -34,6 +34,7 @@ public class NavigatorBuilderTest {
                 "\n" +
                 "import android.os.Bundle;\n" +
                 "import android.support.annotation.NonNull;\n" +
+                "import android.support.annotation.Nullable;\n" +
                 "import java.lang.String;\n" +
                 "\n" +
                 "public final class MainFragmentBuilder {\n" +
@@ -64,6 +65,7 @@ public class NavigatorBuilderTest {
                 "   * build your bundle and call this method to get extras that can be set as \n" +
                 "   * arguments to your {@linkplain android.support.v4.app.Fragment}.\n" +
                 "   */\n" +
+                "  @NonNull\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
                 "    bundle.putString(EXTRA_NAME, name);\n" +
@@ -83,7 +85,7 @@ public class NavigatorBuilderTest {
                 "   * @param extras that will be appended to the current bundle\n" +
                 "   * @return Builder class for chaining other methods\n" +
                 "   */\n" +
-                "  public MainFragmentBuilder setExtras(final Bundle extras) {\n" +
+                "  public MainFragmentBuilder setExtras(@Nullable final Bundle extras) {\n" +
                 "    this.extras = extras;\n" +
                 "    return this;\n" +
                 "  }\n" +
@@ -104,6 +106,7 @@ public class NavigatorBuilderTest {
                 + "import com.shaishavgandhi.navigator.Extra;\n"
                 + "import android.app.Fragment;\n"
                 + "import android.support.annotation.Nullable;\n"
+                + "import android.support.annotation.NonNull;\n"
                 + "\n"
                 + "public class MainFragment extends Fragment {\n"
                 + " @Extra @Nullable public String name;\n"
@@ -113,6 +116,7 @@ public class NavigatorBuilderTest {
                 + "package com.shaishavgandhi.sampleapp.test;\n" +
                 "\n" +
                 "import android.os.Bundle;\n" +
+                "import android.support.annotation.NonNull;\n" +
                 "import android.support.annotation.Nullable;\n" +
                 "import java.lang.String;\n" +
                 "\n" +
@@ -148,6 +152,7 @@ public class NavigatorBuilderTest {
                 "   * build your bundle and call this method to get extras that can be set as \n" +
                 "   * arguments to your {@linkplain android.support.v4.app.Fragment}.\n" +
                 "   */\n" +
+                "  @NonNull\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
                 "    bundle.putString(EXTRA_NAME, name);\n" +
@@ -167,7 +172,7 @@ public class NavigatorBuilderTest {
                 "   * @param extras that will be appended to the current bundle\n" +
                 "   * @return Builder class for chaining other methods\n" +
                 "   */\n" +
-                "  public MainFragmentBuilder setExtras(final Bundle extras) {\n" +
+                "  public MainFragmentBuilder setExtras(@Nullable final Bundle extras) {\n" +
                 "    this.extras = extras;\n" +
                 "    return this;\n" +
                 "  }\n" +
@@ -199,6 +204,7 @@ public class NavigatorBuilderTest {
                 "\n" +
                 "import android.os.Bundle;\n" +
                 "import android.support.annotation.NonNull;\n" +
+                "import android.support.annotation.Nullable;\n" +
                 "import java.lang.String;\n" +
                 "\n" +
                 "public final class MainFragmentBuilder {\n" +
@@ -230,6 +236,7 @@ public class NavigatorBuilderTest {
                 "   * build your bundle and call this method to get extras that can be set as \n" +
                 "   * arguments to your {@linkplain android.support.v4.app.Fragment}.\n" +
                 "   */\n" +
+                "  @NonNull\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
                 "    bundle.putSerializable(EXTRA_NAME, name);\n" +
@@ -249,7 +256,7 @@ public class NavigatorBuilderTest {
                 "   * @param extras that will be appended to the current bundle\n" +
                 "   * @return Builder class for chaining other methods\n" +
                 "   */\n" +
-                "  public MainFragmentBuilder setExtras(final Bundle extras) {\n" +
+                "  public MainFragmentBuilder setExtras(@Nullable final Bundle extras) {\n" +
                 "    this.extras = extras;\n" +
                 "    return this;\n" +
                 "  }\n" +
@@ -313,6 +320,7 @@ public class NavigatorBuilderTest {
                 "\n" +
                 "import android.os.Bundle;\n" +
                 "import android.support.annotation.NonNull;\n" +
+                "import android.support.annotation.Nullable;\n" +
                 "import android.util.SparseArray;\n" +
                 "import java.lang.String;\n" +
                 "import java.util.ArrayList;\n" +
@@ -371,6 +379,7 @@ public class NavigatorBuilderTest {
                 "   * build your bundle and call this method to get extras that can be set as \n" +
                 "   * arguments to your {@linkplain android.support.v4.app.Fragment}.\n" +
                 "   */\n" +
+                "  @NonNull\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
                 "    bundle.putParcelable(EXTRA_NAME, name);\n" +
@@ -393,7 +402,7 @@ public class NavigatorBuilderTest {
                 "   * @param extras that will be appended to the current bundle\n" +
                 "   * @return Builder class for chaining other methods\n" +
                 "   */\n" +
-                "  public MainFragmentBuilder setExtras(final Bundle extras) {\n" +
+                "  public MainFragmentBuilder setExtras(@Nullable final Bundle extras) {\n" +
                 "    this.extras = extras;\n" +
                 "    return this;\n" +
                 "  }\n" +
@@ -455,7 +464,7 @@ public class NavigatorBuilderTest {
                 "   * @see #getBundle\n" +
                 "   * @param context\n" +
                 "   */\n" +
-                "  public void start(Context context) {\n" +
+                "  public void start(@NonNull Context context) {\n" +
                 "    Intent intent = new Intent(context, MainActivity.class);\n" +
                 "    intent.putExtras(getBundle());\n" +
                 "    if (flags != -1) {\n" +
@@ -475,7 +484,7 @@ public class NavigatorBuilderTest {
                 "   * @param activity\n" +
                 "   * @param requestCode\n" +
                 "   */\n" +
-                "  public void startForResult(Activity activity, int requestCode) {\n" +
+                "  public void startForResult(@NonNull Activity activity, int requestCode) {\n" +
                 "    Intent intent = new Intent(activity, MainActivity.class);\n" +
                 "    intent.putExtras(getBundle());\n" +
                 "    if (flags != -1) {\n" +
@@ -495,7 +504,7 @@ public class NavigatorBuilderTest {
                 "   * @param activity\n" +
                 "   * @param requestCode\n" +
                 "   */\n" +
-                "  public void startForResult(Activity activity, int requestCode, @Nullable final Bundle extras) {\n" +
+                "  public void startForResult(@NonNull Activity activity, int requestCode, @Nullable final Bundle extras) {\n" +
                 "    Intent intent = new Intent(activity, MainActivity.class);\n" +
                 "    intent.putExtras(getBundle());\n" +
                 "    if (flags != -1) {\n" +
@@ -520,7 +529,7 @@ public class NavigatorBuilderTest {
                 "   * @param context\n" +
                 "   * @param extras\n" +
                 "   */\n" +
-                "  public void startWithExtras(Context context, Bundle extras) {\n" +
+                "  public void startWithExtras(@NonNull Context context, Bundle extras) {\n" +
                 "    Intent intent = new Intent(context, MainActivity.class);\n" +
                 "    intent.putExtras(getBundle());\n" +
                 "    if (flags != -1) {\n" +
@@ -570,6 +579,7 @@ public class NavigatorBuilderTest {
                 "   * build your bundle and call this method to get extras that can be set as \n" +
                 "   * arguments to your {@linkplain android.support.v4.app.Fragment}.\n" +
                 "   */\n" +
+                "  @NonNull\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
                 "    bundle.putString(EXTRA_NAME, name);\n" +
@@ -589,7 +599,7 @@ public class NavigatorBuilderTest {
                 "   * @param extras that will be appended to the current bundle\n" +
                 "   * @return Builder class for chaining other methods\n" +
                 "   */\n" +
-                "  public MainActivityBuilder setExtras(final Bundle extras) {\n" +
+                "  public MainActivityBuilder setExtras(@Nullable final Bundle extras) {\n" +
                 "    this.extras = extras;\n" +
                 "    return this;\n" +
                 "  }\n" +
