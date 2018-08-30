@@ -512,7 +512,9 @@ final class FileWriter {
                         .add("@return Builder class for chaining other methods\n")
                         .build())
                 .addParameter(ParameterSpec.builder(BUNDLE_CLASSNAME, "extras")
-                .addModifiers(Modifier.FINAL).build())
+                        .addAnnotation(Nullable.class)
+                        .addModifiers(Modifier.FINAL).build()
+                )
                 .addStatement("this.$L = $L", "extras", "extras")
                 .addStatement("return this").build();
     }
@@ -526,6 +528,7 @@ final class FileWriter {
      */
     private MethodSpec.Builder getExtrasBundle() {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getBundle")
+                .addAnnotation(NonNull.class)
                 .addModifiers(Modifier.PUBLIC);
         // Add javadoc
         methodBuilder.addJavadoc(CodeBlock.builder()
@@ -564,7 +567,9 @@ final class FileWriter {
         final String parameterName = "context";
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("start")
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(CONTEXT_CLASSNAME, parameterName);
+                .addParameter(ParameterSpec.builder(CONTEXT_CLASSNAME, parameterName)
+                        .addAnnotation(NonNull.class).build()
+                );
         methodBuilder.addStatement("$T intent = new $T($L, $T.class)", INTENT_CLASSNAME,
                 INTENT_CLASSNAME, parameterName, activity);
         // Add javadoc
@@ -599,7 +604,10 @@ final class FileWriter {
     private MethodSpec getStartActivityWithExtras(String activityName, MethodSpec bundle) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startWithExtras")
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(CONTEXT_CLASSNAME, "context")
+                .addParameter(ParameterSpec.builder(CONTEXT_CLASSNAME, "context")
+                        .addAnnotation(NonNull.class)
+                        .build()
+                )
                 .addParameter(BUNDLE_CLASSNAME, "extras");
         methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
                 INTENT_CLASSNAME, "context", activityName + ".class");
@@ -660,7 +668,9 @@ final class FileWriter {
     private MethodSpec getStartForResultMethod(String activityName, MethodSpec bundle) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startForResult")
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(ACTIVITY_CLASSNAME, "activity")
+                .addParameter(ParameterSpec.builder(ACTIVITY_CLASSNAME, "activity")
+                        .addAnnotation(NonNull.class)
+                        .build())
                 .addParameter(TypeName.INT, "requestCode");
         methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
                 INTENT_CLASSNAME, "activity", activityName + ".class");
@@ -696,7 +706,10 @@ final class FileWriter {
     private MethodSpec getStartForResultWithExtras(String activityName, MethodSpec bundle) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startForResult")
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(ACTIVITY_CLASSNAME, "activity")
+                .addParameter(ParameterSpec.builder(ACTIVITY_CLASSNAME, "activity")
+                        .addAnnotation(NonNull.class)
+                        .build()
+                )
                 .addParameter(TypeName.INT, "requestCode")
                 .addParameter(ParameterSpec.builder(BUNDLE_CLASSNAME, "extras", Modifier.FINAL)
                 .addAnnotation(Nullable.class).build());
