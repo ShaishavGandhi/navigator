@@ -357,18 +357,20 @@ final class FileWriter {
         bundleBuilder.addStatement("return bundle");
         MethodSpec bundle  = bundleBuilder.build();
 
+        // Destination intent
+        MethodSpec destinationIntentMethod = getDestinationIntentMethod(activityName, bundle);
+
         // Start activity
-        MethodSpec startActivityMethod = getStartActivityMethod(activity, bundle);
+        MethodSpec startActivityMethod = getStartActivityMethod(destinationIntentMethod);
 
         // Start activity with extras
-        MethodSpec startActivityExtrasMethod = getStartActivityWithExtras(activityName,
-                bundle);
+        MethodSpec startActivityExtrasMethod = getStartActivityWithExtras(destinationIntentMethod);
 
         // Start for result
-        MethodSpec startForResultMethod = getStartForResultMethod(activityName, bundle);
+        MethodSpec startForResultMethod = getStartForResultMethod(destinationIntentMethod);
 
         // Start result with extras
-        MethodSpec startResultExtrasMethod = getStartForResultWithExtras(activityName, bundle);
+        MethodSpec startResultExtrasMethod = getStartForResultWithExtras(destinationIntentMethod);
 
         MethodSpec setExtrasMethod = getExtrasSetterMethod(builderClass);
 
@@ -377,6 +379,7 @@ final class FileWriter {
             // Add activity specific methods
             builder.addMethod(startActivityMethod);
             builder.addMethod(startForResultMethod);
+            builder.addMethod(destinationIntentMethod);
             builder.addMethod(startResultExtrasMethod);
             builder.addMethod(startActivityExtrasMethod);
             builder.addMethod(setFlagsMethod);
@@ -559,19 +562,18 @@ final class FileWriter {
      * Returns the generated `startActivity` method which is added to the
      * `Builder` class.
      *
-     * @param activity which is being navigated to.
-     * @param bundle extras that are added to the `Intent`
+     * @param destinationIntent Intent to be started.
      * @return `startActivity` method
      */
-    private MethodSpec getStartActivityMethod(ClassName activity, MethodSpec bundle) {
+    private MethodSpec getStartActivityMethod(MethodSpec destinationIntent) {
         final String parameterName = "context";
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("start")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ParameterSpec.builder(CONTEXT_CLASSNAME, parameterName)
                         .addAnnotation(NonNull.class).build()
                 );
-        methodBuilder.addStatement("$T intent = new $T($L, $T.class)", INTENT_CLASSNAME,
-                INTENT_CLASSNAME, parameterName, activity);
+        methodBuilder.addStatement("$T intent = $N($L)", INTENT_CLASSNAME,
+                destinationIntent, "context");
         // Add javadoc
         methodBuilder.addJavadoc(CodeBlock.builder()
                 .add("Terminating method in the builder. Passes the built bundle, \n")
@@ -582,11 +584,6 @@ final class FileWriter {
                 .add("\n")
                 .add("@param $L\n", parameterName)
                 .build());
-        // Put extras
-        methodBuilder.addStatement("intent.putExtras($N())", bundle);
-
-        // Set flags if they exist
-        addOptionalAttributes(methodBuilder);
 
         // Start activity
         methodBuilder.addStatement("$L.startActivity($L)", parameterName, "intent");
@@ -597,11 +594,10 @@ final class FileWriter {
      * Generates the `startActivity` method with an overload for a `Bundle`
      * which is added to the `Builder` class.
      *
-     * @param activityName of Activity being navigated to.
-     * @param bundle that is added to the `Intent`
+     * @param destinationIntent the Intent to be started.
      * @return `startActivity` method.
      */
-    private MethodSpec getStartActivityWithExtras(String activityName, MethodSpec bundle) {
+    private MethodSpec getStartActivityWithExtras(MethodSpec destinationIntent) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startWithExtras")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ParameterSpec.builder(CONTEXT_CLASSNAME, "context")
@@ -609,8 +605,8 @@ final class FileWriter {
                         .build()
                 )
                 .addParameter(BUNDLE_CLASSNAME, "extras");
-        methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
-                INTENT_CLASSNAME, "context", activityName + ".class");
+        methodBuilder.addStatement("$T intent = $N($L)", INTENT_CLASSNAME,
+                destinationIntent, "context");
 
         // Add Javadoc
         methodBuilder.addJavadoc(CodeBlock.builder()
@@ -627,10 +623,7 @@ final class FileWriter {
                 .add("@param $L\n", "context")
                 .add("@param $L\n", "extras")
                 .build());
-        // Put extras
-        methodBuilder.addStatement("intent.putExtras($N())", bundle);
-        // Set flags if any
-        addOptionalAttributes(methodBuilder);
+
         // Start activity
         methodBuilder.addStatement("$L.startActivity($L, $L)", "context", "intent", "extras");
         return methodBuilder.build();
@@ -661,19 +654,18 @@ final class FileWriter {
      * Generates the `startForResult` method which is added to
      * the `Builder` class.
      *
-     * @param activityName name of the Activity being started.
-     * @param bundle added to the `Intent`
+     * @param destinationIntent the intent to start the Activity.
      * @return `startForResult` method.
      */
-    private MethodSpec getStartForResultMethod(String activityName, MethodSpec bundle) {
+    private MethodSpec getStartForResultMethod(MethodSpec destinationIntent) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startForResult")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ParameterSpec.builder(ACTIVITY_CLASSNAME, "activity")
                         .addAnnotation(NonNull.class)
                         .build())
                 .addParameter(TypeName.INT, "requestCode");
-        methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
-                INTENT_CLASSNAME, "activity", activityName + ".class");
+        methodBuilder.addStatement("$T intent = $N($L)", INTENT_CLASSNAME,
+                destinationIntent, "activity");
 
         // Add JavaDoc
         methodBuilder.addJavadoc(CodeBlock.builder()
@@ -684,14 +676,39 @@ final class FileWriter {
                 .add("@param $L\n", "activity")
                 .add("@param $L\n", "requestCode")
                 .build());
+        // Start for result
+        methodBuilder.addStatement("$L.startActivityForResult($L, $L)", "activity",
+                "intent", "requestCode");
+        return methodBuilder.build();
+    }
+
+    private MethodSpec getDestinationIntentMethod(String activityName, MethodSpec bundle) {
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getDestinationIntent")
+                .addModifiers(Modifier.PRIVATE)
+                .addAnnotation(NonNull.class)
+                .addParameter(ParameterSpec.builder(CONTEXT_CLASSNAME, "context")
+                        .addAnnotation(NonNull.class)
+                        .build()
+                ).returns(INTENT_CLASSNAME);
+
+        methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
+                INTENT_CLASSNAME, "context", activityName + ".class");
+
+        methodBuilder.addJavadoc(CodeBlock.builder()
+                .add("Returns the {@link android.content.Intent} that will be used to start the Activity.\n")
+                .add("\n")
+                .add("Sets optional fields like {@link flags}, {@link action} if they are supplied by\n")
+                .add("you in the builder methods.\n")
+                .add("\n")
+                .add("@param $L the context used in Intent.\n", "context")
+                .add("@return the constructed Intent\n")
+                .build());
 
         // Put extras
         methodBuilder.addStatement("intent.putExtras($N())", bundle);
         //Add flags if any
         addOptionalAttributes(methodBuilder);
-        // Start for result
-        methodBuilder.addStatement("$L.startActivityForResult($L, $L)", "activity",
-                "intent", "requestCode");
+        methodBuilder.addStatement("return intent");
         return methodBuilder.build();
     }
 
@@ -699,11 +716,10 @@ final class FileWriter {
      * Generates the `startForResult` method with overload for a `Bundle`. This
      * is added to the `Builder` class to start an Activity with a result.
      *
-     * @param activityName name of Activity that is being started
-     * @param bundle that is added to Intent
+     * @param destinationIntent the Intent to be started.
      * @return `startForResult` method
      */
-    private MethodSpec getStartForResultWithExtras(String activityName, MethodSpec bundle) {
+    private MethodSpec getStartForResultWithExtras(MethodSpec destinationIntent) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startForResult")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ParameterSpec.builder(ACTIVITY_CLASSNAME, "activity")
@@ -713,8 +729,8 @@ final class FileWriter {
                 .addParameter(TypeName.INT, "requestCode")
                 .addParameter(ParameterSpec.builder(BUNDLE_CLASSNAME, "extras", Modifier.FINAL)
                 .addAnnotation(Nullable.class).build());
-        methodBuilder.addStatement("$T intent = new $T($L, $L)", INTENT_CLASSNAME,
-                INTENT_CLASSNAME, "activity", activityName + ".class");
+        methodBuilder.addStatement("$T intent = $N($L)", INTENT_CLASSNAME,
+                destinationIntent, "activity");
 
         // Add JavaDoc
         methodBuilder.addJavadoc(CodeBlock.builder()
@@ -726,10 +742,6 @@ final class FileWriter {
                 .add("@param $L\n", "requestCode")
                 .build());
 
-        // Put extras
-        methodBuilder.addStatement("intent.putExtras($N())", bundle);
-        // Set flags
-        addOptionalAttributes(methodBuilder);
         // Start activity for result
         methodBuilder.addStatement("$L.startActivityForResult($L, $L, $L)", "activity",
                 "intent", "requestCode", "extras");
