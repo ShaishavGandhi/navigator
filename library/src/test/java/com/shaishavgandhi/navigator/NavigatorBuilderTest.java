@@ -465,14 +465,7 @@ public class NavigatorBuilderTest {
                 "   * @param context\n" +
                 "   */\n" +
                 "  public void start(@NonNull Context context) {\n" +
-                "    Intent intent = new Intent(context, MainActivity.class);\n" +
-                "    intent.putExtras(getBundle());\n" +
-                "    if (flags != -1) {\n" +
-                "      intent.setFlags(flags);\n" +
-                "    }\n" +
-                "    if (action != null) {\n" +
-                "      intent.setAction(action);\n" +
-                "    }\n" +
+                "    Intent intent = getDestinationIntent(context);\n" +
                 "    context.startActivity(intent);\n" +
                 "  }\n" +
                 "\n" +
@@ -485,7 +478,22 @@ public class NavigatorBuilderTest {
                 "   * @param requestCode\n" +
                 "   */\n" +
                 "  public void startForResult(@NonNull Activity activity, int requestCode) {\n" +
-                "    Intent intent = new Intent(activity, MainActivity.class);\n" +
+                "    Intent intent = getDestinationIntent(activity);\n" +
+                "    activity.startActivityForResult(intent, requestCode);\n" +
+                "  }\n" +
+                "\n" +
+                "  /**\n" +
+                "   * Returns the {@link android.content.Intent} that will be used to start the Activity.\n" +
+                "   *\n" +
+                "   * Sets optional fields like {@link flags}, {@link action} if they are supplied by\n" +
+                "   * you in the builder methods.\n" +
+                "   *\n" +
+                "   * @param context the context used in Intent.\n" +
+                "   * @return the constructed Intent\n" +
+                "   */\n" +
+                "  @NonNull\n" +
+                "  private Intent getDestinationIntent(@NonNull Context context) {\n" +
+                "    Intent intent = new Intent(context, MainActivity.class);\n" +
                 "    intent.putExtras(getBundle());\n" +
                 "    if (flags != -1) {\n" +
                 "      intent.setFlags(flags);\n" +
@@ -493,7 +501,7 @@ public class NavigatorBuilderTest {
                 "    if (action != null) {\n" +
                 "      intent.setAction(action);\n" +
                 "    }\n" +
-                "    activity.startActivityForResult(intent, requestCode);\n" +
+                "    return intent;\n" +
                 "  }\n" +
                 "\n" +
                 "  /**\n" +
@@ -505,14 +513,7 @@ public class NavigatorBuilderTest {
                 "   * @param requestCode\n" +
                 "   */\n" +
                 "  public void startForResult(@NonNull Activity activity, int requestCode, @Nullable final Bundle extras) {\n" +
-                "    Intent intent = new Intent(activity, MainActivity.class);\n" +
-                "    intent.putExtras(getBundle());\n" +
-                "    if (flags != -1) {\n" +
-                "      intent.setFlags(flags);\n" +
-                "    }\n" +
-                "    if (action != null) {\n" +
-                "      intent.setAction(action);\n" +
-                "    }\n" +
+                "    Intent intent = getDestinationIntent(activity);\n" +
                 "    activity.startActivityForResult(intent, requestCode, extras);\n" +
                 "  }\n" +
                 "\n" +
@@ -530,14 +531,7 @@ public class NavigatorBuilderTest {
                 "   * @param extras\n" +
                 "   */\n" +
                 "  public void startWithExtras(@NonNull Context context, Bundle extras) {\n" +
-                "    Intent intent = new Intent(context, MainActivity.class);\n" +
-                "    intent.putExtras(getBundle());\n" +
-                "    if (flags != -1) {\n" +
-                "      intent.setFlags(flags);\n" +
-                "    }\n" +
-                "    if (action != null) {\n" +
-                "      intent.setAction(action);\n" +
-                "    }\n" +
+                "    Intent intent = getDestinationIntent(context);\n" +
                 "    context.startActivity(intent, extras);\n" +
                 "  }\n" +
                 "\n" +
