@@ -435,6 +435,7 @@ public class NavigatorBuilderTest {
                 "import android.os.Bundle;\n" +
                 "import android.support.annotation.NonNull;\n" +
                 "import android.support.annotation.Nullable;\n" +
+                "import android.support.v4.app.Fragment;\n" +
                 "import java.lang.String;\n" +
                 "\n" +
                 "public final class MainActivityBuilder {\n" +
@@ -470,6 +471,19 @@ public class NavigatorBuilderTest {
                 "  }\n" +
                 "\n" +
                 "  /**\n" +
+                "   * Terminating method in the builder. Passes the built bundle, \n" +
+                "   * sets any {@link android.content.Intent} flags if any and starts the \n" +
+                "   * activity\n" +
+                "   *\n" +
+                "   * @see #getBundle\n" +
+                "   * @param fragment\n" +
+                "   */\n" +
+                "  public void start(@NonNull Fragment fragment) {\n" +
+                "    Intent intent = getDestinationIntent(fragment.getActivity());\n" +
+                "    fragment.startActivity(intent);\n" +
+                "  }\n" +
+                "\n" +
+                "  /**\n" +
                 "   * Terminating method in builder. Passes the built bundle, sets any \n" +
                 "   * {@link android.content.Intent} flags if any and starts the activity with \n" +
                 "   * the provided requestCode.\n" +
@@ -480,6 +494,19 @@ public class NavigatorBuilderTest {
                 "  public void startForResult(@NonNull Activity activity, int requestCode) {\n" +
                 "    Intent intent = getDestinationIntent(activity);\n" +
                 "    activity.startActivityForResult(intent, requestCode);\n" +
+                "  }\n" +
+                "\n" +
+                "  /**\n" +
+                "   * Terminating method in builder. Passes the built bundle, sets any \n" +
+                "   * {@link android.content.Intent} flags if any and starts the activity with \n" +
+                "   * the provided requestCode.\n" +
+                "   *\n" +
+                "   * @param fragment\n" +
+                "   * @param requestCode\n" +
+                "   */\n" +
+                "  public void startForResult(@NonNull Fragment fragment, int requestCode) {\n" +
+                "    Intent intent = getDestinationIntent(fragment.getActivity());\n" +
+                "    fragment.startActivityForResult(intent, requestCode);\n" +
                 "  }\n" +
                 "\n" +
                 "  /**\n" +
@@ -518,6 +545,20 @@ public class NavigatorBuilderTest {
                 "  }\n" +
                 "\n" +
                 "  /**\n" +
+                "   * Terminating method in builder. Passes the built bundle, sets any \n" +
+                "   * {@link android.content.Intent} flags if any and starts the activity with \n" +
+                "   * the provided requestCode and {@link android.os.Bundle extras}.\n" +
+                "   *\n" +
+                "   * @param fragment\n" +
+                "   * @param requestCode\n" +
+                "   */\n" +
+                "  public void startForResult(@NonNull Fragment fragment, int requestCode,\n" +
+                "      @Nullable final Bundle extras) {\n" +
+                "    Intent intent = getDestinationIntent(fragment.getActivity());\n" +
+                "    fragment.startActivityForResult(intent, requestCode, extras);\n" +
+                "  }\n" +
+                "\n" +
+                "  /**\n" +
                 "   * Terminating method in builder. Passes the built bundle, \n" +
                 "   * sets any {@link android.content.Intent} flags if any and additionally \n" +
                 "   * starts the activity with the provided {@link android.os.Bundle bundle}.\n" +
@@ -535,6 +576,24 @@ public class NavigatorBuilderTest {
                 "    context.startActivity(intent, extras);\n" +
                 "  }\n" +
                 "\n" +
+                "\n" +
+                "  /**\n" +
+                "   * Terminating method in builder. Passes the built bundle, \n" +
+                "   * sets any {@link android.content.Intent} flags if any and additionally \n" +
+                "   * starts the activity with the provided {@link android.os.Bundle bundle}.\n" +
+                "   *\n" +
+                "   * Example: When using Shared Element Transition or any kind of Activity \n" +
+                "   * transition, you can use this method to pass the {@link android.os.Bundle} \n" +
+                "   * created by {@link android.app.ActivityOptions}.\n" +
+                "   *\n" +
+                "   * @see #getBundle\n" +
+                "   * @param fragment\n" +
+                "   * @param extras\n" +
+                "   */\n" +
+                "  public void startWithExtras(@NonNull Fragment fragment, Bundle extras) {\n" +
+                "    Intent intent = getDestinationIntent(fragment.getActivity());\n" +
+                "    fragment.startActivity(intent, extras);\n" +
+                "  }" +
                 "  /**\n" +
                 "   * Set intent flags.\n" +
                 "   * For the correct flag values see: {@link android.content.Intent}\n" +
