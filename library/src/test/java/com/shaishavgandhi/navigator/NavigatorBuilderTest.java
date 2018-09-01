@@ -130,7 +130,7 @@ public class NavigatorBuilderTest {
                 "  private MainFragmentBuilder() {\n" +
                 "  }\n" +
                 "\n" +
-                "  public final MainFragmentBuilder setName(String name) {\n" +
+                "  public final MainFragmentBuilder setName(@Nullable String name) {\n" +
                 "    this.name = name;\n" +
                 "    return this;\n" +
                 "  }\n" +
@@ -420,10 +420,12 @@ public class NavigatorBuilderTest {
                 + "package com.shaishavgandhi.sampleapp.test;\n"
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import android.support.annotation.Nullable;\n"
                 + "import android.app.Activity;\n"
                 + "\n"
                 + "public class MainActivity extends Activity {\n"
                 + " @Extra public String name;\n"
+                + " @Extra @Nullable Integer age;\n"
                 +"}\n");
 
         JavaFileObject expected = JavaFileObjects.forSourceString("MainActivityBuilder", "" +
@@ -436,10 +438,13 @@ public class NavigatorBuilderTest {
                 "import android.support.annotation.NonNull;\n" +
                 "import android.support.annotation.Nullable;\n" +
                 "import android.support.v4.app.Fragment;\n" +
+                "import java.lang.Integer;\n" +
                 "import java.lang.String;\n" +
                 "\n" +
                 "public final class MainActivityBuilder {\n" +
                 "  public static final String EXTRA_NAME = \"name\";\n" +
+                "\n" +
+                "  public static final String EXTRA_AGE = \"age\";\n" +
                 "\n" +
                 "  private int flags = -1;\n" +
                 "\n" +
@@ -450,9 +455,17 @@ public class NavigatorBuilderTest {
                 "  @NonNull\n" +
                 "  private String name;\n" +
                 "\n" +
+                "  @Nullable\n" +
+                "  private Integer age;\n" +
+                "\n" +
                 "  private MainActivityBuilder(@NonNull final String name) {\n" +
                 "    this.name = name;\n" +
                 "  }\n" +
+                "  public final MainActivityBuilder setAge(@Nullable Integer age) {\n" +
+                "    this.age = age;\n" +
+                "    return this;\n" +
+                "  }" +
+                "\n" +
                 "  public static final MainActivityBuilder builder(@NonNull final String name) {\n" +
                 "    return new MainActivityBuilder(name);\n" +
                 "  }" +
@@ -636,6 +649,7 @@ public class NavigatorBuilderTest {
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
                 "    bundle.putString(EXTRA_NAME, name);\n" +
+                "    bundle.putInt(EXTRA_AGE, age);\n" +
                 "    if (extras != null) {\n" +
                 "      bundle.putAll(extras);\n" +
                 "    }\n" +

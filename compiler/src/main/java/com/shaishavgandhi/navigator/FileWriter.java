@@ -669,7 +669,9 @@ final class FileWriter {
         String variableName = element.getSimpleName().toString();
         MethodSpec.Builder setter = MethodSpec.methodBuilder("set" + capitalize(variableName))
                 .addModifiers(Modifier.FINAL, Modifier.PUBLIC)
-                .addParameter(TypeName.get(element.asType()), variableName)
+                .addParameter(ParameterSpec.builder(TypeName.get(element.asType()), variableName)
+                        .addAnnotation(Nullable.class)
+                        .build())
                 .addStatement("this.$L = $L", variableName, variableName)
                 .returns(builderClass)
                 .addStatement("return this");
