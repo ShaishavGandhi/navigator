@@ -9,8 +9,6 @@ import java.util.LinkedHashSet
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Element
 import javax.lang.model.type.DeclaredType
-import javax.lang.model.type.TypeMirror
-import javax.tools.Diagnostic
 
 class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) {
 
@@ -179,7 +177,14 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
                     kotlinMapper[param.type.toString()]!! else ClassName.bestGuess(param.type.toString())
 
                 // Add as a parameter.
-                prepareFunctionBuilder.addParameter(ParameterSpec.builder(param.name, returnType).build())
+
+                val elementAnnotations = param.annotations
+                    .map { it.toKPoet() }
+                    .filter { !it.type.toString().contains("NonNull") }
+
+                prepareFunctionBuilder.addParameter(ParameterSpec.builder(param.name, returnType)
+                    .addAnnotations(elementAnnotations)
+                    .build())
                 // Add to return statement.
                 returnBuilder.append("${param.name}, ")
             }

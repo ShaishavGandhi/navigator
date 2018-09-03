@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.Messager;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.DeclaredType;
@@ -302,15 +303,17 @@ final class FileWriter {
             // Add as field parameter
             String name = element.getSimpleName().toString();
             AnnotationSpec nullability = getNullabilityFor(element);
+            List<AnnotationSpec> annotations = getAnnotationsForElement(element);
+            annotations.add(nullability);
             builder.addField(FieldSpec.builder(TypeName.get(typeMirror), name, Modifier.PRIVATE)
-                    .addAnnotation(nullability)
+                    .addAnnotations(annotations)
                     .build());
 
             // Add the extra name as public static variable
             addKeyToClass(element, builder);
 
             // Add to constructor
-            ParameterSpec parameter = getParameter(element);
+            ParameterSpec parameter = getParameter(element, annotations);
 
             AnnotationSpec nullable = AnnotationSpec.builder(ClassName.get(Nullable.class)).build();
             if (!parameter.annotations.contains(nullable)) {
@@ -325,7 +328,7 @@ final class FileWriter {
                 returnStatement.append(parameter.name);
                 returnStatement.append(", ");
             } else {
-                addFieldToBuilder(builder, element, builderClass);
+                addFieldToBuilder(builder, element, builderClass, annotations);
             }
 
             String extraName = getExtraTypeName(element.asType());
@@ -665,12 +668,12 @@ final class FileWriter {
      * @param builderClass {@link ClassName} representation of `Builder` which is returned
      *                                      to have a fluent API.
      */
-    private void addFieldToBuilder(TypeSpec.Builder builder, Element element, ClassName builderClass) {
+    private void addFieldToBuilder(TypeSpec.Builder builder, Element element, ClassName builderClass, List<AnnotationSpec> annotations) {
         String variableName = element.getSimpleName().toString();
         MethodSpec.Builder setter = MethodSpec.methodBuilder("set" + capitalize(variableName))
                 .addModifiers(Modifier.FINAL, Modifier.PUBLIC)
                 .addParameter(ParameterSpec.builder(TypeName.get(element.asType()), variableName)
-                        .addAnnotation(Nullable.class)
+                        .addAnnotations(annotations)
                         .build())
                 .addStatement("this.$L = $L", variableName, variableName)
                 .returns(builderClass)
@@ -819,15 +822,36 @@ final class FileWriter {
      * @param element to be converted to Parameter
      * @return {@link ParameterSpec}
      */
-    private ParameterSpec getParameter(Element element) {
+    private ParameterSpec getParameter(Element element, List<AnnotationSpec> annotations) {
         TypeMirror typeMirror = element.asType();
         String name = element.getSimpleName().toString();
         ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(TypeName.get(typeMirror), name);
         parameterBuilder.addModifiers(Modifier.FINAL);
 
-        parameterBuilder.addAnnotation(getNullabilityFor(element));
+        parameterBuilder.addAnnotations(annotations);
 
         return parameterBuilder.build();
+    }
+
+    private List<AnnotationSpec> getAnnotationsForElement(Element element) {
+        List<AnnotationSpec> annotations = new ArrayList<>();
+
+        for (AnnotationMirror annotation: element.getAnnotationMirrors()) {
+            if (isAnnotationWhitelisted(annotation)) {
+                continue;
+            }
+            annotations.add(AnnotationSpec.builder(ClassName.bestGuess(annotation.getAnnotationType().toString()))
+                    .build());
+        }
+        return annotations;
+    }
+
+    public static boolean isAnnotationWhitelisted(AnnotationMirror annotation) {
+        return annotation.getAnnotationType().toString().contains("Nullable")
+                || annotation.getAnnotationType().toString().contains("NonNull")
+                || annotation.getAnnotationType().toString().contains("NotNull")
+                || annotation.getAnnotationType().toString().contains("Extra")
+                || annotation.getAnnotationType().toString().contains("Optional");
     }
 
     /**

@@ -2,6 +2,7 @@ package com.shaishavgandhi.navigator.sample
 
 
 import android.os.Bundle
+import android.support.annotation.DrawableRes
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +24,7 @@ private const val ARG_PARAM2 = "param2"
 class DetailFragment : Fragment() {
 
     @Extra lateinit var user: User
+    @Extra @DrawableRes var resId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
