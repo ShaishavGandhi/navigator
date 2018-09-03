@@ -23,10 +23,12 @@ public class NavigatorBuilderTest {
                 + "package com.shaishavgandhi.sampleapp.test;\n"
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
+                + "import android.support.annotation.StringRes;\n"
                 + "import android.app.Fragment;\n"
                 + "\n"
                 + "public class MainFragment extends Fragment {\n"
                 + " @Extra public String name;\n"
+                + " @Extra @StringRes public int resId;\n"
                 + "}\n");
 
         JavaFileObject expected = JavaFileObjects.forSourceString("MainFragmentBuilder", ""
@@ -35,20 +37,26 @@ public class NavigatorBuilderTest {
                 "import android.os.Bundle;\n" +
                 "import android.support.annotation.NonNull;\n" +
                 "import android.support.annotation.Nullable;\n" +
+                "import android.support.annotation.StringRes;\n" +
                 "import java.lang.String;\n" +
                 "\n" +
                 "public final class MainFragmentBuilder {\n" +
                 "  public static final String EXTRA_NAME = \"name\";\n\n" +
+                "  public static final String EXTRA_RES_ID = \"resId\";\n\n" +
                 "  private Bundle extras;\n" +
                 "\n" +
                 "  @NonNull\n" +
                 "  private String name;\n" +
+                "  @StringRes\n" +
+                "  @NonNull\n" +
+                "  private int resId;\n" +
                 "\n" +
-                "  private MainFragmentBuilder(@NonNull final String name) {\n" +
+                "  private MainFragmentBuilder(@NonNull final String name, @StringRes @NonNull final int resId) {\n" +
                 "    this.name = name;\n" +
+                "    this.resId = resId;\n" +
                 "  }\n" +
-                "  public static final MainFragmentBuilder builder(@NonNull final String name) {\n" +
-                "    return new MainFragmentBuilder(name);\n" +
+                "  public static final MainFragmentBuilder builder(@NonNull final String name, @StringRes @NonNull final int resId) {\n" +
+                "    return new MainFragmentBuilder(name, resId);\n" +
                 "  }" +
                 "\n" +
                 "  /**\n" +
@@ -69,6 +77,7 @@ public class NavigatorBuilderTest {
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
                 "    bundle.putString(EXTRA_NAME, name);\n" +
+                "    bundle.putInt(EXTRA_RES_ID, resId);\n" +
                 "    if (extras != null) {\n" +
                 "      bundle.putAll(extras);\n" +
                 "    }\n" +
