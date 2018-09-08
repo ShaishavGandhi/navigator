@@ -155,6 +155,10 @@ class DetailFragment extends Fragment {
 }
 ```
 
+#### Alternative To SafeArgs
+
+If you've used the Jetpack Navigation library from Google, you might have used SafeArgs to safely pass data between two fragments. Navigator seems to have a better approach than SafeArgs since you can bind all your Fragment variables in one go instead of actually getting them individually like in SafeArgs. You can also use handy Kotlin extensions that make the API better. More on that in the next section.
+
 ## Kotlin
 
 Navigator has first class support for Kotlin and it's language features. If you use `kapt` as your annotation processor, 
