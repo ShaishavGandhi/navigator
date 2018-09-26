@@ -1,9 +1,9 @@
 package com.shaishavgandhi.navigator.sample
 
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.annotation.Nullable
-import android.support.annotation.StringRes
+import androidx.annotation.Nullable
+import androidx.annotation.StringRes
 import android.util.SparseArray
 import android.widget.TextView
 import com.shaishavgandhi.navigato.sampler.R

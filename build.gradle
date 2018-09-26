@@ -18,6 +18,10 @@ buildscript {
 
 ext {
 
+    compileSdk = 28
+    targetSdk = 28
+    minSdk = 14
+
     supportVersion = "27.1.1"
 
     javapoet = "com.squareup:javapoet:1.11.1"
@@ -26,13 +30,13 @@ ext {
 
     kotlin = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    appcompat = "com.android.support:appcompat-v7:$supportVersion"
-    constraintLayout = "com.android.support.constraint:constraint-layout:1.1.0"
-    design = "com.android.support:design:$supportVersion"
+    appcompat = "androidx.appcompat:appcompat:1.0.0"
+    constraintLayout = "androidx.constraintlayout:constraintlayout:1.1.3"
+    design = "com.google.android.material:material:1.0.0"
     annotations = "com.android.support:support-annotations:$supportVersion"
     jetbrainsAnnotations = "org.jetbrains:annotations:16.0.2"
-    supportLibrary = "com.android.support:support-v4:27.1.1"
-    androidxFragment = "androidx.fragment:fragment:1.0.0-alpha3"
+    supportLibrary = "androidx.legacy:legacy-support-v4:1.0.0"
+    androidxFragment = "androidx.fragment:fragment:1.0.0"
 
     compileTesting = "com.google.testing.compile:compile-testing:0.15"
 

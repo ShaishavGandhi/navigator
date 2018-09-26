@@ -5,14 +5,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion rootProject.compileSdk
     defaultConfig {
         applicationId "com.shaishavgandhi.navigator"
         minSdkVersion 21
-        targetSdkVersion 27
+        targetSdkVersion rootProject.targetSdk
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -28,7 +28,7 @@ dependencies {
     implementation rootProject.appcompat
     implementation rootProject.constraintLayout
     implementation rootProject.design
-    implementation 'com.android.support:support-v4:27.1.1'
+    implementation rootProject.supportLibrary
     testImplementation rootProject.junit
 
     compile 'com.evernote:android-state:1.2.1'
@@ -38,9 +38,5 @@ dependencies {
     kapt project(":compiler")
     kaptTest project(":compiler")
     testImplementation project(":library")
-
-
-//    implementation 'com.shaishavgandhi.navigator:navigator:0.1.1'
-//    kapt 'com.shaishavgandhi.navigator:navigator-compiler:0.1.1'
 
 }

@@ -23,7 +23,7 @@ public class NavigatorBuilderTest {
                 + "package com.shaishavgandhi.sampleapp.test;\n"
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
-                + "import android.support.annotation.StringRes;\n"
+                + "import androidx.annotation.StringRes;\n"
                 + "import android.app.Fragment;\n"
                 + "\n"
                 + "public class MainFragment extends Fragment {\n"
@@ -35,9 +35,9 @@ public class NavigatorBuilderTest {
                 + "package com.shaishavgandhi.sampleapp.test;\n" +
                 "\n" +
                 "import android.os.Bundle;\n" +
-                "import android.support.annotation.NonNull;\n" +
-                "import android.support.annotation.Nullable;\n" +
-                "import android.support.annotation.StringRes;\n" +
+                "import androidx.annotation.NonNull;\n" +
+                "import androidx.annotation.Nullable;\n" +
+                "import androidx.annotation.StringRes;\n" +
                 "import java.lang.String;\n" +
                 "\n" +
                 "public final class MainFragmentBuilder {\n" +
@@ -68,10 +68,10 @@ public class NavigatorBuilderTest {
                 "   *\n" +
                 "   * Exposed publicly to allow custom usage of the {@link android.os.Bundle}. \n" +
                 "   *\n" +
-                "   * Example: It can be useful while navigating to a {@link android.support.v4.app.Fragment}\n" +
+                "   * Example: It can be useful while navigating to a {@link androidx.fragment.app.Fragment}\n" +
                 "   * to use {@linkplain Navigator}'s prepare method to \n" +
                 "   * build your bundle and call this method to get extras that can be set as \n" +
-                "   * arguments to your {@linkplain android.support.v4.app.Fragment}.\n" +
+                "   * arguments to your {@linkplain androidx.fragment.app.Fragment}.\n" +
                 "   */\n" +
                 "  @NonNull\n" +
                 "  public Bundle getBundle() {\n" +
@@ -114,8 +114,8 @@ public class NavigatorBuilderTest {
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
                 + "import android.app.Fragment;\n"
-                + "import android.support.annotation.Nullable;\n"
-                + "import android.support.annotation.NonNull;\n"
+                + "import androidx.annotation.Nullable;\n"
+                + "import androidx.annotation.NonNull;\n"
                 + "\n"
                 + "public class MainFragment extends Fragment {\n"
                 + " @Extra @Nullable public String name;\n"
@@ -125,8 +125,8 @@ public class NavigatorBuilderTest {
                 + "package com.shaishavgandhi.sampleapp.test;\n" +
                 "\n" +
                 "import android.os.Bundle;\n" +
-                "import android.support.annotation.NonNull;\n" +
-                "import android.support.annotation.Nullable;\n" +
+                "import androidx.annotation.NonNull;\n" +
+                "import androidx.annotation.Nullable;\n" +
                 "import java.lang.String;\n" +
                 "\n" +
                 "public final class MainFragmentBuilder {\n" +
@@ -156,10 +156,10 @@ public class NavigatorBuilderTest {
                 "   *\n" +
                 "   * Exposed publicly to allow custom usage of the {@link android.os.Bundle}. \n" +
                 "   *\n" +
-                "   * Example: It can be useful while navigating to a {@link android.support.v4.app.Fragment}\n" +
+                "   * Example: It can be useful while navigating to a {@link androidx.fragment.app.Fragment}\n" +
                 "   * to use {@linkplain Navigator}'s prepare method to \n" +
                 "   * build your bundle and call this method to get extras that can be set as \n" +
-                "   * arguments to your {@linkplain android.support.v4.app.Fragment}.\n" +
+                "   * arguments to your {@linkplain androidx.fragment.app.Fragment}.\n" +
                 "   */\n" +
                 "  @NonNull\n" +
                 "  public Bundle getBundle() {\n" +
@@ -212,8 +212,8 @@ public class NavigatorBuilderTest {
                 + "package com.shaishavgandhi.sampleapp.test;\n" +
                 "\n" +
                 "import android.os.Bundle;\n" +
-                "import android.support.annotation.NonNull;\n" +
-                "import android.support.annotation.Nullable;\n" +
+                "import androidx.annotation.NonNull;\n" +
+                "import androidx.annotation.Nullable;\n" +
                 "import java.lang.String;\n" +
                 "\n" +
                 "public final class MainFragmentBuilder {\n" +
@@ -240,10 +240,10 @@ public class NavigatorBuilderTest {
                 "   *\n" +
                 "   * Exposed publicly to allow custom usage of the {@link android.os.Bundle}. \n" +
                 "   *\n" +
-                "   * Example: It can be useful while navigating to a {@link android.support.v4.app.Fragment}\n" +
+                "   * Example: It can be useful while navigating to a {@link androidx.fragment.app.Fragment}\n" +
                 "   * to use {@linkplain Navigator}'s prepare method to \n" +
                 "   * build your bundle and call this method to get extras that can be set as \n" +
-                "   * arguments to your {@linkplain android.support.v4.app.Fragment}.\n" +
+                "   * arguments to your {@linkplain androidx.fragment.app.Fragment}.\n" +
                 "   */\n" +
                 "  @NonNull\n" +
                 "  public Bundle getBundle() {\n" +
@@ -328,9 +328,9 @@ public class NavigatorBuilderTest {
                 + "package com.shaishavgandhi.sampleapp.test;\n" +
                 "\n" +
                 "import android.os.Bundle;\n" +
-                "import android.support.annotation.NonNull;\n" +
-                "import android.support.annotation.Nullable;\n" +
                 "import android.util.SparseArray;\n" +
+                "import androidx.annotation.NonNull;\n" +
+                "import androidx.annotation.Nullable;\n" +
                 "import java.lang.String;\n" +
                 "import java.util.ArrayList;\n" +
                 "\n" +
@@ -383,10 +383,10 @@ public class NavigatorBuilderTest {
                 "   *\n" +
                 "   * Exposed publicly to allow custom usage of the {@link android.os.Bundle}. \n" +
                 "   *\n" +
-                "   * Example: It can be useful while navigating to a {@link android.support.v4.app.Fragment}\n" +
+                "   * Example: It can be useful while navigating to a {@link androidx.fragment.app.Fragment}\n" +
                 "   * to use {@linkplain Navigator}'s prepare method to \n" +
                 "   * build your bundle and call this method to get extras that can be set as \n" +
-                "   * arguments to your {@linkplain android.support.v4.app.Fragment}.\n" +
+                "   * arguments to your {@linkplain androidx.fragment.app.Fragment}.\n" +
                 "   */\n" +
                 "  @NonNull\n" +
                 "  public Bundle getBundle() {\n" +
@@ -429,7 +429,7 @@ public class NavigatorBuilderTest {
                 + "package com.shaishavgandhi.sampleapp.test;\n"
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
-                + "import android.support.annotation.Nullable;\n"
+                + "import androidx.annotation.Nullable;\n"
                 + "import android.app.Activity;\n"
                 + "\n"
                 + "public class MainActivity extends Activity {\n"
@@ -444,9 +444,9 @@ public class NavigatorBuilderTest {
                 "import android.content.Context;\n" +
                 "import android.content.Intent;\n" +
                 "import android.os.Bundle;\n" +
-                "import android.support.annotation.NonNull;\n" +
-                "import android.support.annotation.Nullable;\n" +
-                "import android.support.v4.app.Fragment;\n" +
+                "import androidx.annotation.NonNull;\n" +
+                "import androidx.annotation.Nullable;\n" +
+                "import androidx.fragment.app.Fragment;\n" +
                 "import java.lang.Integer;\n" +
                 "import java.lang.String;\n" +
                 "\n" +
@@ -649,10 +649,10 @@ public class NavigatorBuilderTest {
                 "   *\n" +
                 "   * Exposed publicly to allow custom usage of the {@link android.os.Bundle}. \n" +
                 "   *\n" +
-                "   * Example: It can be useful while navigating to a {@link android.support.v4.app.Fragment}\n" +
+                "   * Example: It can be useful while navigating to a {@link androidx.fragment.app.Fragment}\n" +
                 "   * to use {@linkplain Navigator}'s prepare method to \n" +
                 "   * build your bundle and call this method to get extras that can be set as \n" +
-                "   * arguments to your {@linkplain android.support.v4.app.Fragment}.\n" +
+                "   * arguments to your {@linkplain androidx.fragment.app.Fragment}.\n" +
                 "   */\n" +
                 "  @NonNull\n" +
                 "  public Bundle getBundle() {\n" +

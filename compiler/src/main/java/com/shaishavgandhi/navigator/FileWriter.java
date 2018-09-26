@@ -1,7 +1,7 @@
 package com.shaishavgandhi.navigator;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -12,9 +12,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import com.squareup.kotlinpoet.ParameterizedTypeName;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -41,7 +39,7 @@ final class FileWriter {
     private static final ClassName INTENT_CLASSNAME = ClassName.get("android.content", "Intent");
     private static final ClassName BUNDLE_CLASSNAME = ClassName.get("android.os", "Bundle");
     private static final ClassName ACTIVITY_CLASSNAME = ClassName.get("android.app", "Activity");
-    private static final ClassName FRAGMENT_CLASSNAME = ClassName.get("android.support.v4.app", "Fragment");
+    private static final ClassName FRAGMENT_CLASSNAME = ClassName.get("androidx.fragment.app", "Fragment");
     private static final ClassName STRING_CLASS = ClassName.bestGuess("java.lang.String");
 
     private static final String FLAGS = "flags";
@@ -564,11 +562,11 @@ final class FileWriter {
                 .add("\n")
                 .add("Exposed publicly to allow custom usage of the {@link android.os.Bundle}. \n")
                 .add("\n")
-                .add("Example: It can be useful while navigating to a {@link android.support.v4.app.Fragment}\n" +
+                .add("Example: It can be useful while navigating to a {@link androidx.fragment.app.Fragment}\n" +
                         "to use the builder methods to \n" +
                         "construct your bundle and call this method to get extras that can be set" +
                         " as \n" +
-                        "arguments to your {@linkplain android.support.v4.app.Fragment}.")
+                        "arguments to your {@linkplain androidx.fragment.app.Fragment}.")
                 .add("\n")
                 .build());
         // Add code body
