@@ -3,12 +3,12 @@ package com.shaishavgandhi.navigator;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
+import javax.tools.JavaFileObject;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import javax.tools.JavaFileObject;
+
 import static com.google.testing.compile.CompilationSubject.assertThat;
-import static org.junit.Assert.assertEquals;
 
 @FixMethodOrder(MethodSorters.JVM)
 public class NavigatorProcessorTest {
@@ -67,7 +67,7 @@ public class NavigatorProcessorTest {
                 + "package com.shaishavgandhi.navigator.test;\n"
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
-                + "import android.support.v4.app.FragmentActivity;\n"
+                + "import androidx.fragment.app.FragmentActivity;\n"
                 + "\n"
                 + "public class MainActivity extends FragmentActivity {\n"
                 + " @Extra public String name;\n"
@@ -85,7 +85,7 @@ public class NavigatorProcessorTest {
                 + "package com.shaishavgandhi.navigator.test;\n"
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
-                + "import android.support.v4.app.FragmentActivity;\n"
+                + "import androidx.fragment.app.FragmentActivity;\n"
                 + "import android.os.Bundle;\n"
                 + "\n"
                 + "public class MainActivity extends FragmentActivity {\n"
@@ -167,7 +167,7 @@ public class NavigatorProcessorTest {
                 + "package com.shaishavgandhi.navigator.test;\n"
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
-                + "import android.support.v4.app.Fragment;\n"
+                + "import androidx.fragment.app.Fragment;\n"
                 + "\n"
                 + "public class MainFragment extends Fragment {\n"
                 + " @Extra public String name;\n"
@@ -185,7 +185,7 @@ public class NavigatorProcessorTest {
                 + "package com.shaishavgandhi.navigator.test;\n"
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
-                + "import android.support.v4.app.Fragment;\n"
+                + "import androidx.fragment.app.Fragment;\n"
                 + "\n"
                 + "public class MainFragment extends Fragment {\n"
                 + " @Extra final String name;\n"
@@ -203,7 +203,7 @@ public class NavigatorProcessorTest {
                 + "package com.shaishavgandhi.navigator.test;\n"
                 + "\n"
                 + "import com.shaishavgandhi.navigator.Extra;\n"
-                + "import android.support.v4.app.Fragment;\n"
+                + "import androidx.fragment.app.Fragment;\n"
                 + "\n"
                 + "public class MainFragment extends Fragment {\n"
                 + " @Extra User user;\n"

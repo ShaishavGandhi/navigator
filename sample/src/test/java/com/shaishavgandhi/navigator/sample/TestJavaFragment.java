@@ -1,10 +1,10 @@
 package com.shaishavgandhi.navigator.sample;
 
-import android.support.v4.app.Fragment;
 import android.util.Size;
 import android.util.SizeF;
 import android.util.SparseArray;
 
+import androidx.fragment.app.Fragment;
 import com.shaishavgandhi.navigator.Extra;
 
 import java.util.ArrayList;

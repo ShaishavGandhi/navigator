@@ -3,15 +3,15 @@ apply plugin: 'kotlin-android'
 apply from: '../gradle/gradle-mvn-push.gradle'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion rootProject.compileSdk
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 27
+        minSdkVersion rootProject.minSdk
+        targetSdkVersion rootProject.targetSdk
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -34,9 +34,9 @@ android {
 }
 
 dependencies {
-    testImplementation rootProject.junit
     api project(":annotations")
 
+    testImplementation rootProject.junit
     testImplementation rootProject.compileTesting
     testImplementation rootProject.supportLibrary
     testImplementation rootProject.androidxFragment
@@ -49,16 +49,16 @@ repositories {
     mavenCentral()
 }
 
-def getRuntimeJar() {
+static def getRuntimeJar() {
     try {
-        final File javaBase = new File(System.getProperty("java.home")).getCanonicalFile();
-        File runtimeJar = new File(javaBase, "lib/rt.jar");
+        final File javaBase = new File(System.getProperty("java.home")).getCanonicalFile()
+        File runtimeJar = new File(javaBase, "lib/rt.jar")
         if (runtimeJar.exists()) {
-            return runtimeJar;
+            return runtimeJar
         }
-        runtimeJar = new File(javaBase, "jre/lib/rt.jar");
-        return runtimeJar.exists() ? runtimeJar : null;
+        runtimeJar = new File(javaBase, "jre/lib/rt.jar")
+        return runtimeJar.exists() ? runtimeJar : null
     } catch (IOException e) {
-        throw new RuntimeException(e);
+        throw new RuntimeException(e)
     }
 }

@@ -1,6 +1,6 @@
 package com.shaishavgandhi.navigator;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 class StringUtils {
 
