@@ -177,10 +177,9 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
                     kotlinMapper[param.type.toString()]!! else ClassName.bestGuess(param.type.toString())
 
                 // Add as a parameter.
-
                 val elementAnnotations = param.annotations
                     .map { it.toKPoet() }
-                    .filter { !it.type.toString().contains("NonNull") }
+                    .filter { !it.toString().contains("NonNull") }
 
                 prepareFunctionBuilder.addParameter(ParameterSpec.builder(param.name, returnType)
                     .addAnnotations(elementAnnotations)
