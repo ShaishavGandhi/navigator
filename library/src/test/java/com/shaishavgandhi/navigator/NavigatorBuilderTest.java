@@ -35,6 +35,7 @@ public class NavigatorBuilderTest {
                 + "package com.shaishavgandhi.sampleapp.test;\n" +
                 "\n" +
                 "import android.os.Bundle;\n" +
+                "import androidx.annotation.CheckResult;\n" +
                 "import androidx.annotation.NonNull;\n" +
                 "import androidx.annotation.Nullable;\n" +
                 "import androidx.annotation.StringRes;\n" +
@@ -55,6 +56,7 @@ public class NavigatorBuilderTest {
                 "    this.name = name;\n" +
                 "    this.resId = resId;\n" +
                 "  }\n" +
+                "  @CheckResult\n" +
                 "  public static final MainFragmentBuilder builder(@NonNull final String name, @StringRes @NonNull final int resId) {\n" +
                 "    return new MainFragmentBuilder(name, resId);\n" +
                 "  }" +
@@ -74,6 +76,7 @@ public class NavigatorBuilderTest {
                 "   * arguments to your {@linkplain androidx.fragment.app.Fragment}.\n" +
                 "   */\n" +
                 "  @NonNull\n" +
+                "  @CheckResult\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
                 "    bundle.putString(EXTRA_NAME, name);\n" +
@@ -94,6 +97,7 @@ public class NavigatorBuilderTest {
                 "   * @param extras that will be appended to the current bundle\n" +
                 "   * @return Builder class for chaining other methods\n" +
                 "   */\n" +
+                "  @CheckResult\n" +
                 "  public MainFragmentBuilder setExtras(@Nullable final Bundle extras) {\n" +
                 "    this.extras = extras;\n" +
                 "    return this;\n" +
@@ -125,6 +129,7 @@ public class NavigatorBuilderTest {
                 + "package com.shaishavgandhi.sampleapp.test;\n" +
                 "\n" +
                 "import android.os.Bundle;\n" +
+                "import androidx.annotation.CheckResult;\n" +
                 "import androidx.annotation.NonNull;\n" +
                 "import androidx.annotation.Nullable;\n" +
                 "import java.lang.String;\n" +
@@ -139,10 +144,12 @@ public class NavigatorBuilderTest {
                 "  private MainFragmentBuilder() {\n" +
                 "  }\n" +
                 "\n" +
+                "  @CheckResult\n" +
                 "  public final MainFragmentBuilder setName(@Nullable String name) {\n" +
                 "    this.name = name;\n" +
                 "    return this;\n" +
                 "  }\n" +
+                "  @CheckResult\n" +
                 "  public static final MainFragmentBuilder builder() {\n" +
                 "    return new MainFragmentBuilder();\n" +
                 "  }" +
@@ -162,6 +169,7 @@ public class NavigatorBuilderTest {
                 "   * arguments to your {@linkplain androidx.fragment.app.Fragment}.\n" +
                 "   */\n" +
                 "  @NonNull\n" +
+                "  @CheckResult\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
                 "    bundle.putString(EXTRA_NAME, name);\n" +
@@ -181,6 +189,7 @@ public class NavigatorBuilderTest {
                 "   * @param extras that will be appended to the current bundle\n" +
                 "   * @return Builder class for chaining other methods\n" +
                 "   */\n" +
+                "  @CheckResult\n" +
                 "  public MainFragmentBuilder setExtras(@Nullable final Bundle extras) {\n" +
                 "    this.extras = extras;\n" +
                 "    return this;\n" +
@@ -212,6 +221,7 @@ public class NavigatorBuilderTest {
                 + "package com.shaishavgandhi.sampleapp.test;\n" +
                 "\n" +
                 "import android.os.Bundle;\n" +
+                "import androidx.annotation.CheckResult;\n" +
                 "import androidx.annotation.NonNull;\n" +
                 "import androidx.annotation.Nullable;\n" +
                 "import java.lang.String;\n" +
@@ -226,6 +236,7 @@ public class NavigatorBuilderTest {
                 "  private MainFragmentBuilder(@NonNull final MainFragment.User name) {\n" +
                 "    this.name = name;\n" +
                 "  }\n" +
+                "  @CheckResult\n" +
                 "  public static final MainFragmentBuilder builder(@NonNull final MainFragment.User name) {\n" +
                 "    return new MainFragmentBuilder(name);\n" +
                 "  }" +
@@ -246,6 +257,7 @@ public class NavigatorBuilderTest {
                 "   * arguments to your {@linkplain androidx.fragment.app.Fragment}.\n" +
                 "   */\n" +
                 "  @NonNull\n" +
+                "  @CheckResult\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
                 "    bundle.putSerializable(EXTRA_NAME, name);\n" +
@@ -265,6 +277,7 @@ public class NavigatorBuilderTest {
                 "   * @param extras that will be appended to the current bundle\n" +
                 "   * @return Builder class for chaining other methods\n" +
                 "   */\n" +
+                "  @CheckResult\n" +
                 "  public MainFragmentBuilder setExtras(@Nullable final Bundle extras) {\n" +
                 "    this.extras = extras;\n" +
                 "    return this;\n" +
@@ -329,6 +342,7 @@ public class NavigatorBuilderTest {
                 "\n" +
                 "import android.os.Bundle;\n" +
                 "import android.util.SparseArray;\n" +
+                "import androidx.annotation.CheckResult;\n" +
                 "import androidx.annotation.NonNull;\n" +
                 "import androidx.annotation.Nullable;\n" +
                 "import java.lang.String;\n" +
@@ -366,6 +380,7 @@ public class NavigatorBuilderTest {
                 "    this.userArray = userArray;\n" +
                 "    this.sparseArray = sparseArray;\n" +
                 "  }\n" +
+                "  @CheckResult\n" +
                 "  public static final MainFragmentBuilder builder(@NonNull final MainFragment.User name,\n" +
                 "      @NonNull final ArrayList<MainFragment.User> users,\n" +
                 "      @NonNull final MainFragment.User[] userArray,\n" +
@@ -389,6 +404,7 @@ public class NavigatorBuilderTest {
                 "   * arguments to your {@linkplain androidx.fragment.app.Fragment}.\n" +
                 "   */\n" +
                 "  @NonNull\n" +
+                "  @CheckResult\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
                 "    bundle.putParcelable(EXTRA_NAME, name);\n" +
@@ -411,6 +427,7 @@ public class NavigatorBuilderTest {
                 "   * @param extras that will be appended to the current bundle\n" +
                 "   * @return Builder class for chaining other methods\n" +
                 "   */\n" +
+                "  @CheckResult\n" +
                 "  public MainFragmentBuilder setExtras(@Nullable final Bundle extras) {\n" +
                 "    this.extras = extras;\n" +
                 "    return this;\n" +
@@ -444,6 +461,7 @@ public class NavigatorBuilderTest {
                 "import android.content.Context;\n" +
                 "import android.content.Intent;\n" +
                 "import android.os.Bundle;\n" +
+                "import androidx.annotation.CheckResult;\n" +
                 "import androidx.annotation.NonNull;\n" +
                 "import androidx.annotation.Nullable;\n" +
                 "import androidx.fragment.app.Fragment;\n" +
@@ -470,11 +488,13 @@ public class NavigatorBuilderTest {
                 "  private MainActivityBuilder(@NonNull final String name) {\n" +
                 "    this.name = name;\n" +
                 "  }\n" +
+                "  @CheckResult\n" +
                 "  public final MainActivityBuilder setAge(@Nullable Integer age) {\n" +
                 "    this.age = age;\n" +
                 "    return this;\n" +
                 "  }" +
                 "\n" +
+                "  @CheckResult\n" +
                 "  public static final MainActivityBuilder builder(@NonNull final String name) {\n" +
                 "    return new MainActivityBuilder(name);\n" +
                 "  }" +
@@ -623,6 +643,7 @@ public class NavigatorBuilderTest {
                 "   * @param flags  The desired flags.\n" +
                 "   * @return Returns the same Builder object for chaining multiple calls\n" +
                 "   */\n" +
+                "  @CheckResult\n" +
                 "  public MainActivityBuilder setFlags(final int flags) {\n" +
                 "    this.flags = flags;\n" +
                 "    return this;\n" +
@@ -635,6 +656,7 @@ public class NavigatorBuilderTest {
                 "   * @param action  The desired action.\n" +
                 "   * @return Returns the same Builder object for chaining multiple calls\n" +
                 "   */\n" +
+                "  @CheckResult\n" +
                 "  public MainActivityBuilder setAction(final String action) {\n" +
                 "    this.action = action;\n" +
                 "    return this;\n" +
@@ -655,6 +677,7 @@ public class NavigatorBuilderTest {
                 "   * arguments to your {@linkplain androidx.fragment.app.Fragment}.\n" +
                 "   */\n" +
                 "  @NonNull\n" +
+                "  @CheckResult\n" +
                 "  public Bundle getBundle() {\n" +
                 "    Bundle bundle = new Bundle();\n" +
                 "    bundle.putString(EXTRA_NAME, name);\n" +
@@ -675,6 +698,7 @@ public class NavigatorBuilderTest {
                 "   * @param extras that will be appended to the current bundle\n" +
                 "   * @return Builder class for chaining other methods\n" +
                 "   */\n" +
+                "  @CheckResult\n" +
                 "  public MainActivityBuilder setExtras(@Nullable final Bundle extras) {\n" +
                 "    this.extras = extras;\n" +
                 "    return this;\n" +

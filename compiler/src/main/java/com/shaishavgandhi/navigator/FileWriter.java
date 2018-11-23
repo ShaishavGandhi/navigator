@@ -1,5 +1,6 @@
 package com.shaishavgandhi.navigator;
 
+import androidx.annotation.CheckResult;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -478,6 +479,7 @@ final class FileWriter {
                         .build())
                 .addParameter(ParameterSpec.builder(TypeName.INT, "flags", Modifier.FINAL).build())
                 .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(CheckResult.class)
                 .returns(builderClass)
                 .addStatement("this.$1L = $1L", FLAGS)
                 .addStatement("return this").build();
@@ -503,6 +505,7 @@ final class FileWriter {
                         .build())
                 .addParameter(ParameterSpec.builder(STRING_CLASS, "action", Modifier.FINAL).build())
                 .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(CheckResult.class)
                 .returns(builderClass)
                 .addStatement("this.$1L = $1L", ACTION)
                 .addStatement("return this").build();
@@ -519,6 +522,7 @@ final class FileWriter {
     private MethodSpec getExtrasSetterMethod(ClassName builderClass) {
         return MethodSpec.methodBuilder("setExtras")
                 .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(CheckResult.class)
                 .returns(builderClass)
                 // Add JavaDoc
                 .addJavadoc(CodeBlock.builder()
@@ -550,6 +554,7 @@ final class FileWriter {
     private MethodSpec.Builder getExtrasBundle() {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getBundle")
                 .addAnnotation(NonNull.class)
+                .addAnnotation(CheckResult.class)
                 .addModifiers(Modifier.PUBLIC);
         // Add javadoc
         methodBuilder.addJavadoc(CodeBlock.builder()
@@ -673,6 +678,7 @@ final class FileWriter {
                 .addParameter(ParameterSpec.builder(TypeName.get(element.asType()), variableName)
                         .addAnnotations(annotations)
                         .build())
+                .addAnnotation(CheckResult.class)
                 .addStatement("this.$L = $L", variableName, variableName)
                 .returns(builderClass)
                 .addStatement("return this");
@@ -793,6 +799,7 @@ final class FileWriter {
         MethodSpec.Builder prepareMethodBuilder = MethodSpec.methodBuilder("builder");
         prepareMethodBuilder.addModifiers(Modifier.STATIC, Modifier.FINAL, Modifier.PUBLIC);
         prepareMethodBuilder.returns(builderClass);
+        prepareMethodBuilder.addAnnotation(CheckResult.class);
         return prepareMethodBuilder;
     }
 

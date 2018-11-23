@@ -1,5 +1,6 @@
 package com.shaishavgandhi.navigator
 
+import androidx.annotation.CheckResult
 import com.shaishavgandhi.navigator.FileWriter.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
@@ -166,6 +167,7 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
             // Replacement for static constructor
             val prepareFunctionBuilder = FunSpec.builder("${className.simpleName.decapitalize()}Builder")
                 .receiver(anyClass)
+                .addAnnotation(CheckResult::class)
                 .returns(ClassName.bestGuess("${className.simpleName}Builder"))
 
             // Builder for return string so we can append parameters to it.
