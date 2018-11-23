@@ -3,10 +3,7 @@ package com.shaishavgandhi.navigator.sample;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.shaishavgandhi.navigator.Extra;
-
-
 
 public class SampleActivity extends AppCompatActivity {
 

@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.CheckResult
 import com.shaishavgandhi.navigato.sampler.R
 import com.shaishavgandhi.navigator.Extra
 
@@ -28,7 +29,6 @@ class MainActivity : AppCompatActivity() {
                 // Clears the task
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 .start(this)
-
         }
 
         findViewById<View>(R.id.button2).setOnClickListener {
