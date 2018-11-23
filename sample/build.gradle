@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 apply plugin: 'kotlin-android-extensions'
 
@@ -20,7 +20,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
 }
 
 dependencies {
@@ -30,6 +29,8 @@ dependencies {
     implementation rootProject.design
     implementation rootProject.supportLibrary
     testImplementation rootProject.junit
+
+  lintChecks project(":lint")
 
     implementation project(":library")
     kapt project(":compiler")

@@ -1,0 +1,17 @@
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
+apply plugin: 'kotlin-kapt'
+
+dependencies {
+    kapt rootProject.autoservice
+
+    compileOnly rootProject.autoservice
+    compileOnly rootProject.kotlin
+    compileOnly rootProject.lintApi
+
+    testImplementation rootProject.lint
+    testImplementation rootProject.lintTest
+}
+
+sourceCompatibility = "7"
+targetCompatibility = "7"
