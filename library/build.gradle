@@ -20,6 +20,11 @@ android {
         }
     }
 
+  compileOptions {
+    sourceCompatibility rootProject.javaVersion
+    targetCompatibility rootProject.javaVersion
+  }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -45,6 +50,7 @@ dependencies {
     testImplementation project(":compiler")
     implementation rootProject.kotlin
 }
+
 repositories {
     mavenCentral()
 }

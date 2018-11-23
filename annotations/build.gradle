@@ -4,5 +4,5 @@ apply from: '../gradle/gradle-mvn-push.gradle'
 dependencies {
 }
 
-sourceCompatibility = "7"
-targetCompatibility = "7"
+sourceCompatibility = rootProject.javaVersion
+targetCompatibility = rootProject.javaVersion
