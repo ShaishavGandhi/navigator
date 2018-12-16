@@ -34,7 +34,7 @@ class NavigatorBindDetectorTest {
         .detector(NavigatorBindDetector())
         .issues(NavigatorBindDetector.ISSUE)
         .run()
-        .expect("""src/foo/MyActivity.java:7: Error: You have added fields with @Extra annotation. However, you've not yet bound the variables by calling MyActivityBinder.bind(). This will cause a null pointer exception later in your app. Avoid this by calling bind() in your onCreate() method [NavigatorBindUsage]
+        .expect("""src/foo/MyActivity.java:7: Error: ${NavigatorBindDetector.SHORT_DESCRIPTION} [Navigator]
           |  @Extra String name;
           |  ~~~~~~
           |1 errors, 0 warnings""".trimMargin())
@@ -58,7 +58,7 @@ class NavigatorBindDetectorTest {
         .detector(NavigatorBindDetector())
         .issues(NavigatorBindDetector.ISSUE)
         .run()
-        .expect("""src/foo/MyActivity.kt:7: Error: You have added fields with @Extra annotation. However, you've not yet bound the variables by calling MyActivityBinder.bind(). This will cause a null pointer exception later in your app. Avoid this by calling bind() in your onCreate() method [NavigatorBindUsage]
+        .expect("""src/foo/MyActivity.kt:7: Error: ${NavigatorBindDetector.SHORT_DESCRIPTION} [Navigator]
           |  @Extra lateinit var name: String
           |  ~~~~~~
           |1 errors, 0 warnings""".trimMargin())
@@ -216,6 +216,46 @@ class NavigatorBindDetectorTest {
         .expectClean()
   }
 
+  @Test fun kotlinNavigatorBind() {
+    val navigator = kotlin("""
+      package com.shaishavgandhi.navigator
+
+      object Navigator
+    """).indented()
+
+    val extensionFile = kotlin("""
+      package foo
+
+      import com.shaishavgandhi.navigator.Navigator
+      import foo.MyActivity
+
+      fun Navigator.bind(binder: MyActivity) {}
+    """).indented()
+
+    lint()
+        .files(EXTRA,
+            navigator,
+            extensionFile,
+            kotlin("""
+          package foo
+
+          import com.shaishavgandhi.navigator.Extra
+          import com.shaishavgandhi.navigator.Navigator
+          import kotlin.String
+
+          class MyActivity {
+            @Extra lateinit var name: String
+
+            fun onCreate() {
+              Navigator.bind(this)
+            }
+          }""").indented())
+        .detector(NavigatorBindDetector())
+        .issues(NavigatorBindDetector.ISSUE)
+        .run()
+        .expectClean()
+  }
+
   @Test fun errorBindCalledOnMemberMethod() {
     lint()
         .files(EXTRA,
@@ -237,7 +277,7 @@ class NavigatorBindDetectorTest {
         .detector(NavigatorBindDetector())
         .issues(NavigatorBindDetector.ISSUE)
         .run()
-        .expect("""src/foo/MyActivity.java:7: Error: You have added fields with @Extra annotation. However, you've not yet bound the variables by calling MyActivityBinder.bind(). This will cause a null pointer exception later in your app. Avoid this by calling bind() in your onCreate() method [NavigatorBindUsage]
+        .expect("""src/foo/MyActivity.java:7: Error: ${NavigatorBindDetector.SHORT_DESCRIPTION} [Navigator]
           |  @Extra String name;
           |  ~~~~~~
           |1 errors, 0 warnings""".trimMargin())
@@ -264,7 +304,7 @@ class NavigatorBindDetectorTest {
         .detector(NavigatorBindDetector())
         .issues(NavigatorBindDetector.ISSUE)
         .run()
-        .expect("""src/foo/MyActivity.java:7: Error: You have added fields with @Extra annotation. However, you've not yet bound the variables by calling MyActivityBinder.bind(). This will cause a null pointer exception later in your app. Avoid this by calling bind() in your onCreate() method [NavigatorBindUsage]
+        .expect("""src/foo/MyActivity.java:7: Error: ${NavigatorBindDetector.SHORT_DESCRIPTION} [Navigator]
           |  @Extra String name;
           |  ~~~~~~
           |1 errors, 0 warnings""".trimMargin())

@@ -2,10 +2,8 @@ package com.shaishavgandhi.navigator.lint
 
 import com.android.tools.lint.client.api.UElementHandler
 import com.android.tools.lint.detector.api.*
-import com.intellij.lang.Language
 import com.intellij.psi.PsiType
 import org.jetbrains.uast.*
-import org.jetbrains.uast.kotlin.KotlinUastLanguagePlugin
 import org.jetbrains.uast.util.isMethodCall
 import org.jetbrains.uast.visitor.AbstractUastVisitor
 import java.util.*
@@ -18,12 +16,14 @@ import java.util.*
  */
 class NavigatorBindDetector : Detector(), SourceCodeScanner {
   companion object {
+    internal const val SHORT_DESCRIPTION = "The defined Extras are not being bound in this class. " +
+        "Call bind(this) to bind their values."
     val ISSUE: Issue = Issue.create(
-        "NavigatorBindUsage",
-        "You're not calling bind() in this class.",
-        "You have added fields with @Extra annotation. However, you've not yet bound " +
-            "the variables by calling YourActivityBinder.bind(). This will cause a null pointer " +
-            "exception later in your app.",
+        "Navigator",
+        SHORT_DESCRIPTION,
+        "There are fields defined in this class with @Extra annotations but they're not " +
+            "bound yet. You must call bind(this) to bind value to those fields and avoid" +
+            " runtime NPE.",
         Category.CORRECTNESS,
         10,
         Severity.ERROR,
@@ -40,7 +40,6 @@ class NavigatorBindDetector : Detector(), SourceCodeScanner {
         if (!applicableAnnotations().contains(node.qualifiedName)) return
 
         var hasBindMethod = false
-        val className = node.getContainingUClass()?.name
 
         node.getContainingUClass()?.accept(object : AbstractUastVisitor() {
           override fun visitCallExpression(node: UCallExpression): Boolean {
@@ -55,10 +54,7 @@ class NavigatorBindDetector : Detector(), SourceCodeScanner {
         })
 
         if (!hasBindMethod)
-          context.report(ISSUE, node, context.getLocation(node), "You have added fields with" +
-              " @Extra annotation. However, you've not yet bound the variables by calling " +
-              "${className}Binder.bind(). This will cause a null pointer exception later in your app. " +
-              "Avoid this by calling bind() in your onCreate() method")
+          context.report(ISSUE, node, context.getLocation(node), SHORT_DESCRIPTION)
       }
     }
   }
@@ -89,15 +85,15 @@ class NavigatorBindDetector : Detector(), SourceCodeScanner {
    * @return whether it's a valid invocation of the method `bind()` from a Kotlin
    * extension perspective.
    *
-   * We check three things for a given class MyActivity:
-   * 1. Receiver is MyActivity
+   * We check the following things for a given class MyActivity:
+   * 1. Receiver is MyActivity or com.shaishavgandhi.navigator.Navigator
    * 2. Arguments are empty
    * 3. It is a Kotlin file!
    */
   private fun isValidExtensionMethod(node: UCallExpression, receiver: PsiType?, context: JavaContext): Boolean {
     val isKotlin  = context.file.extension == "kt"
-    return receiver?.canonicalText == node.getContainingUClass()?.qualifiedName
-        && node.valueArguments.isEmpty()
+    return ((receiver?.canonicalText == node.getContainingUClass()?.qualifiedName
+        && node.valueArguments.isEmpty()) || receiver?.canonicalText == "com.shaishavgandhi.navigator.Navigator")
         && isKotlin
   }
 
