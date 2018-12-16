@@ -13,5 +13,5 @@ dependencies {
     testImplementation rootProject.lintTest
 }
 
-sourceCompatibility = "7"
-targetCompatibility = "7"
+sourceCompatibility = rootProject.javaVersion
+targetCompatibility = rootProject.javaVersion

@@ -30,8 +30,6 @@ dependencies {
     implementation rootProject.supportLibrary
     testImplementation rootProject.junit
 
-  lintChecks project(":lint")
-
     implementation project(":library")
     kapt project(":compiler")
     kaptTest project(":compiler")

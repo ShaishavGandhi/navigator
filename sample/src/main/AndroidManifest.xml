@@ -19,7 +19,6 @@
         <activity android:name="com.shaishavgandhi.navigator.sample.DetailActivity" />
 
         <activity android:name="com.shaishavgandhi.navigator.sample.SampleActivity"/>
-        <activity android:name="com.shaishavgandhi.navigator.sample.MyActivity"/>
     </application>
 
 </manifest>
