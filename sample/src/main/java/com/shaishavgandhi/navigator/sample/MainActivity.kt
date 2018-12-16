@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        bind()
+        bind()
         findViewById<View>(R.id.button).setOnClickListener {
             val users = arrayListOf(User(name = "Shaishav", age = 10),
                     User("Dimple", 13))
