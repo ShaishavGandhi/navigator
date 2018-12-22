@@ -44,7 +44,10 @@ class NavigatorBindDetector : Detector(), SourceCodeScanner {
         node.getContainingUClass()?.accept(object : AbstractUastVisitor() {
           override fun visitCallExpression(node: UCallExpression): Boolean {
             if (node.isMethodCall() && node.methodIdentifier?.name == "bind") {
-              hasBindMethod = true
+              val receiver = node.receiverType
+              hasBindMethod = if (receiver != null) {
+                isValidBindMethod(node) || isValidExtensionMethod(node, receiver, context)
+              } else true
             }
             return super.visitCallExpression(node)
           }
