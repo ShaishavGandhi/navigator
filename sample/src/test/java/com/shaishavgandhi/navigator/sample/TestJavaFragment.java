@@ -1,9 +1,11 @@
 package com.shaishavgandhi.navigator.sample;
 
+import android.os.Bundle;
 import android.util.Size;
 import android.util.SizeF;
 import android.util.SparseArray;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.shaishavgandhi.navigator.Extra;
 
@@ -51,4 +53,10 @@ public class TestJavaFragment extends Fragment {
     @Extra ArrayList<KTParcelable> javaParcelableArrayList;
     @Extra KTParcelable[] javaParcelableArray;
     @Extra SparseArray<KTParcelable> javaParcelableSparseArray;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        TestJavaFragmentBinder.bind(this);
+    }
 }

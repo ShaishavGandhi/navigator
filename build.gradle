@@ -21,6 +21,7 @@ ext {
     compileSdk = 28
     targetSdk = 28
     minSdk = 14
+    lintVersion = "26.3.0-beta04"
 
   javaVersion = 8
 
@@ -36,6 +37,9 @@ ext {
     jetbrainsAnnotations = "org.jetbrains:annotations:16.0.2"
     supportLibrary = "androidx.legacy:legacy-support-v4:1.0.0"
     androidxFragment = "androidx.fragment:fragment:1.0.0"
+    lint = "com.android.tools.lint:lint-api:${lintVersion}"
+    lintApi = "com.android.tools.lint:lint-api:${lintVersion}"
+    lintTest = "com.android.tools.lint:lint-tests:${lintVersion}"
 
     compileTesting = "com.google.testing.compile:compile-testing:0.15"
 

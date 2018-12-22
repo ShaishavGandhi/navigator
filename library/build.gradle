@@ -41,6 +41,8 @@ android {
 dependencies {
     api project(":annotations")
 
+    lintChecks project(":lint")
+
     testImplementation rootProject.junit
     testImplementation rootProject.compileTesting
     testImplementation rootProject.supportLibrary
