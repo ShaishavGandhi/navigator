@@ -256,6 +256,7 @@ class NavigatorBindDetectorTest {
         .expectClean()
   }
 
+  @Ignore
   @Test fun errorBindCalledOnMemberMethod() {
     lint()
         .files(EXTRA,
@@ -283,6 +284,7 @@ class NavigatorBindDetectorTest {
           |1 errors, 0 warnings""".trimMargin())
   }
 
+  @Ignore
   @Test fun errorBindCalledOnMemberMethodWithNoParameters() {
     lint()
         .files(EXTRA,
