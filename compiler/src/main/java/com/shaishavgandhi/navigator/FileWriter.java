@@ -33,6 +33,10 @@ import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
 import static com.shaishavgandhi.navigator.StringUtils.capitalize;
+import static javax.lang.model.element.Modifier.FINAL;
+import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.PUBLIC;
+import static javax.lang.model.element.Modifier.STATIC;
 
 final class FileWriter {
 
@@ -112,8 +116,17 @@ final class FileWriter {
         }
     }
 
-    private MethodSpec getBindMethod(ClassName activity, LinkedHashSet<Element> annotations) {
+    private void addBindingVariables(TypeSpec.Builder binder, ClassName activity, LinkedHashSet<Element> annotations) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("bind")
+                .addJavadoc(CodeBlock.builder()
+                        .add("Binds the fields in {@link $T} annotated with {@link $T}\n", activity, Extra.class)
+                        .add("\n")
+                        .add("This requires that the fields in {@link $T} be at least package-private" +
+                                " or if they \nare private, they have a defined setter in the class.\n", activity)
+                        .add("You should call this method in an early part of the activity lifecycle like " +
+                                "onCreate on onStart.\n\n")
+                        .add("@param binder the activity/fragment whose variables are being bound\n")
+                        .build())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
                 .addParameter(activity, "binder");
 
@@ -132,11 +145,43 @@ final class FileWriter {
         for (Element element: annotations) {
             Set<Modifier> modifiers = element.getModifiers();
 
-
             TypeName name = TypeName.get(element.asType());
             String varKey = getQualifiedExtraFieldName(activity, element);
             String varName = element.getSimpleName().toString();
+
+            MethodSpec.Builder nullableGetter = MethodSpec.methodBuilder("get" + capitalize(varName))
+                    .addModifiers(PUBLIC)
+                    .addJavadoc(CodeBlock.builder()
+                            .add("Nullable getter for $L\n\n", varName)
+                            .add("If you want a non-null instance of the type, see {@link #$L($T)}\n", "get" + capitalize(varName), name)
+                            .add("\n")
+                            .add("@return the $L\n", varName)
+                            .build())
+                    .returns(name);
+
+            MethodSpec.Builder nonNullGetter = MethodSpec.methodBuilder("get" + capitalize(varName))
+                    .addModifiers(PUBLIC)
+                    .addAnnotation(NonNull.class)
+                   .addParameter(ParameterSpec.builder(name, "defaultValue")
+                           .addModifiers(FINAL)
+                           .addAnnotation(NonNull.class)
+                           .build())
+                    .addJavadoc(CodeBlock.builder()
+                            .add("Non-null getter for $L\n", varName)
+                            .add("\n")
+                            .add("@param defaultValue the default value in case the key isn't present in the Bundle.\n")
+                            .add("@return the $L\n", varName)
+                            .build())
+                    .returns(name);
+
             builder.beginControlFlow("if ($L.containsKey($L))", "bundle", varKey);
+            nonNullGetter.beginControlFlow("if ($L.containsKey($L)\n" +
+                    "    && $L.get($L) != null)", "bundle", varKey, "bundle", varKey);
+
+            if (!name.isPrimitive()) {
+                nullableGetter.addAnnotation(Nullable.class);
+                nullableGetter.beginControlFlow("if ($L.containsKey($L))", "bundle", varKey);
+            }
 
             String extraName = getExtraTypeName(element.asType());
             if (extraName == null) {
@@ -144,6 +189,8 @@ final class FileWriter {
                     // Add casting for serializable
                     builder.addStatement("$T $L = ($T) bundle.getSerializable($L)", name,
                             varName, name, varKey);
+                    nullableGetter.addStatement("return ($T) bundle.getSerializable($L)", name, varKey);
+                    nonNullGetter.addStatement("return ($T) bundle.getSerializable($L)", name, varKey);
                 } else {
                     messager.printMessage(Diagnostic.Kind.ERROR, element.getSimpleName().toString() + " cannot be put in Bundle");
                 }
@@ -152,13 +199,17 @@ final class FileWriter {
                     // Add extra casting. TODO: Refactor this to be more generic
                     builder.addStatement("$T $L = ($T) bundle.get" + extraName + "($L)", name,
                             varName, name, varKey);
+                    nullableGetter.addStatement("return ($T) bundle.get" + extraName + "($L)", name, varKey);
+                    nonNullGetter.addStatement("return ($T) bundle.get" + extraName + "($L)", name, varKey);
                 } else {
                     builder.addStatement("$T $L = bundle.get" + extraName + "($L)", name, varName,
                             varKey);
+                    nullableGetter.addStatement("return bundle.get" + extraName + "($L)", varKey);
+                    nonNullGetter.addStatement("return bundle.get" + extraName + "($L)", varKey);
                 }
             }
 
-            if (modifiers.contains(Modifier.PRIVATE)) {
+            if (modifiers.contains(PRIVATE)) {
                 // Use getter and setter
                 builder.addStatement("$L.set$L($L)", "binder", capitalize(varName), varName);
 
@@ -166,11 +217,20 @@ final class FileWriter {
                 builder.addStatement("$L.$L = $L", "binder", varName, varName);
             }
             builder.endControlFlow();
+
+            if (!name.isPrimitive()) {
+                nullableGetter.endControlFlow();
+                nullableGetter.addStatement("return null");
+            }
+            nonNullGetter.endControlFlow();
+            nonNullGetter.addStatement("return defaultValue");
+
+            binder.addMethod(nullableGetter.build());
+            binder.addMethod(nonNullGetter.build());
         }
+
         builder.endControlFlow();
-
-
-        return builder.build();
+        binder.addMethod(builder.build());
     }
 
     /**
@@ -219,8 +279,45 @@ final class FileWriter {
         TypeSpec.Builder binder = TypeSpec.classBuilder(binderClass.simpleName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
-        MethodSpec bindMethod = getBindMethod(className, annotations);
-        binder.addMethod(bindMethod);
+        addBindingVariables(binder, className, annotations);
+
+        // Add a private empty constructor
+        binder.addMethod(MethodSpec.constructorBuilder()
+                .addModifiers(PRIVATE)
+                .build());
+
+        // Add private constructor with arg as Bundle
+        binder.addMethod(MethodSpec.constructorBuilder()
+                .addParameter(ParameterSpec.builder(BUNDLE_CLASSNAME, "bundle")
+                        .addAnnotation(NonNull.class)
+                        .build())
+                .addModifiers(PRIVATE)
+                .addStatement("this.bundle = bundle")
+                .build());
+
+        // Field for storing the Bundle
+        binder.addField(FieldSpec.builder(BUNDLE_CLASSNAME, "bundle")
+                .addModifiers(PRIVATE)
+                .addAnnotation(NonNull.class)
+                .build());
+
+        // Static method to get the binder
+        binder.addMethod(MethodSpec.methodBuilder("from")
+                .addModifiers(PUBLIC, STATIC)
+                .addParameter(ParameterSpec.builder(BUNDLE_CLASSNAME, "bundle")
+                        .addAnnotation(NonNull.class)
+                        .addModifiers(FINAL)
+                        .build())
+                .addJavadoc(CodeBlock.builder()
+                        .add("Static factory method to instantiate {@link $T}\n", binderClass)
+                        .add("\n")
+                        .add("@param bundle non null bundle that will be used to unwrap the data.\n")
+                        .add("@return the binder that will expose getters.\n")
+                        .build())
+                .returns(binderClass)
+                .addStatement("return new $T(bundle)", binderClass)
+                .build());
+
 
         TypeSpec binderResolved = binder.build();
         files.add(JavaFile.builder(className.packageName(), binderResolved).build());
@@ -260,23 +357,23 @@ final class FileWriter {
 
         if (isActivity(activity)) {
             builder.addField(FieldSpec.builder(TypeName.INT, FLAGS)
-                    .addModifiers(Modifier.PRIVATE)
+                    .addModifiers(PRIVATE)
                     .initializer("$L", -1)
                     .build());
 
             builder.addField(FieldSpec.builder(STRING_CLASS, ACTION)
-                    .addModifiers(Modifier.PRIVATE)
+                    .addModifiers(PRIVATE)
                     .build());
         }
 
         builder.addField(FieldSpec.builder(BUNDLE_CLASSNAME, "extras")
-                .addModifiers(Modifier.PRIVATE).build());
+                .addModifiers(PRIVATE).build());
 
         ClassName builderClass = getBuilderClass(activity);
 
         // Constructor
         MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PRIVATE);
+                .addModifiers(PRIVATE);
 
         // Set intent flags
         MethodSpec setFlagsMethod = setFlagsMethod(builderClass);
@@ -304,7 +401,7 @@ final class FileWriter {
             AnnotationSpec nullability = getNullabilityFor(element);
             List<AnnotationSpec> annotations = getAnnotationsForElement(element);
             annotations.add(nullability);
-            builder.addField(FieldSpec.builder(TypeName.get(typeMirror), name, Modifier.PRIVATE)
+            builder.addField(FieldSpec.builder(TypeName.get(typeMirror), name, PRIVATE)
                     .addAnnotations(annotations)
                     .build());
 
@@ -722,7 +819,7 @@ final class FileWriter {
 
     private MethodSpec getDestinationIntentMethod(String activityName, MethodSpec bundle) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getDestinationIntent")
-                .addModifiers(Modifier.PRIVATE)
+                .addModifiers(PRIVATE)
                 .addAnnotation(NonNull.class)
                 .addParameter(ParameterSpec.builder(CONTEXT_CLASSNAME, "context")
                         .addAnnotation(NonNull.class)
