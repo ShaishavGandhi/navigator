@@ -1,7 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-
 apply plugin: 'kotlin-android-extensions'
 
 android {
@@ -27,6 +26,7 @@ dependencies {
     implementation rootProject.appcompat
     implementation rootProject.constraintLayout
     implementation rootProject.design
+    implementation rootProject.recyclerView
     implementation rootProject.supportLibrary
     testImplementation rootProject.junit
 

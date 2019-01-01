@@ -1,38 +1,56 @@
 package com.shaishavgandhi.navigator.sample
 
-import android.content.Intent
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import androidx.annotation.CheckResult
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.util.Pair
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.shaishavgandhi.navigato.sampler.R
-import com.shaishavgandhi.navigator.Extra
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), UserListListener {
 
-    @Extra(key = "userName")
-    var name: String? = null
+  private val recyclerView: RecyclerView by lazy { findViewById<RecyclerView>(R.id.recyclerView) }
+  lateinit var adapter: UserListAdapter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
 
-        bind()
-        findViewById<View>(R.id.button).setOnClickListener {
-            val users = arrayListOf(User(name = "Shaishav", age = 10),
-                    User("Dimple", 13))
+    recyclerView.layoutManager = LinearLayoutManager(this)
+    adapter = UserListAdapter(sampleData(), this)
+    recyclerView.adapter = adapter
+  }
 
-            DetailActivityBuilder.builder()
-                .setUserList(users)
-                .setSource("source")
-                .setUserId(100)
-                .setPoints(Points(100))
-                // Clears the task
-                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                .start(this)
-        }
+  private fun sampleData(): List<User> {
+    val list = mutableListOf<User>()
 
-        findViewById<View>(R.id.button2).setOnClickListener {
-        }
-    }
+    list.add(User(
+        name = "Tom",
+        age = 21,
+        color = Color.CYAN
+    ))
+
+    list.add(User(
+        name = "Robert",
+        age = 24,
+        color = Color.RED
+    ))
+
+    list.add(User(
+        name = "William",
+        age = 24,
+        color = Color.MAGENTA
+    ))
+
+    return list
+  }
+
+  override fun onUserClicked(user: User, vararg view: Pair<View, String>) {
+    val bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(this, *view).toBundle()
+    userDetailActivityBuilder(user)
+        .startWithExtras(this, bundle)
+  }
 }
