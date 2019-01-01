@@ -2,17 +2,21 @@ package com.shaishavgandhi.navigator.sample
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.ColorInt
 
 data class User(val name: String,
-                val age: Int): Parcelable {
+                val age: Int,
+                @ColorInt val color: Int
+): Parcelable {
     constructor(parcel: Parcel) : this(
-            parcel.readString(),
-            parcel.readInt()) {
-    }
+        parcel.readString(),
+        parcel.readInt(),
+        parcel.readInt())
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(name)
         parcel.writeInt(age)
+        parcel.writeInt(color)
     }
 
     override fun describeContents(): Int {
@@ -28,4 +32,5 @@ data class User(val name: String,
             return arrayOfNulls(size)
         }
     }
+
 }

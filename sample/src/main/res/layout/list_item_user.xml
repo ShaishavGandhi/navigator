@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:padding="16dp"
+    android:background="?attr/selectableItemBackground"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/color"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="50dp"
+        android:transitionName="transitionLogo"
+        android:layout_height="50dp" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/name"
+        app:layout_constraintLeft_toRightOf="@+id/color"
+        app:layout_constraintTop_toTopOf="@+id/color"
+        android:layout_marginStart="16dp"
+        android:transitionName="transitionName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Robert"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/age"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/name"
+        app:layout_constraintLeft_toLeftOf="@+id/name"
+        tools:text="24"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

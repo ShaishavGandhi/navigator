@@ -23,7 +23,7 @@ ext {
     minSdk = 14
     lintVersion = "26.3.0-beta04"
 
-  javaVersion = 8
+    javaVersion = 8
 
     javapoet = "com.squareup:javapoet:1.11.1"
     kotlinpoet = "com.squareup:kotlinpoet:1.0.0"
@@ -33,6 +33,7 @@ ext {
 
     appcompat = "androidx.appcompat:appcompat:1.0.0"
     constraintLayout = "androidx.constraintlayout:constraintlayout:1.1.3"
+    recyclerView = "androidx.recyclerview:recyclerview:1.0.0"
     design = "com.google.android.material:material:1.0.0"
     jetbrainsAnnotations = "org.jetbrains:annotations:16.0.2"
     supportLibrary = "androidx.legacy:legacy-support-v4:1.0.0"
@@ -68,4 +69,3 @@ subprojects { project ->
         google()
     }
 }
-
