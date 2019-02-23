@@ -21,7 +21,7 @@ ext {
     compileSdk = 28
     targetSdk = 28
     minSdk = 14
-    lintVersion = "26.3.0-beta04"
+    lintVersion = "26.3.0"
 
     javaVersion = 8
 
