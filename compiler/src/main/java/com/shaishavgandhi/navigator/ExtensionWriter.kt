@@ -34,13 +34,13 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
 
         "java.lang.Long" to ClassName.bestGuess("kotlin.Long"),
         "long" to ClassName.bestGuess("kotlin.Long"),
-        "long[]" to ClassName.bestGuess("LongArray"),
-        "java.lang.Long[]" to ClassName.bestGuess("LongArray"),
+        "long[]" to ClassName.bestGuess("kotlin.LongArray"),
+        "java.lang.Long[]" to ClassName.bestGuess("kotlin.LongArray"),
 
         "int" to ClassName.bestGuess("kotlin.Int"),
         "java.lang.Integer" to ClassName.bestGuess("kotlin.Int"),
-        "int[]" to ClassName.bestGuess("IntArray"),
-        "java.lang.Integer[]" to ClassName.bestGuess("IntArray"),
+        "int[]" to ClassName.bestGuess("kotlin.IntArray"),
+        "java.lang.Integer[]" to ClassName.bestGuess("kotlin.IntArray"),
 
         "boolean" to ClassName.bestGuess("kotlin.Boolean"),
         "java.lang.Boolean" to ClassName.bestGuess("kotlin.Boolean"),
@@ -156,10 +156,10 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
             fileBuilder.addFunction(FunSpec.builder("bind")
                 .receiver(className)
                 .addKdoc(CodeBlock.builder()
-                    .addStatement("Extension method on [$className] that binds the variables ")
+                    .addStatement("Extension method on [%T] that binds the variables ", className)
                     .addStatement("in the class annotated with [com.shaishavgandhi.navigator.Extra]")
                     .add("\n")
-                    .addStatement("@see $classBinder")
+                    .addStatement("@see %T", classBinder)
                     .build())
                 .addStatement("%T.bind(this)", classBinder)
                 .build())
@@ -168,7 +168,7 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
             val prepareFunctionBuilder = FunSpec.builder("${className.simpleName.decapitalize()}Builder")
                 .receiver(anyClass)
                 .addAnnotation(CheckResult::class)
-                .returns(ClassName.bestGuess("${className.simpleName}Builder"))
+                .returns(ClassName.bestGuess("${className.packageName}.${className.simpleName}Builder"))
 
             // Builder for return string so we can append parameters to it.
             val returnBuilder = StringBuilder("return ${className.simpleName}Builder.builder(")
