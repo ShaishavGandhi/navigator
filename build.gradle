@@ -1,14 +1,14 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.3.21'
+    ext.kotlin_version = '1.3.30'
     repositories {
         google()
         jcenter()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
+        classpath 'com.android.tools.build:gradle:3.4.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -17,17 +17,16 @@ buildscript {
 }
 
 ext {
-
     compileSdk = 28
     targetSdk = 28
     minSdk = 14
-    lintVersion = "26.3.0"
+    lintVersion = "26.4.0"
 
     javaVersion = 8
 
     javapoet = "com.squareup:javapoet:1.11.1"
-    kotlinpoet = "com.squareup:kotlinpoet:1.2.0-SNAPSHOT"
-    autoservice = "com.google.auto.service:auto-service:1.0-rc4"
+    kotlinpoet = "com.squareup:kotlinpoet:1.2.0"
+    autoservice = "com.google.auto.service:auto-service:1.0-rc5"
 
     kotlin = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 

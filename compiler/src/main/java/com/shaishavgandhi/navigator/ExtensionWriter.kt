@@ -7,6 +7,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.io.File
 import java.util.LinkedHashMap
 import java.util.LinkedHashSet
+import javax.annotation.processing.Filer
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Element
 import javax.lang.model.type.DeclaredType
@@ -16,6 +17,7 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
     val typeUtils = processingEnvironment.typeUtils
     val elementUtils = processingEnvironment.elementUtils
     val messager = processingEnvironment.messager
+    val filer: Filer = processingEnvironment.filer
 
     private val navigatorClass = ClassName.bestGuess("com.shaishavgandhi.navigator.Navigator")
     private val anyClass = ClassName.bestGuess("kotlin.Any")
@@ -198,7 +200,7 @@ class ExtensionWriter(private val processingEnvironment: ProcessingEnvironment) 
             prepareFunctionBuilder.addStatement(returnBuilder.toString())
             fileBuilder.addFunction(prepareFunctionBuilder.build())
 
-            fileBuilder.build().writeTo(File(kaptGeneratedDirPath))
+            fileBuilder.build().writeTo(filer)
         }
 
     }
