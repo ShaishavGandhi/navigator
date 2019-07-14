@@ -1,7 +1,7 @@
 # Navigator
 
 
-![CircleCI branch](https://img.shields.io/circleci/project/github/shaishavgandhi05/navigator/master.svg)
+![CircleCI branch](https://img.shields.io/circleci/project/github/ShaishavGandhi/navigator/master.svg)
 
 <img src="assets/navigator-logo.png" width="275px"/>
 
